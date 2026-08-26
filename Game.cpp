@@ -1,6 +1,12 @@
 ﻿#include "Game.h"
 #include<iostream>
 #include "map.h"
+#include"SceneManager.h"
+
+void setColor(int colorCode) {
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, colorCode);
+}
 
 void Game::run() {
 	initialize();
@@ -22,7 +28,9 @@ void Game::gameLoop() {
 
 void Game::gameCommand(const string& command) {
 	if (command == "1") {
-		cout << "开始游戏（未制作）";//不要忘记删除！！！！！！！
+		//"开始游戏(只完成第一幕和第二幕剧情)";//不要忘记删除！！！！！！！
+		scene_id = 1;
+		ShowBackground(scene_id);
 	}
 	else if (command == "2") {
 		cout << "继续游戏（未制作）";//不要忘记删除！！！！！！！
@@ -41,6 +49,14 @@ void Game::gameCommand(const string& command) {
 		setColor(3);
 		map();
 		setColor(14);
+	}
+	else if (command == "south" || command =="w" || command == "W") {
+		scene_id++;
+		ShowBackground(scene_id);
+	}
+	else if (command == "north") {
+		scene_id--;
+		ShowBackground(scene_id);
 	}
 	else {
 		cout << "未知指令：" << command << "\n";
@@ -64,8 +80,10 @@ void Game::showWelcome(){
 
 void Game::showHelp() {
 	cout << "\n" << "========== 指令 ==========" << "\n"
-		<< "  " << "help" << "     " << "查看帮助" << "\n"
-		<< "  " << "quit" << "     " << "退出游戏" << "\n"
-		<< "  " << "map " << "     " << "查看地图" << "\n"
+		<< "  " << "help " << "     " << "查看帮助" << "\n"
+		<< "  " << "quit " << "     " << "退出游戏" << "\n"
+		<< "  " << "map  " << "     " << "查看地图" << "\n"
+		<< "  " << "south" << "     " << "继续剧情" << "\n"
+		<< "  " << "north" << "     " << "回退剧情" << "\n"
 		<< "===========================" << "\n";
 }

@@ -50,5 +50,8 @@
     <ClInclude Include="map.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="StroyManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
