@@ -1,6 +1,6 @@
 ﻿#include "Game.h"
 #include<iostream>
-#include<map>
+#include "map.h"
 
 void Game::run() {
 	initialize();
@@ -38,7 +38,9 @@ void Game::gameCommand(const string& command) {
 		return;
 	}
 	else if (command == "map") {
+		setColor(3);
 		map();
+		setColor(14);
 	}
 	else {
 		cout << "未知指令：" << command << "\n";
@@ -64,5 +66,6 @@ void Game::showHelp() {
 	cout << "\n" << "========== 指令 ==========" << "\n"
 		<< "  " << "help" << "     " << "查看帮助" << "\n"
 		<< "  " << "quit" << "     " << "退出游戏" << "\n"
+		<< "  " << "map " << "     " << "查看地图" << "\n"
 		<< "===========================" << "\n";
 }
