@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37111.16 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TheFalloftheOverlord", "TheFalloftheOverlord.vcxproj", "{B76738BC-3E5F-4FF4-B1AC-3100DAEC94B5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B76738BC-3E5F-4FF4-B1AC-3100DAEC94B5}.Debug|x64.ActiveCfg = Debug|x64
+		{B76738BC-3E5F-4FF4-B1AC-3100DAEC94B5}.Debug|x64.Build.0 = Debug|x64
+		{B76738BC-3E5F-4FF4-B1AC-3100DAEC94B5}.Debug|x86.ActiveCfg = Debug|Win32
+		{B76738BC-3E5F-4FF4-B1AC-3100DAEC94B5}.Debug|x86.Build.0 = Debug|Win32
+		{B76738BC-3E5F-4FF4-B1AC-3100DAEC94B5}.Release|x64.ActiveCfg = Release|x64
+		{B76738BC-3E5F-4FF4-B1AC-3100DAEC94B5}.Release|x64.Build.0 = Release|x64
+		{B76738BC-3E5F-4FF4-B1AC-3100DAEC94B5}.Release|x86.ActiveCfg = Release|Win32
+		{B76738BC-3E5F-4FF4-B1AC-3100DAEC94B5}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {922AB02D-6313-4B86-8E59-40225FC40B83}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,15 @@
+# VS编译输出
+x64/
+TheFallo.b76738bc/
+*.obj
+*.pdb
+*.exe
+
+# VS用户配置
+*.vcxproj.user
+*.suo
+.vs/
+
+# 编译缓存
+Debug/
+Release/
