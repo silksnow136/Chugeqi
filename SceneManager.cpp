@@ -40,6 +40,7 @@ void ShowBackground(int scene_id = 0) {
 	case 1:
 		setColor(4);
 		cout << "第一幕：四面楚歌，垓下之围" << "\n";
+		Sleep(1000);
 		setColor(12);
 		cout << "\n";
 		cout << "公元前202年12月（上旬），垓下（今安徽灵璧东南）" << "\n";
@@ -85,6 +86,7 @@ void ShowBackground(int scene_id = 0) {
 	case 2:
 		setColor(4);
 		cout << "第二幕：突围南逃，淮河之阻" << "\n";
+		Sleep(1000);
 		setColor(12);
 		cout << "\n";
 		cout << "公元前202年12月（中旬），自垓下经淮河、阴陵（安徽滁州）至东城" << "\n";
@@ -110,6 +112,7 @@ void ShowBackground(int scene_id = 0) {
 				cin >> choice;
 				switch (choice) {
 				case 'A':
+				case 'a':
 					setColor(14);
 					cout << "遇到大将王翦" << "\n";
 					nextLine();
@@ -134,6 +137,7 @@ void ShowBackground(int scene_id = 0) {
 					break;
 
 				case 'B':
+				case 'b':
 					setColor(14);
 					cout << "项羽一行军队陷入沼泽，被困半天" << "\n";
 					nextLine();
@@ -161,6 +165,7 @@ void ShowBackground(int scene_id = 0) {
 	case 3:
 		setColor(4);
 		cout << "第三幕：东城快战，以一敌千" << "\n";
+		Sleep(1000);
 		setColor(12);
 		cout << "\n";
 		cout << "公元前202年12月（下旬），东城（今安徽定远东南）" << "\n";
@@ -196,6 +201,7 @@ void ShowBackground(int scene_id = 0) {
 	case 4:
 		setColor(4);
 		cout << "第四幕：乌江自刎，天地同悲" << "\n";
+		Sleep(1000);
 		setColor(12);
 		cout << "\n";
 		cout << "公元前202年12月（月底），乌江（今安徽和县东北乌江浦）" << "\n";
