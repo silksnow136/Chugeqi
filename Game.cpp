@@ -54,7 +54,7 @@ void Game::gameCommand(const string& command) {
 		scene_id++;
 		ShowBackground(scene_id);
 	}
-	else if (command == "north") {
+	else if (command == "north" || command == "n" || command == "N") {
 		scene_id--;
 		ShowBackground(scene_id);
 	}
@@ -63,7 +63,7 @@ void Game::gameCommand(const string& command) {
 			chageAuto();
 		}
 	}
-	else if (command == "n" || command == "N") {
+	else if (command == "manual") {
 		if (current_Auto()) {
 			chageAuto();
 		}
@@ -90,13 +90,13 @@ void Game::showWelcome(){
 
 void Game::showHelp() {
 	cout << "\n" << "========== 指令 ==========" << "\n"
-		<< "  " << "help " << "     " << "查看帮助" << "\n"
-		<< "  " << "quit " << "     " << "退出游戏" << "\n"
-		<< "  " << "map  " << "     " << "查看地图" << "\n"
-		<< "  " << "south" << "     " << "继续剧情" << "\n"
-		<< "  " << "north" << "     " << "回退剧情" << "\n"
-		<< "  " << "auto " << "     " << "自动播放剧情" << "\n"
-		<< "  " << "n " << "     " << "自动播放剧情" << "\n"
+		<< "  " << "help  " << "     " << "查看帮助" << "\n"
+		<< "  " << "quit  " << "     " << "退出游戏" << "\n"
+		<< "  " << "map   " << "     " << "查看地图" << "\n"
+		<< "  " << "south " << "     " << "继续剧情" << "\n"
+		<< "  " << "north " << "     " << "回退剧情" << "\n"
+		<< "  " << "auto  " << "     " << "自动播放剧情" << "\n"
+		<< "  " << "manual" << "     " << "手动播放剧情" << "\n"
 		
 		<< "===========================" << "\n";
 }

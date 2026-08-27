@@ -13,24 +13,41 @@ void chageAuto() {
 	autoPlay = !autoPlay;
 }
 
+void deleteWords(string tip) {
+	// 以下是让提示【按任意键继续对话】消失
+	for (int i = 0; i < tip.length(); i++) {
+		cout << '\b'; // \b是退格符，循环提示长度的次数，使光标到达提示之前
+	}
+	// 用空格覆盖所有残留字符，再退回到行首
+	cout << string(tip.length(), ' ');
+	for (int i = 0; i < tip.length(); i++) {
+		cout << '\b';
+	}
+}
 void nextLine() {
 	if (autoPlay) {
+		string tip = "  【按ESC手动对话】";
+		cout << tip;
 		Sleep(1500);//1500ms后播放下一条剧情
+		deleteWords(tip);
+		//_kbhit()非阻塞检测按键输入
+		if (_kbhit()) {
+			int key;
+			key = _getch(); // 读取键盘按键，但不是显示键盘输入
+			if (key == 27) {
+				chageAuto();
+			}
+		}
 	}
 	else {
-		string tip = "  【按任意键继续对话】";
+		string tip = "  【按ESC自动对话，按其他键继续对话】";
 		cout << tip;
-		_getch(); // 读取键盘按键，但不是显示键盘输入
-
-		// 以下是让提示【按任意键继续对话】消失
-		for (int i = 0; i < tip.length(); i++) {
-			cout << '\b'; // \b是退格符，循环提示长度的次数，使光标到达提示之前
+		int key;
+		key=_getch(); // 读取键盘按键，但不是显示键盘输入
+		if (key == 27) {
+			chageAuto();
 		}
-		// 用空格覆盖所有残留字符，再退回到行首
-		cout << string(tip.length(), ' ');
-		for (int i = 0; i < tip.length(); i++) {
-			cout << '\b';
-		}
+		deleteWords(tip);
 	}
 	
 }
@@ -44,10 +61,12 @@ void ShowBackground(int scene_id = 0) {
 		setColor(12);
 		cout << "\n";
 		cout << "公元前202年12月（上旬），垓下（今安徽灵璧东南）" << "\n";
+		Sleep(1000);
 		setColor(14);
 		cout << "项羽和虞姬被困，兵少食尽，人心惶惶。汉军围困重重，夜间楚歌四起。"
 			<< "帐中，霸王与虞姬对饮，虞姬舞剑，霸王悲怆，"
 			<< "诗曰“力拔山兮气盖世，时不利兮骓不逝，骓不逝兮可奈何，虞兮虞兮奈若何。”" << "\n";
+		Sleep(1000);
 		//弹出对话框暂时没有制作思路！！！！！！
 		cout << "\n小卒a来报" << "\n";
 		nextLine();
@@ -80,7 +99,8 @@ void ShowBackground(int scene_id = 0) {
 		setColor(14);
 		cout << "长夜微凉，锦绣未央。虞姬的身姿映衬在烛火之下，翩翩起舞。"
 			<< "宝剑的光泽和着凄冷的月，一切似乎定格在这一刻......" << "\n"<<"\n";
-		cout << "输入w继续剧情" << "\n";
+		Sleep(1000);
+		cout << "输入w或south继续剧情" << "\n";
 		break;
 
 	case 2:
@@ -90,9 +110,11 @@ void ShowBackground(int scene_id = 0) {
 		setColor(12);
 		cout << "\n";
 		cout << "公元前202年12月（中旬），自垓下经淮河、阴陵（安徽滁州）至东城" << "\n";
+		Sleep(1000);
 		setColor(14);
 		cout << "霸王率麾下八百壮士，突围南逃，至破晓，渡淮河，余骑百人，汉军觉察。"
 			<<"灌婴以五千骑追之。至阴陵，迷失道。遇一田夫。" << "\n";
+		Sleep(1000);
 		cout << "\n" << "与田夫交谈" << "\n";
 		nextLine();
 		//弹出对话框暂时没有制作思路！！！！！！
@@ -159,7 +181,8 @@ void ShowBackground(int scene_id = 0) {
 				}
 			} while (choice_test);
 		}
-		cout << "输入w继续剧情" << "\n";
+		Sleep(1000);
+		cout << "输入w或south继续剧情" << "\n";
 		break;
 
 	case 3:
@@ -169,6 +192,7 @@ void ShowBackground(int scene_id = 0) {
 		setColor(12);
 		cout << "\n";
 		cout << "公元前202年12月（下旬），东城（今安徽定远东南）" << "\n";
+		Sleep(1000);
 		setColor(14);
 		cout << "霸王至东城，余二十八骑，勉诸将曰：“吾起兵至今八岁有余，"
 			<<"身经百战，战无不胜，攻无不克，遂霸天下。"
@@ -195,7 +219,8 @@ void ShowBackground(int scene_id = 0) {
 		nextLine();
 		setColor(14);
 		cout << "赤泉候退。" << "\n"<<"\n";
-		cout << "输入w继续剧情" << "\n";
+		Sleep(1000);
+		cout << "输入w或south继续剧情" << "\n";
 		break;
 
 	case 4:
@@ -205,6 +230,7 @@ void ShowBackground(int scene_id = 0) {
 		setColor(12);
 		cout << "\n";
 		cout << "公元前202年12月（月底），乌江（今安徽和县东北乌江浦）" << "\n";
+		Sleep(1000);
 		setColor(14);
 		cout << "霸王欲渡乌江，数合间连斩数敌人，退至江边。"
 			<<"乌江亭长檥船待。忆起江东父老，心中怅然，停步江边，仰天长啸。"<< "\n";
