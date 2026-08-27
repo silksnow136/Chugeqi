@@ -1,0 +1,26 @@
+{
+  "normal_attack": {
+    "name": "普攻",
+    "description": "普通攻击",
+    "type": "damage",
+    "cost": 0,
+    "power": 5,
+    "scope": "single"
+  },
+  "fireball": {
+    "name": "火球",
+    "description": "发射火球",
+    "type": "damage",
+    "cost": 10,
+    "power": 8,
+    "scope": "single"
+  },
+  "heal": {
+    "name": "治疗",
+    "description": "恢复HP",
+    "type": "heal",
+    "cost": 8,
+    "healAmount": 30,
+    "scope": "single"
+  }
+}

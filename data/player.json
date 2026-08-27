@@ -1,0 +1,10 @@
+{
+  "id": "player",
+  "name": "player",
+  "level": 1,
+  "hp": 100,
+  "sp": 50,
+  "exp": 0,
+  "baseStats": [10, 5, 8, 12],
+  "skills": ["fireball", "heal"]
+}

@@ -1,0 +1,9 @@
+# 构建产物
+build/
+
+# 运行时生成的存档数据库
+save.db
+*.db
+
+# IDE 配置
+.vscode/
