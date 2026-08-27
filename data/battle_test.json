@@ -1,0 +1,9 @@
+{
+  "name": "峡谷遭遇战",
+  "first_side": "player",
+  "disable_run": false,
+  "disable_items": false,
+  "player_ref": "player.json",
+  "companions_ref": ["companion.json"],
+  "enemies_ref": ["enemy_test1.json", "enemy_test2.json"]
+}
