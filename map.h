@@ -4,4 +4,4 @@
 using namespace std;
 
 void map();//世界地图
-void m();//场景地图
+void map_Manager(int scene_id);//场景地图

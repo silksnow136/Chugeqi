@@ -2,18 +2,28 @@
 #include"SceneManager.h"
 #include"Game.h"
 #include <conio.h> // 控制台无回显按键读取
+#include"map.h"
+#include"StroyManager.h"
 
-bool autoPlay = false;//判断是否自动播放剧情
+SceneManager::SceneManager(Game& game): game(game)
+{
+	current_scene_id = 0;//剧情初步存档,显示当前场景id
+	current_state = SceneState::ORIGIN_SCENE;
+	current_character = 0;
 
-bool current_Auto() {
+	autoPlay = false;//判断是否自动播放剧情
+	unique_map_print = false;
+}
+
+bool SceneManager::current_Auto() {
 	return autoPlay;
 }
 
-void chageAuto() {
+void SceneManager::chageAuto() {
 	autoPlay = !autoPlay;
 }
 
-void deleteWords(string tip) {
+void SceneManager::deleteWords(string tip) {
 	// 以下是让提示【按任意键继续对话】消失
 	for (int i = 0; i < tip.length(); i++) {
 		cout << '\b'; // \b是退格符，循环提示长度的次数，使光标到达提示之前
@@ -24,7 +34,7 @@ void deleteWords(string tip) {
 		cout << '\b';
 	}
 }
-void nextLine() {
+void SceneManager::nextLine() {
 	if (autoPlay) {
 		string tip = "  【按ESC手动对话】";
 		cout << tip;
@@ -52,7 +62,184 @@ void nextLine() {
 	
 }
 
-void ShowBackground(int scene_id = 0) {
+int SceneManager::showScene_id() {
+	return current_scene_id;
+}
+
+void SceneManager::changeScene(int scene_id)
+{
+	// 离开旧场景
+	current_scene_id = scene_id;
+	// 进入新场景时重置状态
+	current_state = SceneState::ORIGIN_SCENE;
+	// 重置对话人物
+	current_character = 0;
+	// 允许新场景重新打印地图
+	unique_map_print = false;
+}
+
+//场景功能显示管理
+void SceneManager::showSceneManager(int scene_id) {
+	switch (scene_id) {
+	case 1:
+		map_Manager(scene_id);
+		setColor(14);
+		sceneManager(game);
+		break;
+
+	case  2:
+		break;
+
+	case 3:
+		break;
+
+	case 4:
+		break;
+
+	default:
+		break;
+	}
+}
+void choiceList_01() {
+	cout << "1. 对话\n";
+	cout << "2. 药房\n";
+	cout << "3. 锻造\n";
+}
+//场景功能管理
+void SceneManager::sceneManager(Game& game1) {
+	string sceneCommand;
+	bool choice=true;
+	while (choice) {
+		switch (current_state) {
+
+		//大世界场景
+		case SceneState::ORIGIN_SCENE:
+			backGround_01();
+			choiceList_01();
+
+			cout << "\n> ";
+			cin >> sceneCommand;
+			if (sceneCommand == "1" || sceneCommand == "2" || sceneCommand == "3") {
+				int num = stoi(sceneCommand);//将string转化为int
+				switch (num) {
+				case 1:
+					//进入对话
+					current_state = SceneState::TALK;
+					break;
+
+				case 2:
+					//进入药店
+					current_state = SceneState::PHARMACY;
+					//药店未制作！！！！！！！！！！！！！！！！！！！！！
+					//不要在这里添加，这里只负责进入药店系统
+					break;
+
+				case 3:
+					// 进入锻造
+					current_state = SceneState::FORGE;
+					//锻造未制作！！！！！！！！！！！！！！！！
+					//不要在这里添加，这里只负责进入锻造系统
+					break;
+				}
+			}
+			else {
+				
+				if (sceneCommand == "south" || sceneCommand == "w" || sceneCommand == "W"
+					|| sceneCommand == "north" || sceneCommand == "n" || sceneCommand == "N"
+					|| sceneCommand ==" quit" ) {
+					choice = false;
+					
+				}
+				game1.gameCommand(sceneCommand);
+			}
+			break;
+
+		// 选择对话人物
+		case SceneState::TALK:
+			talkScene_01();
+
+			cout << "\n> ";
+			cin >> sceneCommand;
+			if (sceneCommand == "1" || sceneCommand == "2" || sceneCommand == "3") {
+				int num = stoi(sceneCommand);//将string转化为int
+				switch (num) {
+				case 1:
+					//与小卒a对话
+					current_character = 1;
+					talk_character_contnt_01(current_character);
+					break;
+
+				case 2:
+					//与虞姬对话
+					current_character = 2;
+					talk_character_contnt_01(current_character);
+					break;
+
+				case 3:
+					//返回
+					current_state = SceneState::ORIGIN_SCENE;
+					break;
+				}
+			}
+			else {
+				
+				if (sceneCommand == "south" || sceneCommand == "w" || sceneCommand == "W"
+					|| sceneCommand == "north" || sceneCommand == "n" || sceneCommand == "N"
+					|| sceneCommand == " quit") {
+					choice = false;
+					
+				}
+				game1.gameCommand(sceneCommand);
+
+			}
+			break;
+
+			//药房
+		case SceneState::PHARMACY:
+			void phar();
+			cout << "输入任意数字返回。\n";
+			cin >> sceneCommand;
+			//别忘记加入if/else输入指令
+			current_state = SceneState::ORIGIN_SCENE;
+
+			break;
+
+			//锻造
+		case SceneState::FORGE:
+			void forge();
+			cout << "输入任意数字返回。\n";
+			cin >> sceneCommand;
+			//别忘记加入if/else输入指令
+			current_state = SceneState::ORIGIN_SCENE;
+
+			break;
+		}
+	}
+}
+
+//SceneManager::SceneState函数的返回值类型，后面是类的成员函数
+//读取当前场景状态
+SceneManager::SceneState SceneManager::getSceneState() const
+{
+	return current_state;
+}
+//进入新场景状态，便于从主世界进入对话
+void SceneManager::setSceneState(SceneState state)
+{
+	current_state = state;
+}
+//读取对话人物
+int SceneManager::getCurrentCharacter() const
+{
+	return current_character;
+}
+//更改对话人物
+void SceneManager::setCurrentCharacter(int character_id)
+{
+	current_character = character_id;
+}
+
+void SceneManager::ShowBackground(int scene_id = 0) {
 	switch (scene_id) {
 	case 1:
 		setColor(4);
@@ -100,7 +287,11 @@ void ShowBackground(int scene_id = 0) {
 		cout << "长夜微凉，锦绣未央。虞姬的身姿映衬在烛火之下，翩翩起舞。"
 			<< "宝剑的光泽和着凄冷的月，一切似乎定格在这一刻......" << "\n"<<"\n";
 		Sleep(1000);
+		cout << "已存档" << "\n";
+		current_scene_id = scene_id;
 		cout << "输入w或south继续剧情" << "\n";
+
+		showSceneManager(current_scene_id);
 		break;
 
 	case 2:
@@ -182,6 +373,8 @@ void ShowBackground(int scene_id = 0) {
 			} while (choice_test);
 		}
 		Sleep(1000);
+		cout << "已存档" << "\n";
+		current_scene_id = scene_id;
 		cout << "输入w或south继续剧情" << "\n";
 		break;
 
@@ -220,6 +413,8 @@ void ShowBackground(int scene_id = 0) {
 		setColor(14);
 		cout << "赤泉候退。" << "\n"<<"\n";
 		Sleep(1000);
+		cout << "已存档" << "\n";
+		current_scene_id = scene_id;
 		cout << "输入w或south继续剧情" << "\n";
 		break;
 

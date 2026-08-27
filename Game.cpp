@@ -3,10 +3,13 @@
 #include "map.h"
 #include"SceneManager.h"
 
+Game::Game(): sceneManager(*this){}//创建 SceneManager 的时候，把当前这个 Game 对象传给它
+
 void setColor(int colorCode) {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, colorCode);
 }
+
 
 void Game::run() {
 	initialize();
@@ -27,20 +30,22 @@ void Game::gameLoop() {
 }
 
 void Game::gameCommand(const string& command) {
-	if (command == "1") {
+	if (command == "1" && scene_id == 0) {
 		//"开始游戏(剧情制作完成)";//不要忘记删除！！！！！！！
 		scene_id = 1;
-		ShowBackground(scene_id);
+		sceneManager.ShowBackground(scene_id);
 	}
-	else if (command == "2") {
-		cout << "继续游戏（未制作）";//不要忘记删除！！！！！！！
+	else if (command == "2" && scene_id == 0) {
+		cout << "继续游戏（未制作完成）"<<"\n";//不要忘记删除！！！！！！！
+		sceneManager.ShowBackground(sceneManager.showScene_id()+1);
 	}
-	else if (command == "help" || command == "4") {
+	else if (command == "help" || (command == "4" && scene_id == 0)) {
 		showHelp();
 	}
-	else if (command == "quit" || command == "3") {
+	else if (command == "quit" || (command == "3" && scene_id == 0)) {
 		running = false;
 		cout << "感谢游玩。"<<"\n";
+		exit(0);
 	}
 	else if (command.empty()) {
 		return;
@@ -52,21 +57,25 @@ void Game::gameCommand(const string& command) {
 	}
 	else if (command == "south" || command =="w" || command == "W") {
 		scene_id++;
-		ShowBackground(scene_id);
+		sceneManager.ShowBackground(scene_id);
 	}
 	else if (command == "north" || command == "n" || command == "N") {
 		scene_id--;
-		ShowBackground(scene_id);
+		sceneManager.ShowBackground(scene_id);
 	}
 	else if (command == "auto") {
-		if (!current_Auto()) {
-			chageAuto();
+		if (!sceneManager.current_Auto()) {
+			sceneManager.chageAuto();
 		}
 	}
 	else if (command == "manual") {
-		if (current_Auto()) {
-			chageAuto();
+		if (sceneManager.current_Auto()) {
+			sceneManager.chageAuto();
 		}
+	}
+	else if (command == "start") {
+		scene_id = 0;
+		showWelcome();
 	}
 	else {
 		cout << "未知指令：" << command << "\n";
@@ -90,13 +99,16 @@ void Game::showWelcome(){
 
 void Game::showHelp() {
 	cout << "\n" << "========== 指令 ==========" << "\n"
-		<< "  " << "help  " << "     " << "查看帮助" << "\n"
-		<< "  " << "quit  " << "     " << "退出游戏" << "\n"
-		<< "  " << "map   " << "     " << "查看地图" << "\n"
-		<< "  " << "south " << "     " << "继续剧情" << "\n"
-		<< "  " << "north " << "     " << "回退剧情" << "\n"
-		<< "  " << "auto  " << "     " << "自动播放剧情" << "\n"
-		<< "  " << "manual" << "     " << "手动播放剧情" << "\n"
+		<< "  " << "help     " << "     " << "查看帮助" << "\n"
+		<< "  " << "quit     " << "     " << "退出游戏" << "\n"
+		<< "  " << "map      " << "     " << "查看地图" << "\n"
+		<< "  " << "south(s)(S)" << "   " << "继续剧情" << "\n"
+		<< "  " << "north(n)(N)" << "   " << "回退剧情" << "\n"
+		<< "  " << "auto  " << "        " << "自动播放剧情" << "\n"
+		<< "  " << "manual" << "        " << "手动播放剧情" << "\n"
+		//<< "  " << "ESC   " << "      " << "切换自动/手动播放剧情" << "\n"
+		<< "  " << "start " << "        " << "开始界面" << "\n"
 		
 		<< "===========================" << "\n";
 }
+
