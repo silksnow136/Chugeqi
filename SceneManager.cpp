@@ -3,20 +3,36 @@
 #include"Game.h"
 #include <conio.h> // 控制台无回显按键读取
 
-void nextLine() {
-	string tip = "  【按任意键继续对话】";
-	cout << tip;
-	_getch(); // 读取键盘按键，但不是显示键盘输入
+bool autoPlay = false;//判断是否自动播放剧情
 
-	// 以下是让提示【按任意键继续对话】消失
-	for (int i = 0; i < tip.length(); i++) {
-		cout << '\b'; // \b是退格符，循环提示长度的次数，使光标到达提示之前
+bool current_Auto() {
+	return autoPlay;
+}
+
+void chageAuto() {
+	autoPlay = !autoPlay;
+}
+
+void nextLine() {
+	if (autoPlay) {
+		Sleep(1500);//1500ms后播放下一条剧情
 	}
-	// 用空格覆盖所有残留字符，再退回到行首
-	cout << string(tip.length(), ' ');
-	for (int i = 0; i < tip.length(); i++) {
-		cout << '\b';
+	else {
+		string tip = "  【按任意键继续对话】";
+		cout << tip;
+		_getch(); // 读取键盘按键，但不是显示键盘输入
+
+		// 以下是让提示【按任意键继续对话】消失
+		for (int i = 0; i < tip.length(); i++) {
+			cout << '\b'; // \b是退格符，循环提示长度的次数，使光标到达提示之前
+		}
+		// 用空格覆盖所有残留字符，再退回到行首
+		cout << string(tip.length(), ' ');
+		for (int i = 0; i < tip.length(); i++) {
+			cout << '\b';
+		}
 	}
+	
 }
 
 void ShowBackground(int scene_id = 0) {
@@ -228,12 +244,17 @@ void ShowBackground(int scene_id = 0) {
 		cout<<"遂自刎而亡。" << "\n";
 		nextLine();
 		setColor(14);
-		cout << "旁白："<<"\n"
-			"公元前202年，一场大雪涤净了天地的色彩。乌江之畔，一人持枪立马，傲立天地之间，鬼神不侵。"<<"\n"
-			<<"他是项羽，他去见他的虞姬了。一代霸王落幕，退出了楚汉相争的舞台。"<<"\n"
-			"东城荒野，无数的雪花自天边翩翩而落，天地也在为他的死而悲叹，送了他最后一程。"<<"\n"
-			"马蹄声淹没了天地，烟尘吞噬了最后的视野，后来，那面残旗被风高高扬起，又被马蹄踩进土里，再也不见。"<<"\n"
-			"往事越千年，魏武挥鞭，东临碣石有遗篇，萧瑟秋风今又是，换了人间。" << "\n";
+		cout << "旁白：" << "\n";
+		Sleep(1500);
+		cout << "公元前202年，一场大雪涤净了天地的色彩。乌江之畔，一人持枪立马，傲立天地之间，鬼神不侵。" << "\n";
+		Sleep(1500);
+		cout<< "他是项羽，他去见他的虞姬了。一代霸王落幕，退出了楚汉相争的舞台。" << "\n";
+		Sleep(1500);
+		cout<<"东城荒野，无数的雪花自天边翩翩而落，天地也在为他的死而悲叹，送了他最后一程。" << "\n";
+		Sleep(1500);
+		cout << "马蹄声淹没了天地，烟尘吞噬了最后的视野，后来，那面残旗被风高高扬起，又被马蹄踩进土里，再也不见。" << "\n";
+		Sleep(1500);
+		cout << "往事越千年，魏武挥鞭，东临碣石有遗篇，萧瑟秋风今又是，换了人间。" << "\n";
 		nextLine();
 		cout << "游戏结束，感谢您的游玩" << "\n"
 			<< "请输入quit退出游戏" << "\n";

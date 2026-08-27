@@ -28,7 +28,7 @@ void Game::gameLoop() {
 
 void Game::gameCommand(const string& command) {
 	if (command == "1") {
-		//"开始游戏(只完成第一幕和第二幕剧情)";//不要忘记删除！！！！！！！
+		//"开始游戏(剧情制作完成)";//不要忘记删除！！！！！！！
 		scene_id = 1;
 		ShowBackground(scene_id);
 	}
@@ -58,6 +58,16 @@ void Game::gameCommand(const string& command) {
 		scene_id--;
 		ShowBackground(scene_id);
 	}
+	else if (command == "auto") {
+		if (!current_Auto()) {
+			chageAuto();
+		}
+	}
+	else if (command == "n" || command == "N") {
+		if (current_Auto()) {
+			chageAuto();
+		}
+	}
 	else {
 		cout << "未知指令：" << command << "\n";
 		cout << "请输入help查看帮助" << "\n";
@@ -85,5 +95,8 @@ void Game::showHelp() {
 		<< "  " << "map  " << "     " << "查看地图" << "\n"
 		<< "  " << "south" << "     " << "继续剧情" << "\n"
 		<< "  " << "north" << "     " << "回退剧情" << "\n"
+		<< "  " << "auto " << "     " << "自动播放剧情" << "\n"
+		<< "  " << "n " << "     " << "自动播放剧情" << "\n"
+		
 		<< "===========================" << "\n";
 }
