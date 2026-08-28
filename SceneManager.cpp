@@ -79,21 +79,30 @@ void SceneManager::changeScene(int scene_id)
 }
 
 //场景功能显示管理
-void SceneManager::showSceneManager(int scene_id) {
+void SceneManager::showSceneManager(int scene_id, int branch_id) {
 	switch (scene_id) {
 	case 1:
-		map_Manager(scene_id);
+		map_Manager(scene_id, branch_id);
 		setColor(14);
-		sceneManager(game);
+		sceneManager(game, branch_id);
 		break;
 
 	case  2:
+		map_Manager(scene_id, branch_id);
+		setColor(14);
+		sceneManager(game, branch_id);
 		break;
 
 	case 3:
+		map_Manager(scene_id, branch_id);
+		setColor(14);
+		sceneManager(game, branch_id);
 		break;
 
 	case 4:
+		map_Manager(scene_id, branch_id);
+		setColor(14);
+		sceneManager(game, branch_id);
 		break;
 
 	default:
@@ -104,9 +113,10 @@ void choiceList_01() {
 	cout << "1. 对话\n";
 	cout << "2. 药房\n";
 	cout << "3. 锻造\n";
+	cout << "\n输入w继续游戏\n";
 }
-//场景功能管理
-void SceneManager::sceneManager(Game& game1) {
+//场景功能管理,1对话系统+命令系统；2药店系统；3锻造系统
+void SceneManager::sceneManager(Game& game1, int branch_id) {
 	string sceneCommand;
 	bool choice=true;
 	while (choice) {
@@ -114,7 +124,21 @@ void SceneManager::sceneManager(Game& game1) {
 
 		//大世界场景
 		case SceneState::ORIGIN_SCENE:
-			backGround_01();
+			switch (showScene_id()) {
+			case 1:
+				backGround_01();
+				break;
+			case 2:
+				backGround_02();
+				break;
+			case 3:
+				backGround_03();
+				break;
+			case 4:
+				backGround_04();
+				break;
+			}
+			
 			choiceList_01();
 
 			cout << "\n> ";
@@ -156,42 +180,225 @@ void SceneManager::sceneManager(Game& game1) {
 
 		// 选择对话人物
 		case SceneState::TALK:
-			talkScene_01();
+			switch (showScene_id()) {
+				//第一幕
+			case 1:
+				talkScene_01();
 
-			cout << "\n> ";
-			cin >> sceneCommand;
-			if (sceneCommand == "1" || sceneCommand == "2" || sceneCommand == "3") {
-				int num = stoi(sceneCommand);//将string转化为int
-				switch (num) {
-				case 1:
-					//与小卒a对话
-					current_character = 1;
-					talk_character_contnt_01(current_character);
-					break;
+				cout << "\n> ";
+				cin >> sceneCommand;
+				if (sceneCommand == "1" || sceneCommand == "2" || sceneCommand == "3") {
+					int num = stoi(sceneCommand);//将string转化为int
+					switch (num) {
+					case 1:
+						//与小卒a对话
+						current_character = 1;
+						talk_character_contnt_01(current_character);
+						break;
 
-				case 2:
-					//与虞姬对话
-					current_character = 2;
-					talk_character_contnt_01(current_character);
-					break;
+					case 2:
+						//与虞姬对话
+						current_character = 2;
+						talk_character_contnt_01(current_character);
+						break;
 
-				case 3:
-					//返回
-					current_state = SceneState::ORIGIN_SCENE;
-					break;
+					case 3:
+						//返回
+						current_state = SceneState::ORIGIN_SCENE;
+						break;
+					}
 				}
-			}
-			else {
-				
-				if (sceneCommand == "south" || sceneCommand == "w" || sceneCommand == "W"
-					|| sceneCommand == "north" || sceneCommand == "n" || sceneCommand == "N"
-					|| sceneCommand == " quit") {
-					choice = false;
-					
-				}
-				game1.gameCommand(sceneCommand);
+				else {
 
+					if (sceneCommand == "south" || sceneCommand == "w" || sceneCommand == "W"
+						|| sceneCommand == "north" || sceneCommand == "n" || sceneCommand == "N"
+						|| sceneCommand == " quit") {
+						choice = false;
+
+					}
+					game1.gameCommand(sceneCommand);
+				}
+				break;
+
+				//第二幕
+			case 2:
+				//走左边遇王翦
+				if (branch_id == 1) {
+					talkScene_021();
+
+					cout << "\n> ";
+					cin >> sceneCommand;
+					if (sceneCommand == "1" || sceneCommand == "2" || sceneCommand == "3") {
+						int num = stoi(sceneCommand);//将string转化为int
+						switch (num) {
+						case 1:
+							//与王翦对话
+							current_character = 1;
+							talk_character_contnt_021(current_character);
+							break;
+
+						case 2:
+							//与汉军对话
+							current_character = 2;
+							talk_character_contnt_021(current_character);
+							break;
+
+						case 3:
+							//返回
+							current_state = SceneState::ORIGIN_SCENE;
+							break;
+						}
+					}
+					else {
+
+						if (sceneCommand == "south" || sceneCommand == "w" || sceneCommand == "W"
+							|| sceneCommand == "north" || sceneCommand == "n" || sceneCommand == "N"
+							|| sceneCommand == " quit") {
+							choice = false;
+
+						}
+						game1.gameCommand(sceneCommand);
+					}
+				}
+				//走右边进沼泽
+				else {
+					talkScene_022();
+
+					cout << "\n> ";
+					cin >> sceneCommand;
+					if (sceneCommand == "1" || sceneCommand == "2") {
+						int num = stoi(sceneCommand);//将string转化为int
+						switch (num) {
+						case 1:
+							//与副将对话
+							current_character = 1;
+							talk_character_contnt_022(current_character);
+							break;
+
+						case 2:
+							//返回
+							current_state = SceneState::ORIGIN_SCENE;
+							break;
+						}
+					}
+					else {
+
+						if (sceneCommand == "south" || sceneCommand == "w" || sceneCommand == "W"
+							|| sceneCommand == "north" || sceneCommand == "n" || sceneCommand == "N"
+							|| sceneCommand == " quit") {
+							choice = false;
+
+						}
+						game1.gameCommand(sceneCommand);
+					}
+				}
+				break;
+
+				//第三幕
+			case 3:
+				talkScene_03();
+
+				cout << "\n> ";
+				cin >> sceneCommand;
+				if (sceneCommand == "1" || sceneCommand == "2" || sceneCommand == "3"|| sceneCommand == "4"|| sceneCommand == "5") {
+					int num = stoi(sceneCommand);//将string转化为int
+					switch (num) {
+					case 1:
+						//与赤泉侯对话
+						current_character = 1;
+						talk_character_contnt_03(current_character);
+						break;
+
+					case 2:
+						//与秦时月对话
+						current_character = 2;
+						talk_character_contnt_03(current_character);
+						break;
+					case 3:
+						//与钟离昧对话
+						current_character = 3;
+						talk_character_contnt_03(current_character);
+						break;
+					case 4:
+						//与二十八骑对话
+						current_character = 4;
+						talk_character_contnt_03(current_character);
+						break;
+
+					case 5:
+						//返回
+						current_state = SceneState::ORIGIN_SCENE;
+						break;
+					}
+				}
+				else {
+
+					if (sceneCommand == "south" || sceneCommand == "w" || sceneCommand == "W"
+						|| sceneCommand == "north" || sceneCommand == "n" || sceneCommand == "N"
+						|| sceneCommand == " quit") {
+						choice = false;
+
+					}
+					game1.gameCommand(sceneCommand);
+				}
+				break;
+
+				//第四幕!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				//第四幕对话暂时没有地方插入，第四幕项羽死了不知道如何合理的进行对话
+			case 4:
+				talkScene_04();
+
+				cout << "\n> ";
+				cin >> sceneCommand;
+				if (sceneCommand == "1" || sceneCommand == "2" || sceneCommand == "3" || sceneCommand == "4" || sceneCommand == "5") {
+					int num = stoi(sceneCommand);//将string转化为int
+					switch (num) {
+					case 1:
+						//与韩信对话
+						current_character = 1;
+						talk_character_contnt_04(current_character);
+						break;
+
+					case 2:
+						//与汉军对话
+						current_character = 2;
+						talk_character_contnt_04(current_character);
+						break;
+					case 3:
+						//与钟离昧对话
+						current_character = 3;
+						talk_character_contnt_04(current_character);
+						break;
+					case 4:
+						//与二十八骑对话
+						current_character = 4;
+						talk_character_contnt_04(current_character);
+						break;
+					case 5:
+						//与乌江亭长对话
+						current_character = 5;
+						talk_character_contnt_04(current_character);
+						break;
+
+					case 6:
+						//返回
+						current_state = SceneState::ORIGIN_SCENE;
+						break;
+					}
+				}
+				else {
+
+					if (sceneCommand == "south" || sceneCommand == "w" || sceneCommand == "W"
+						|| sceneCommand == "north" || sceneCommand == "n" || sceneCommand == "N"
+						|| sceneCommand == " quit") {
+						choice = false;
+
+					}
+					game1.gameCommand(sceneCommand);
+				}
+				break;
 			}
+			
 			break;
 
 			//药房
@@ -240,6 +447,7 @@ void SceneManager::setCurrentCharacter(int character_id)
 }
 
 void SceneManager::ShowBackground(int scene_id = 0) {
+	int branch_id = 0;
 	switch (scene_id) {
 	case 1:
 		setColor(4);
@@ -295,6 +503,7 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 		break;
 
 	case 2:
+
 		setColor(4);
 		cout << "第二幕：突围南逃，淮河之阻" << "\n";
 		Sleep(1000);
@@ -347,6 +556,7 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 					setColor(14);
 					cout << "项羽突围，向南袭去" << "\n" << "\n";
 					choice_test = false;
+					branch_id = 1;
 					break;
 
 				case 'B':
@@ -363,6 +573,7 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 					setColor(14);
 					cout << "项羽沉默" << "\n" << "\n";
 					choice_test = false;
+					branch_id = 2;
 					break;
 
 				default:
@@ -376,6 +587,8 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 		cout << "已存档" << "\n";
 		current_scene_id = scene_id;
 		cout << "输入w或south继续剧情" << "\n";
+
+		showSceneManager(current_scene_id, branch_id);
 		break;
 
 	case 3:
@@ -416,6 +629,8 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 		cout << "已存档" << "\n";
 		current_scene_id = scene_id;
 		cout << "输入w或south继续剧情" << "\n";
+
+		showSceneManager(current_scene_id);
 		break;
 
 	case 4:
