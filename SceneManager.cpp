@@ -119,11 +119,18 @@ void choiceList_01() {
 void SceneManager::sceneManager(Game& game1, int branch_id) {
 	string sceneCommand;
 	bool choice=true;
+	int key1;//吃掉对话结束后的输入，方便返回上级交谈系统
+	string tip1 = "输入任意按键返回";
 	while (choice) {
 		switch (current_state) {
 
 		//大世界场景
 		case SceneState::ORIGIN_SCENE:
+
+			//清屏
+			system("cls");
+			map_Manager(showScene_id(), branch_id);
+
 			switch (showScene_id()) {
 			case 1:
 				backGround_01();
@@ -174,12 +181,25 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 					choice = false;
 					
 				}
+
+				//清屏
+				system("cls");
+
 				game1.gameCommand(sceneCommand);
+
+				cout << tip1;
+				key1 = _getch();
+				deleteWords(tip1);
 			}
 			break;
 
 		// 选择对话人物
 		case SceneState::TALK:
+			
+			//清屏
+			system("cls");
+			map_Manager(showScene_id(), branch_id);
+
 			switch (showScene_id()) {
 				//第一幕
 			case 1:
@@ -191,15 +211,35 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 					int num = stoi(sceneCommand);//将string转化为int
 					switch (num) {
 					case 1:
+
+						//清屏
+						system("cls");
+						map_Manager(showScene_id(), branch_id);
+
 						//与小卒a对话
 						current_character = 1;
 						talk_character_contnt_01(current_character);
+
+						cout << tip1;
+						key1 = _getch();
+						deleteWords(tip1);
+
 						break;
 
 					case 2:
+
+						//清屏
+						system("cls");
+						map_Manager(showScene_id(), branch_id);
+
 						//与虞姬对话
 						current_character = 2;
 						talk_character_contnt_01(current_character);
+	
+						cout << tip1;
+						key1 = _getch();
+						deleteWords(tip1);
+
 						break;
 
 					case 3:
@@ -216,7 +256,14 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 						choice = false;
 
 					}
+					//清屏
+					system("cls");
+
 					game1.gameCommand(sceneCommand);
+
+					cout << tip1;
+					key1 = _getch();
+					deleteWords(tip1);
 				}
 				break;
 
@@ -232,15 +279,35 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 						int num = stoi(sceneCommand);//将string转化为int
 						switch (num) {
 						case 1:
+
+							//清屏
+							system("cls");
+							map_Manager(showScene_id(), branch_id);
+
 							//与王翦对话
 							current_character = 1;
 							talk_character_contnt_021(current_character);
+
+							cout << tip1;
+							key1 = _getch();
+							deleteWords(tip1);
+
 							break;
 
 						case 2:
+
+							//清屏
+							system("cls");
+							map_Manager(showScene_id(), branch_id);
+
 							//与汉军对话
 							current_character = 2;
 							talk_character_contnt_021(current_character);
+
+							cout << tip1;
+							key1 = _getch();
+							deleteWords(tip1);
+
 							break;
 
 						case 3:
@@ -257,7 +324,14 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 							choice = false;
 
 						}
+						//清屏
+						system("cls");
+
 						game1.gameCommand(sceneCommand);
+
+						cout << tip1;
+						key1 = _getch();
+						deleteWords(tip1);
 					}
 				}
 				//走右边进沼泽
@@ -270,9 +344,19 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 						int num = stoi(sceneCommand);//将string转化为int
 						switch (num) {
 						case 1:
+
+							//清屏
+							system("cls");
+							map_Manager(showScene_id(), branch_id);
+
 							//与副将对话
 							current_character = 1;
 							talk_character_contnt_022(current_character);
+
+							cout << tip1;
+							key1 = _getch();
+							deleteWords(tip1);
+
 							break;
 
 						case 2:
@@ -289,7 +373,14 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 							choice = false;
 
 						}
+						//清屏
+						system("cls");
+
 						game1.gameCommand(sceneCommand);
+
+						cout << tip1;
+						key1 = _getch();
+						deleteWords(tip1);
 					}
 				}
 				break;
@@ -304,25 +395,65 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 					int num = stoi(sceneCommand);//将string转化为int
 					switch (num) {
 					case 1:
+
+						//清屏
+						system("cls");
+						map_Manager(showScene_id(), branch_id);
+
 						//与赤泉侯对话
 						current_character = 1;
 						talk_character_contnt_03(current_character);
+
+						cout << tip1;
+						key1 = _getch();
+						deleteWords(tip1);
+
 						break;
 
 					case 2:
+
+						//清屏
+						system("cls");
+						map_Manager(showScene_id(), branch_id);
+
 						//与秦时月对话
 						current_character = 2;
 						talk_character_contnt_03(current_character);
+
+						cout << tip1;
+						key1 = _getch();
+						deleteWords(tip1);
+
 						break;
 					case 3:
+
+						//清屏
+						system("cls");
+						map_Manager(showScene_id(), branch_id);
+
 						//与钟离昧对话
 						current_character = 3;
 						talk_character_contnt_03(current_character);
+
+						cout << tip1;
+						key1 = _getch();
+						deleteWords(tip1);
+
 						break;
 					case 4:
+
+						//清屏
+						system("cls");
+						map_Manager(showScene_id(), branch_id);
+
 						//与二十八骑对话
 						current_character = 4;
 						talk_character_contnt_03(current_character);
+
+						cout << tip1;
+						key1 = _getch();
+						deleteWords(tip1);
+
 						break;
 
 					case 5:
@@ -339,7 +470,14 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 						choice = false;
 
 					}
+					//清屏
+					system("cls");
+
 					game1.gameCommand(sceneCommand);
+
+					cout << tip1;
+					key1 = _getch();
+					deleteWords(tip1);
 				}
 				break;
 
@@ -354,30 +492,80 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 					int num = stoi(sceneCommand);//将string转化为int
 					switch (num) {
 					case 1:
+
+						//清屏
+						system("cls");
+						map_Manager(showScene_id(), branch_id);
+
 						//与韩信对话
 						current_character = 1;
 						talk_character_contnt_04(current_character);
+
+						cout << "输入任意按键继续";
+						
+						key1 = _getch();
+
 						break;
 
 					case 2:
+
+						//清屏
+						system("cls");
+						map_Manager(showScene_id(), branch_id);
+
 						//与汉军对话
 						current_character = 2;
 						talk_character_contnt_04(current_character);
+
+						cout << "输入任意按键继续";
+						
+						key1 = _getch();
+
 						break;
 					case 3:
+
+						//清屏
+						system("cls");
+						map_Manager(showScene_id(), branch_id);
+
 						//与钟离昧对话
 						current_character = 3;
 						talk_character_contnt_04(current_character);
+
+						cout << "输入任意按键继续";
+						
+						key1 = _getch();
+
 						break;
 					case 4:
+
+						//清屏
+						system("cls");
+						map_Manager(showScene_id(), branch_id);
+
 						//与二十八骑对话
 						current_character = 4;
 						talk_character_contnt_04(current_character);
+
+						cout << "输入任意按键继续";
+						
+						key1 = _getch();
+
 						break;
 					case 5:
+
+						//清屏
+						system("cls");
+						map_Manager(showScene_id(), branch_id);
+
 						//与乌江亭长对话
 						current_character = 5;
 						talk_character_contnt_04(current_character);
+
+						cout << "输入任意按键继续";
+						
+						key1 = _getch();
+
 						break;
 
 					case 6:
@@ -394,7 +582,14 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 						choice = false;
 
 					}
+					//清屏
+					system("cls");
+
 					game1.gameCommand(sceneCommand);
+
+					cout << "输入任意按键返回";
+
+					key1 = _getch();
 				}
 				break;
 			}
@@ -403,6 +598,11 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 
 			//药房
 		case SceneState::PHARMACY:
+
+			//清屏
+			system("cls");
+			map_Manager(showScene_id(), branch_id);
+
 			void phar();
 			cout << "输入任意数字返回。\n";
 			cin >> sceneCommand;
@@ -413,6 +613,11 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 
 			//锻造
 		case SceneState::FORGE:
+
+			//清屏
+			system("cls");
+			map_Manager(showScene_id(), branch_id);
+
 			void forge();
 			cout << "输入任意数字返回。\n";
 			cin >> sceneCommand;
@@ -447,9 +652,15 @@ void SceneManager::setCurrentCharacter(int character_id)
 }
 
 void SceneManager::ShowBackground(int scene_id = 0) {
+	int key1;
 	int branch_id = 0;
+	string command = "quit";//控制游戏结束后结束循环退出游戏
 	switch (scene_id) {
 	case 1:
+
+		//清屏
+		system("cls");
+
 		setColor(4);
 		cout << "第一幕：四面楚歌，垓下之围" << "\n";
 		Sleep(1000);
@@ -494,7 +705,14 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 		setColor(14);
 		cout << "长夜微凉，锦绣未央。虞姬的身姿映衬在烛火之下，翩翩起舞。"
 			<< "宝剑的光泽和着凄冷的月，一切似乎定格在这一刻......" << "\n"<<"\n";
-		Sleep(1000);
+		Sleep(2000);
+		cout << "输入任意按键继续";
+
+		key1 = _getch();
+		
+		//清屏
+		system("cls");
+
 		cout << "已存档" << "\n";
 		current_scene_id = scene_id;
 		cout << "输入w或south继续剧情" << "\n";
@@ -503,6 +721,9 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 		break;
 
 	case 2:
+
+		//清屏
+		system("cls");
 
 		setColor(4);
 		cout << "第二幕：突围南逃，淮河之阻" << "\n";
@@ -583,7 +804,14 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 				}
 			} while (choice_test);
 		}
-		Sleep(1000);
+		Sleep(2000);
+		cout << "输入任意按键继续";
+
+		key1 = _getch();
+
+		//清屏
+		system("cls");
+
 		cout << "已存档" << "\n";
 		current_scene_id = scene_id;
 		cout << "输入w或south继续剧情" << "\n";
@@ -592,6 +820,10 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 		break;
 
 	case 3:
+
+		//清屏
+		system("cls");
+
 		setColor(4);
 		cout << "第三幕：东城快战，以一敌千" << "\n";
 		Sleep(1000);
@@ -625,7 +857,14 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 		nextLine();
 		setColor(14);
 		cout << "赤泉候退。" << "\n"<<"\n";
-		Sleep(1000);
+		Sleep(2000);
+		cout << "输入任意按键继续";
+
+		key1 = _getch();
+
+		//清屏
+		system("cls");
+
 		cout << "已存档" << "\n";
 		current_scene_id = scene_id;
 		cout << "输入w或south继续剧情" << "\n";
@@ -634,6 +873,10 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 		break;
 
 	case 4:
+
+		//清屏
+		system("cls");
+
 		setColor(4);
 		cout << "第四幕：乌江自刎，天地同悲" << "\n";
 		Sleep(1000);
@@ -699,7 +942,11 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 		cout << "往事越千年，魏武挥鞭，东临碣石有遗篇，萧瑟秋风今又是，换了人间。" << "\n";
 		nextLine();
 		cout << "游戏结束，感谢您的游玩" << "\n"
-			<< "请输入quit退出游戏" << "\n";
+			<< "请输入任意键退出游戏" << "\n";
+		
+		key1 = _getch();
+		game.gameCommand(command);
+
 		break;
 
 	default:
