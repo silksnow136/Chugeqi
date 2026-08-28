@@ -28,9 +28,9 @@ public:
 	// 修改场景
 	void changeScene(int scene_id);
 	//场景功能显示管理
-	void showSceneManager(int scene_id = 0);
-	//场景功能管理
-	void sceneManager(Game& game1);
+	void showSceneManager(int scene_id = 0, int branch_id = 0);
+	//场景功能管理,1对话系统以及对话分支+指令系统；2.药店系统；3.锻造系统
+	void sceneManager(Game& game1, int branch_id);
 
 	void nextLine();
 
