@@ -19,7 +19,7 @@ bool SceneManager::current_Auto() {
 	return autoPlay;
 }
 
-void SceneManager::chageAuto() {
+void SceneManager::changeAuto() {
 	autoPlay = !autoPlay;
 }
 
@@ -45,7 +45,7 @@ void SceneManager::nextLine() {
 			int key;
 			key = _getch(); // 读取键盘按键，但不是显示键盘输入
 			if (key == 27) {
-				chageAuto();
+				changeAuto();
 			}
 		}
 	}
@@ -55,7 +55,7 @@ void SceneManager::nextLine() {
 		int key;
 		key=_getch(); // 读取键盘按键，但不是显示键盘输入
 		if (key == 27) {
-			chageAuto();
+			changeAuto();
 		}
 		deleteWords(tip);
 	}
@@ -109,6 +109,8 @@ void SceneManager::showSceneManager(int scene_id, int branch_id) {
 		break;
 	}
 }
+
+
 void choiceList_01() {
 	cout << "1. 对话\n";
 	cout << "2. 药房\n";
@@ -174,22 +176,22 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 				}
 			}
 			else {
-				
 				if (sceneCommand == "south" || sceneCommand == "w" || sceneCommand == "W"
 					|| sceneCommand == "north" || sceneCommand == "n" || sceneCommand == "N"
-					|| sceneCommand ==" quit" ) {
+					|| sceneCommand == "quit" || sceneCommand == "start") {
 					choice = false;
-					
+
 				}
 
 				//清屏
 				system("cls");
 
 				game1.gameCommand(sceneCommand);
-
-				cout << tip1;
-				key1 = _getch();
-				deleteWords(tip1);
+				if (choice) {
+					cout << tip1;
+					key1 = _getch();
+					deleteWords(tip1);
+				}
 			}
 			break;
 
@@ -252,18 +254,20 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 
 					if (sceneCommand == "south" || sceneCommand == "w" || sceneCommand == "W"
 						|| sceneCommand == "north" || sceneCommand == "n" || sceneCommand == "N"
-						|| sceneCommand == " quit") {
+						|| sceneCommand == "quit" || sceneCommand == "start") {
 						choice = false;
 
 					}
+
 					//清屏
 					system("cls");
 
 					game1.gameCommand(sceneCommand);
-
-					cout << tip1;
-					key1 = _getch();
-					deleteWords(tip1);
+					if (choice) {
+						cout << tip1;
+						key1 = _getch();
+						deleteWords(tip1);
+					}
 				}
 				break;
 
@@ -320,18 +324,20 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 
 						if (sceneCommand == "south" || sceneCommand == "w" || sceneCommand == "W"
 							|| sceneCommand == "north" || sceneCommand == "n" || sceneCommand == "N"
-							|| sceneCommand == " quit") {
+							|| sceneCommand == "quit" || sceneCommand == "start") {
 							choice = false;
 
 						}
+
 						//清屏
 						system("cls");
 
 						game1.gameCommand(sceneCommand);
-
-						cout << tip1;
-						key1 = _getch();
-						deleteWords(tip1);
+						if (choice) {
+							cout << tip1;
+							key1 = _getch();
+							deleteWords(tip1);
+						}
 					}
 				}
 				//走右边进沼泽
@@ -369,18 +375,20 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 
 						if (sceneCommand == "south" || sceneCommand == "w" || sceneCommand == "W"
 							|| sceneCommand == "north" || sceneCommand == "n" || sceneCommand == "N"
-							|| sceneCommand == " quit") {
+							|| sceneCommand == "quit" || sceneCommand == "start") {
 							choice = false;
 
 						}
+
 						//清屏
 						system("cls");
 
 						game1.gameCommand(sceneCommand);
-
-						cout << tip1;
-						key1 = _getch();
-						deleteWords(tip1);
+						if (choice) {
+							cout << tip1;
+							key1 = _getch();
+							deleteWords(tip1);
+						}
 					}
 				}
 				break;
@@ -466,18 +474,20 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 
 					if (sceneCommand == "south" || sceneCommand == "w" || sceneCommand == "W"
 						|| sceneCommand == "north" || sceneCommand == "n" || sceneCommand == "N"
-						|| sceneCommand == " quit") {
+						|| sceneCommand == "quit" || sceneCommand == "start") {
 						choice = false;
 
 					}
+
 					//清屏
 					system("cls");
 
 					game1.gameCommand(sceneCommand);
-
-					cout << tip1;
-					key1 = _getch();
-					deleteWords(tip1);
+					if (choice) {
+						cout << tip1;
+						key1 = _getch();
+						deleteWords(tip1);
+					}
 				}
 				break;
 
@@ -578,18 +588,20 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 
 					if (sceneCommand == "south" || sceneCommand == "w" || sceneCommand == "W"
 						|| sceneCommand == "north" || sceneCommand == "n" || sceneCommand == "N"
-						|| sceneCommand == " quit") {
+						|| sceneCommand == "quit" || sceneCommand == "start") {
 						choice = false;
 
 					}
+
 					//清屏
 					system("cls");
 
 					game1.gameCommand(sceneCommand);
-
-					cout << "输入任意按键返回";
-
-					key1 = _getch();
+					if (choice) {
+						cout << tip1;
+						key1 = _getch();
+						deleteWords(tip1);
+					}
 				}
 				break;
 			}

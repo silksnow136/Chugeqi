@@ -21,7 +21,7 @@ public:
 
 	void ShowBackground(int scene_id);
 
-	void chageAuto();//自动/手动切换
+	void changeAuto();//自动/手动切换
 	bool current_Auto();//当前的自动/手动模式
 	//初步剧情存档,获得当前场景id
 	int showScene_id();
@@ -63,5 +63,6 @@ private:
 
 	// 避免地图重复打印
 	bool unique_map_print = false;
+
 };
 

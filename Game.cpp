@@ -65,12 +65,12 @@ void Game::gameCommand(const string& command) {
 	}
 	else if (command == "auto") {
 		if (!sceneManager.current_Auto()) {
-			sceneManager.chageAuto();
+			sceneManager.changeAuto();
 		}
 	}
 	else if (command == "manual") {
 		if (sceneManager.current_Auto()) {
-			sceneManager.chageAuto();
+			sceneManager.changeAuto();
 		}
 	}
 	else if (command == "start") {
