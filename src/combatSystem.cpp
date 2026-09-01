@@ -154,8 +154,11 @@ void CombatSystem::displayBattle() const {
     std::cout << "=▽战斗日志▽============" << std::endl;
     std::cout << log.render();
 
-    // 我方状态
-    std::cout << "=▽我方▽================" << std::endl;
+    // 我方状态（托管中时显示标记）
+    std::cout << "=▽我方▽================"
+              << (playerAiAssisted ? "  [全员AI托管中，ESC退出]"
+                                   : (companionAiAssisted ? "  [同伴AI托管中，ESC退出]" : ""))
+              << std::endl;
     displayStatus(player);
     for (auto* companion : companions) {
         if (companion->isAlive()) {
@@ -181,18 +184,26 @@ void CombatSystem::displayStatus(const Combatant* c) const {
 // 回合处理
 // ---------------------------------------------------------------------------
 
-bool CombatSystem::processPlayerTurn() { return manualTurn(player, 4); }
+bool CombatSystem::processPlayerTurn() {
+    if (playerAiAssisted) return processAllyAITurn(player); // AI 托管
+    return manualTurn(player, 5);                           // 手动：含切换托管项
+}
 
-bool CombatSystem::processCompanionTurn(Combatant* companion) { return manualTurn(companion, 2); }
+bool CombatSystem::processCompanionTurn(Combatant* companion) {
+    if (playerAiAssisted || companionAiAssisted) return processAllyAITurn(companion); // 全员托管 或 同伴独立托管
+    return manualTurn(companion, 3); // 手动（含托管选项）
+}
 
-// 通用手动回合：玩家与同伴共用。maxChoice 决定菜单项数（玩家 4，同伴 2）
+// 手动回合：玩家(maxChoice=5，含全员托管切换)与同伴(maxChoice=3，含同伴托管切换)共用
 bool CombatSystem::manualTurn(Combatant* actor, int maxChoice) {
     while (true) {
         displayBattle(); // 行动前刷新一次界面
-        if (maxChoice == 4)
-            std::cout << "[1]攻击  [2]技能  [3]道具(未实现)  [4]逃跑" << std::endl;
+        if (maxChoice >= 5)
+            std::cout << "[1]攻击  [2]技能  [3]道具(未实现)  [4]逃跑  [5]"
+                      << (playerAiAssisted ? "关闭全员AI托管" : "开启全员AI托管") << std::endl;
         else
-            std::cout << actor->getName() << " 的行动：[1]攻击  [2]技能" << std::endl;
+            std::cout << actor->getName() << " 的行动：[1]攻击  [2]技能  [3]"
+                      << (companionAiAssisted ? "关闭AI托管" : "AI托管") << std::endl;
 
         switch (readMenuChoice(1, maxChoice)) {
             case 1: { // 普通攻击：手动选择目标
@@ -209,16 +220,51 @@ bool CombatSystem::manualTurn(Combatant* actor, int maxChoice) {
                 performSkill(actor, s, targets);
                 break;
             }
-            case 3: // 道具（未实现）
-                std::cout << "道具系统：(未实现)" << std::endl;
+            case 3:
+                if (maxChoice >= 5) { // 玩家：道具（未实现）
+                    std::cout << "道具系统：(未实现)" << std::endl;
+                    console::pause();
+                    continue;
+                }
+                // 同伴：切换同伴 AI 托管，开启后立即由 AI 接管本回合
+                companionAiAssisted = !companionAiAssisted;
+                if (companionAiAssisted) {
+                    addLog(std::string(actor->getName()) + " 进入了 AI 托管。");
+                    return processAllyAITurn(actor);
+                }
+                addLog(std::string(actor->getName()) + " 退出了 AI 托管。");
+                std::cout << "已关闭 " << actor->getName() << " 的 AI 托管。" << std::endl;
                 console::pause();
                 continue;
             case 4: // 逃跑（仅玩家）
                 return attemptRun(actor);
+            case 5: // 切换全员 AI 托管：开启后立即由 AI 接管本回合
+                playerAiAssisted = !playerAiAssisted;
+                if (playerAiAssisted) {
+                    addLog("全体我方角色进入了 AI 托管。");
+                    return processAllyAITurn(actor); // actor 必为 player（仅玩家菜单含此项）
+                }
+                addLog("全体我方角色退出了 AI 托管。");
+                std::cout << "已关闭全员 AI 托管。" << std::endl;
+                console::pause();
+                continue;
         }
         displayBattle(); // HP/SP 变动后立即刷新显示
         console::pause();
         return false;
+    }
+}
+
+// AI 行动后的等待：任意键继续；ESC 立即退出托管（优先退全员，其次退同伴），下一步即恢复手操
+void CombatSystem::aiPause() {
+    if (console::pauseEsc()) {
+        if (playerAiAssisted) {
+            playerAiAssisted = false;
+            addLog("全体我方角色退出了 AI 托管（ESC）。");
+        } else if (companionAiAssisted) {
+            companionAiAssisted = false;
+            addLog("同伴退出了 AI 托管（ESC）。");
+        }
     }
 }
 
@@ -227,7 +273,7 @@ bool CombatSystem::processEnemyTurn(Combatant* enemy) {
     if (enemy->hasStatusEffect(StatusEffect::Stun)) {
         addLog(enemy->getName() + " 处于眩晕，无法行动！");
         displayBattle();
-        console::pause();
+        aiPause();
         return false;
     }
 
@@ -249,7 +295,7 @@ bool CombatSystem::processEnemyTurn(Combatant* enemy) {
             displayBattle();
             performSkill(enemy, skill, skillTargets);
             displayBattle();
-            console::pause();
+            aiPause();
             return false;
         }
     }
@@ -260,7 +306,78 @@ bool CombatSystem::processEnemyTurn(Combatant* enemy) {
     displayBattle();
     performAttack(enemy, target, true);
     displayBattle();
-    console::pause();
+    aiPause();
+    return false;
+}
+
+// 我方 AI 托管回合：低血优先治疗，否则优先伤害技能，最后退回普攻
+bool CombatSystem::processAllyAITurn(Combatant* actor) {
+    // 眩晕跳过
+    if (actor->hasStatusEffect(StatusEffect::Stun)) {
+        addLog(actor->getName() + " 处于眩晕，无法行动！");
+        displayBattle();
+        aiPause();
+        return false;
+    }
+
+    auto allies = getAliveAllies();   // 含 actor 自身，治疗可选
+    auto enemies = getAliveEnemies();
+    if (enemies.empty()) return false;
+
+    // 满血估算 = 100 + 等级×10；HP 低于 30% 视为残血
+    int maxHpEst = 100 + actor->getLevel() * 10;
+    bool lowHp = actor->getHP() < (maxHpEst * 3 / 10);
+
+    // 1) 低血优先：找可用治疗技能
+    if (lowHp) {
+        for (auto* s : actor->getSkills()) {
+            if (s->getCost() > actor->getSP()) continue;
+            if (dynamic_cast<HealSkill*>(s) == nullptr) continue;
+            // 治疗目标：全体技能→全队，单体技能→HP 最低的我方（含自己）
+            std::vector<Combatant*> tgts;
+            if (s->getScope() == AttackScope::All) {
+                tgts = allies;
+            } else {
+                Combatant* t = chooseAITarget(actor, allies);
+                if (t) tgts.push_back(t);
+            }
+            if (!tgts.empty()) {
+                displayBattle();
+                performSkill(actor, s, tgts);
+                displayBattle();
+                aiPause();
+                return false;
+            }
+        }
+    }
+
+    // 2) 优先伤害技能：找 SP 足够的 DamageSkill
+    for (auto* s : actor->getSkills()) {
+        if (s->getCost() > actor->getSP()) continue;
+        if (dynamic_cast<DamageSkill*>(s) == nullptr) continue;
+        std::vector<Combatant*> tgts;
+        if (s->getScope() == AttackScope::All) {
+            tgts = enemies;
+        } else {
+            Combatant* t = chooseAITarget(actor, enemies);
+            if (t) tgts.push_back(t);
+        }
+        if (!tgts.empty()) {
+            displayBattle();
+            performSkill(actor, s, tgts);
+            displayBattle();
+            aiPause();
+            return false;
+        }
+    }
+
+    // 3) 退回普攻：集火 HP 最低的敌方
+    Combatant* t = chooseAITarget(actor, enemies);
+    if (!t) return false;
+    displayBattle();
+    performAttack(actor, t, true);
+    displayBattle();
+    aiPause();
     return false;
 }
 
