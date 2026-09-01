@@ -3,7 +3,7 @@
 // 以下功能仅保留接口与定义，未实现
 //   - 道具使用
 //   - 状态效果（灼烧 / 迟缓 / 眩晕 / 充能）
-//   - 同伴与敌人的 AI（同伴手动操控，敌人不会回击）
+//   - 充能技能的实际执行
 #include <vector>
 #include <memory>
 #include <deque>
@@ -53,6 +53,8 @@ private:
     // 战斗状态
     bool battleEnded = false;
     bool playerWon = false;
+    bool playerAiAssisted = false; // 玩家是否开启全员 AI 托管
+    bool companionAiAssisted = false; // 同伴独立 AI 托管（同伴菜单切换）
     BattleLog log;
     mutable std::mt19937 rng; // 随机数引擎，构造时用 random_device 播种
 
@@ -67,8 +69,10 @@ private:
     // 回合处理
     bool processPlayerTurn();
     bool processCompanionTurn(Combatant* companion);
-    bool processEnemyTurn(Combatant* enemy); // 未实现：敌人不会回击
+    bool processEnemyTurn(Combatant* enemy);
+    bool processAllyAITurn(Combatant* actor); // 我方 AI 托管回合（玩家可切换开启）
     bool manualTurn(Combatant* actor, int maxChoice); // 玩家/同伴共用的手动回合
+    void aiPause(); // AI 行动后的等待：任意键继续，ESC 退出玩家 AI 托管
 
     // 行动执行
     bool performAttack(Combatant* attacker, Combatant* target, bool isNormalAttack = true);
@@ -88,7 +92,7 @@ private:
     void applySlowEffect(Combatant* c);
     void checkStun(Combatant* c);
 
-    // AI 决策（未实现）
+    // AI 决策
     SkillBase* chooseAISkill(Combatant* ai, const std::vector<Combatant*>& enemies, const std::vector<Combatant*>& allies);
     Combatant* chooseAITarget(Combatant* ai, const std::vector<Combatant*>& potentialTargets);
 };
