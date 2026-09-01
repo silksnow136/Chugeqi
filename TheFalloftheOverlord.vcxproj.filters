@@ -33,10 +33,28 @@
     <ClCompile Include="SceneManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="StoryManager.cpp">
+    <ClCompile Include="TalkManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="map.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PharManager.h">
+      <Filter>头文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PharManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ForgeManager.h">
+      <Filter>头文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ForgeManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BackGround.h">
+      <Filter>头文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BackGround.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -50,7 +68,7 @@
     <ClInclude Include="map.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="StroyManager.h">
+    <ClInclude Include="TalkManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

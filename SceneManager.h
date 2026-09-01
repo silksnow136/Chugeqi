@@ -2,9 +2,12 @@
 //负责故事背景显示
 //负责显示剧情
 //负责显示场景以及场景交互
+#include "TalkManager.h"
 using namespace std;
 
 class Game;
+class PharManager;
+class ForgeManager;
 
 class SceneManager {
 public:
@@ -45,9 +48,18 @@ public:
 	void setCurrentCharacter(int character_id);
 
 	void deleteWords(string tip);
+
+	// 当前选择的人物
+	int current_character = 0;
+	//是否返回地图场景
+	bool scene = true;
 private:
 
 	Game& game;
+
+	TalkManager talkManager;
+	PharManager* pharManager = nullptr;
+	ForgeManager* forgeManager = nullptr;
 
 	// 当前场景ID
 	int current_scene_id = 0;
@@ -55,14 +67,26 @@ private:
 	// 当前场景状态
 	SceneState current_state = SceneState::ORIGIN_SCENE;
 
-	// 当前选择的人物
-	int current_character = 0;
-
 	// 是否自动播放剧情
 	bool autoPlay = false;
 
 	// 避免地图重复打印
 	bool unique_map_print = false;
 
+	// =====================================
+	// 通用辅助函数
+	// =====================================
+public:
+	// 清屏并显示地图
+	void refreshScene(int branch_id);
+
+	// 判断并执行命令
+	bool handleCommand(Game& game1, const string& command);
+
+	// 显示当前场景背景
+	void showCurrentBackground();
+
+	//输出剧情对话
+	void printWords(string tips,int color, int sleep);
 };
 

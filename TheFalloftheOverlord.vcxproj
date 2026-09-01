@@ -123,17 +123,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BackGround.cpp" />
+    <ClCompile Include="BackGround.h" />
+    <ClCompile Include="ForgeManager.cpp" />
+    <ClCompile Include="ForgeManager.h" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="map.cpp" />
+    <ClCompile Include="PharManager.cpp" />
+    <ClCompile Include="PharManager.h" />
     <ClCompile Include="SceneManager.cpp" />
-    <ClCompile Include="StoryManager.cpp" />
+    <ClCompile Include="TalkManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h" />
     <ClInclude Include="map.h" />
     <ClInclude Include="SceneManager.h" />
-    <ClInclude Include="StroyManager.h" />
+    <ClInclude Include="TalkManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
