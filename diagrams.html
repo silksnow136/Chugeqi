@@ -36,6 +36,16 @@
 <p class="toggle" onclick="toggleSrc('src-turn')">查看源码</p>
 <pre id="src-turn"></pre>
 
+<h2>5. JSON 数据加载流程</h2>
+<div class="diagram" id="diagram-json"></div>
+<p class="toggle" onclick="toggleSrc('src-json')">查看源码</p>
+<pre id="src-json"></pre>
+
+<h2>6. SQL 存档读写流程</h2>
+<div class="diagram" id="diagram-sql"></div>
+<p class="toggle" onclick="toggleSrc('src-sql')">查看源码</p>
+<pre id="src-sql"></pre>
+
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <script>
 function toggleSrc(id) {
@@ -302,17 +312,94 @@ const TURN_FLOW = `flowchart TD
     RUN4 --> END
     RUN5 --> END`;
 
+const JSON_FLOW = `flowchart TD
+    subgraph A["DataLoader：静态模板加载"]
+        A1[loadGameData data/] --> A2[loadSkills skill.json]
+        A2 --> A3[readFileText 读文件]
+        A3 --> A4[json::Value::parse]
+        A4 --> A5[遍历每个技能 id]
+        A5 --> A6{type?}
+        A6 -- heal --> A7[make_unique HealSkill]
+        A6 -- charge --> A8[make_unique ChargingSkill]
+        A6 -- damage --> A9[make_unique DamageSkill]
+        A7 --> A10[SkillPool]
+        A8 --> A10
+        A9 --> A10
+
+        A11[loadPartyTemplates battle_test.json] --> A12[loadCombatant player_ref]
+        A11 --> A13[loadCombatant companions_ref]
+        A14[loadBattle battle_test.json] --> A15[loadCombatant enemies_ref]
+        A14 --> A16[读 config: first_side / disable_run / disable_items]
+        A12 --> B1
+        A13 --> B1
+        A15 --> B1
+    end
+
+    subgraph B["loadCombatant 内部"]
+        B1[readFileText -> json::Value::parse] --> B2[读 name / id / level / hp / sp / exp]
+        B2 --> B3[读 baseStats 四维]
+        B3 --> B4[skills 经 skillPool.find 反查指针]
+        B4 --> B5[读 inventory]
+        B5 --> B6[make_unique Combatant]
+    end
+
+    subgraph C["json::Value::parse 递归下降"]
+        C1[parseValue] --> C2{当前字符}
+        C2 -- 对象 --> C3[parseObject]
+        C2 -- 数组 --> C4[parseArray]
+        C2 -- 字符串 --> C5[parseString]
+        C2 -- 布尔 --> C6[parseBool]
+        C2 -- null --> C7[null]
+        C2 -- 数字 --> C8[parseNumber]
+    end`;
+
+const SQL_FLOW = `flowchart TD
+    subgraph A["构造"]
+        A1[SaveManager dbPath] --> A2[sqlite3_open]
+        A2 --> A3[sqlite3_exec<br/>CREATE TABLE IF NOT EXISTS x3]
+    end
+
+    subgraph B["读档 loadParty"]
+        B1[loadParty skillPool] --> B2[SELECT characters<br/>ORDER BY rowid]
+        B2 --> B3[逐行 make_unique Combatant<br/>byId 记录]
+        B3 --> B4[SELECT learned_skills<br/>skill_id -> skillPool.find]
+        B4 --> B5[Combatant.addSkill]
+        B5 --> B6[SELECT inventory]
+        B6 --> B7[Combatant.addItem]
+        B7 --> B8[返回队伍]
+    end
+
+    subgraph C["写档 saveParty"]
+        C1[saveParty party, skillPool] --> C2[BEGIN TRANSACTION]
+        C2 --> C3[DELETE characters<br/>DELETE learned_skills<br/>DELETE inventory]
+        C3 --> C4[遍历 party]
+        C4 --> C5[runStatement INSERT characters<br/>prepare -> bind -> step -> finalize]
+        C5 --> C6[遍历技能 findSkillId 反查 id]
+        C6 --> C7[INSERT learned_skills]
+        C7 --> C8[遍历背包 INSERT inventory]
+        C8 --> C9[COMMIT]
+    end
+
+    subgraph D["重置 / 判断"]
+        D1[resetSave] --> D2[BEGIN -> DELETE x3 -> COMMIT]
+        D3[hasSave] --> D4[SELECT COUNT 记录数]
+    end`;
+
 const diagrams = [
   { id: 'diagram-class',  code: CLASS_DIAGRAM },
   { id: 'diagram-main',   code: MAIN_FLOW },
   { id: 'diagram-battle', code: BATTLE_FLOW },
-  { id: 'diagram-turn',   code: TURN_FLOW }
+  { id: 'diagram-turn',   code: TURN_FLOW },
+  { id: 'diagram-json',   code: JSON_FLOW },
+  { id: 'diagram-sql',    code: SQL_FLOW }
 ];
 
 document.getElementById('src-class').textContent  = CLASS_DIAGRAM;
 document.getElementById('src-main').textContent   = MAIN_FLOW;
 document.getElementById('src-battle').textContent = BATTLE_FLOW;
 document.getElementById('src-turn').textContent   = TURN_FLOW;
+document.getElementById('src-json').textContent   = JSON_FLOW;
+document.getElementById('src-sql').textContent    = SQL_FLOW;
 
 mermaid.initialize({ startOnLoad: false, theme: 'default', flowchart: { curve: 'basis' } });
 for (const d of diagrams) {
