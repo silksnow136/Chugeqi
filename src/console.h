@@ -10,4 +10,5 @@ namespace console {
     void clearScreen(); // 清屏
     int  readKey();     // 读取一个按键（无回显）
     void pause();       // 等待任意按键
+    bool pauseEsc();    // 等待按键，若按下 ESC 返回 true
 }
