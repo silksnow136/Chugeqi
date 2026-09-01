@@ -2,6 +2,7 @@
 #include "skill.h" // 需要SkillBase定义
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
 // ---- Civil ----
 Civil::Civil(const std::string& name, const std::string& role, const std::vector<std::string>& dialogue)
@@ -158,4 +159,38 @@ void Combatant::levelUp() {
     // 恢复满HP和SP
     hp = 100 + level * 10;
     sp = 50 + level * 5;
+}
+
+// ---- 拾取与查看（探索态交互） ----
+
+void Combatant::pickUp(const std::string& itemId, int count) {
+    addItem(itemId, count);
+    std::cout << getName() << " 拾取了 " << count
+              << " 个 [" << itemId << "]。" << std::endl;
+}
+
+void Combatant::showStats() const {
+    std::cout << "\n========== 角色属性 ==========\n";
+    std::cout << "姓名: " << getName() << "\n";
+    std::cout << "等级: " << level << "\n";
+    std::cout << "生命: " << hp << "  技能值: " << sp << "\n";
+    std::cout << "经验: " << exp << "/" << (10 * level * level) << "\n";
+    std::cout << "力量: " << getEffectiveStat(0)
+              << "  魔力: " << getEffectiveStat(1)
+              << "  耐力: " << getEffectiveStat(2)
+              << "  敏捷: " << getEffectiveStat(3) << "\n";
+    std::cout << "==============================\n";
+}
+
+void Combatant::showInventory() const {
+    std::cout << "\n========== 背包 ==========\n";
+    if (inventory.empty()) {
+        std::cout << "背包是空的。\n";
+    } else {
+        int idx = 1;
+        for (const auto& p : inventory) {
+            std::cout << idx++ << ". " << p.first << " ×" << p.second << "\n";
+        }
+    }
+    std::cout << "==========================\n";
 }
