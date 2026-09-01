@@ -13,6 +13,7 @@ namespace console {
     void clearScreen() { std::system("cls"); }
     int readKey() { return _getch(); }
     void pause() { _getch(); }
+    bool pauseEsc() { return _getch() == 27; } // ESC 的键码为 27
 }
 #else
 #include <cstdio>
@@ -23,5 +24,6 @@ namespace console {
     void clearScreen() { std::system("clear"); }
     int readKey() { return std::getchar(); }
     void pause() { std::getchar(); }
+    bool pauseEsc() { return std::getchar() == 27; } // ESC 的键码为 27
 }
 #endif
