@@ -100,6 +100,11 @@ public:
     void addItem(const std::string& itemId, int count = 1);
     bool consumeItem(const std::string& itemId, int count = 1);
 
+    // 拾取与查看（探索态交互）
+    void pickUp(const std::string& itemId, int count = 1); // 拾取物品并输出反馈
+    void showStats() const;                                // 查看基础属性
+    void showInventory() const;                            // 查看背包（itemId×数量）
+
     // 经验与升级
     void addExp(int amount);
     void levelUp(); // 升级时全属性+1，并恢复满HP/SP
