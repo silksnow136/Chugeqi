@@ -87,6 +87,6 @@ public:
 	void showCurrentBackground();
 
 	//输出剧情对话
-	void printWords(string tips,int color, int sleep);
+	void printWords(string tips,int color, int sleep,int sleep1);
 };
 

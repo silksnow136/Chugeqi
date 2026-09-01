@@ -14,7 +14,7 @@ void TalkManager::setSceneManager(SceneManager* manager)
 }
 
 //第一幕
-bool TalkManager::talkScene01(Game& game1, int branch_id) {
+void TalkManager::talkScene01(Game& game1, int branch_id) {
 	talkScene_01();
 	string sceneCommand1;
 	cout << "\n> ";
@@ -32,13 +32,12 @@ bool TalkManager::talkScene01(Game& game1, int branch_id) {
 	}
 	else {
 		sceneManager->scene = sceneManager->handleCommand(game1, sceneCommand1);
-		return false;
+		
 	}
-	return true;
 }
 
 //第二章
-bool TalkManager::talkScene02(Game& game1, int branch_id) {
+void TalkManager::talkScene02(Game& game1, int branch_id) {
 	if (branch_id == 1) {
 		talkScene_021();
 		string sceneCommand1;
@@ -57,7 +56,7 @@ bool TalkManager::talkScene02(Game& game1, int branch_id) {
 		}
 		else {
 			sceneManager->scene = sceneManager->handleCommand(game1, sceneCommand1);
-			return false;
+			
 		}
 	}
 	else {
@@ -78,14 +77,13 @@ bool TalkManager::talkScene02(Game& game1, int branch_id) {
 		}
 		else {
 			sceneManager->scene = sceneManager->handleCommand(game1, sceneCommand1);
-			return false;
+			
 		}
 	}
-	return true;
 }
 
 //第三章
-bool TalkManager::talkScene03(Game& game1, int branch_id) {
+void TalkManager::talkScene03(Game& game1, int branch_id) {
 	talkScene_03();
 	string sceneCommand1;
 	cout << "\n> ";
@@ -103,9 +101,7 @@ bool TalkManager::talkScene03(Game& game1, int branch_id) {
 	}
 	else {
 		sceneManager->scene = sceneManager->handleCommand(game1, sceneCommand1);
-		return false;
 	}
-	return true;
 }
 
 void TalkManager::waitForReturn() {

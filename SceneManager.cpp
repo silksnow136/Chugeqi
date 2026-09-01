@@ -7,6 +7,7 @@
 #include "PharManager.h"
 #include "ForgeManager.h"
 #include "BackGround.h"
+
 SceneManager::SceneManager(Game& game): game(game)
 {
 	current_scene_id = 0;//剧情初步存档,显示当前场景id
@@ -130,25 +131,29 @@ void SceneManager::refreshScene(int branch_id) {
 
 //判断并执行命令
 bool SceneManager::handleCommand(Game& game1, const string& sceneCommand)
-{
+{	
+	bool ch = true;
 	// 判断是否为需要退出当前场景的指令
 	if (sceneCommand == "south" || sceneCommand == "w" ||  sceneCommand == "W" ||  
 		sceneCommand == "north" || sceneCommand == "n" || sceneCommand == "N" ||
 		sceneCommand == "quit" || sceneCommand == "start")
-	{
+	{	
 		// 结束当前 SceneManager
-		return false;
+		ch = false;
 	}
 
 	// 清屏
 	system("cls");
 	game1.gameCommand(sceneCommand);
-
 	// 执行完普通指令后，等待玩家按键
-	cout << "输入任意按键返回";
-	_getch();
-	deleteWords("输入任意按键返回");
-	return true;
+	
+	if (sceneCommand != "start") {
+		cout << "输入任意按键返回";
+		_getch();
+		deleteWords("输入任意按键返回");
+	}
+	
+	return ch;
 }
 
 
@@ -223,17 +228,17 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 			switch (showScene_id()) {
 				//第一幕
 			case 1:
-				scene=talkManager.talkScene01(game1, branch_id);
+				talkManager.talkScene01(game1, branch_id);
 				break;
 
 				//第二幕
 			case 2:
-				scene=talkManager.talkScene02(game1, branch_id);
+				talkManager.talkScene02(game1, branch_id);
 				break;
 
 				//第三幕
 			case 3:
-				scene=talkManager.talkScene03(game1, branch_id);
+				talkManager.talkScene03(game1, branch_id);
 				break;
 
 				//第四幕!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -296,12 +301,30 @@ void SceneManager::setCurrentCharacter(int character_id)
 	current_character = character_id;
 }
 
-void SceneManager::printWords(string tips,int color,int sleep) {
+//输出剧情对话,逐字打印，Sleep1控制逐字打印速度
+void SceneManager::printWords(string tips,int color,int sleep,int sleep1=100) {
 	setColor(color);
-	cout << tips;
+	for (size_t i = 0; i < tips.length();)
+	{
+		unsigned char c = tips[i];
+		// ASCII 字符
+		if (c < 128)
+		{
+			cout << tips[i];
+			i++;
+		}
+		// UTF-8 中文字符，通常占 3 个字节
+		else
+		{
+			cout << tips.substr(i, 3);
+			i += 3;
+		}
+		cout << flush;
+		Sleep(sleep1);
+	}
+
 	cout << "\n";
 	Sleep(sleep);
-	
 }
 void SceneManager::ShowBackground(int scene_id = 0) {
 	int key1;
@@ -312,7 +335,7 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 
 		//清屏
 		system("cls");
-		printWords("第一幕：四面楚歌，垓下之围", 4, 1000);
+		printWords("第一幕：四面楚歌，垓下之围", 4, 1500);
 		cout << "\n";
 		printWords("公元前202年12月（上旬），垓下（今安徽灵璧东南）",12,1000);
 		printWords("项羽和虞姬被困，兵少食尽，人心惶惶。汉军围困重重，夜间楚歌四起。帐中，霸王与虞姬对饮，虞姬舞剑，霸王悲怆，诗曰“力拔山兮气盖世，时不利兮骓不逝，骓不逝兮可奈何，虞兮虞兮奈若何。”", 14, 1000);
@@ -360,7 +383,7 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 
 		//清屏
 		system("cls");
-		printWords("第二幕：突围南逃，淮河之阻",4,1000);
+		printWords("第二幕：突围南逃，淮河之阻",4,1500);
 		printWords("\n公元前202年12月（中旬），自垓下经淮河、阴陵（安徽滁州）至东城", 12, 1000);
 		printWords("霸王率麾下八百壮士，突围南逃，至破晓，渡淮河，余骑百人，汉军觉察。灌婴以五千骑追之。至阴陵，迷失道。遇一田夫。", 14, 1000);
 		printWords("\n与田夫交谈", 14, 0);
@@ -436,7 +459,7 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 
 		//清屏
 		system("cls");
-		printWords("第三幕：东城快战，以一敌千", 4, 1000);
+		printWords("第三幕：东城快战，以一敌千", 4, 1500);
 		printWords("\n公元前202年12月（下旬），东城（今安徽定远东南）", 12, 1000);
 		printWords("霸王至东城，余二十八骑，勉诸将曰：“吾起兵至今八岁有余，身经百战，战无不胜，攻无不克，遂霸天下。今天公亡我，固死矣，且看吾溃围，斩将，刈旗。”", 14, 0);
 		//弹出对话框暂时没有制作思路！！！！！！
@@ -474,7 +497,7 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 
 		//清屏
 		system("cls");
-		printWords("第四幕：乌江自刎，天地同悲", 4, 1000);
+		printWords("第四幕：乌江自刎，天地同悲", 4, 1500);
 		printWords("\n公元前202年12月（月底），乌江（今安徽和县东北乌江浦）", 12, 1000);
 		printWords("霸王欲渡乌江，数合间连斩数敌人，退至江边。乌江亭长檥船待。忆起江东父老，心中怅然，停步江边，仰天长啸。", 14, 0);
 		//弹出对话框暂时没有制作思路！！！！！！

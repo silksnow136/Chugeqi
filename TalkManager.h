@@ -20,11 +20,11 @@ public:
     // 对话系统
     bool talkScene(Game& game1, int branch_id);
     // 第一幕
-    bool talkScene01(Game& game1, int branch_id);
+    void talkScene01(Game& game1, int branch_id);
     // 第二幕
-    bool talkScene02(Game& game1, int branch_id);
+    void talkScene02(Game& game1, int branch_id);
     // 第三幕
-    bool talkScene03(Game& game1, int branch_id);
+    void talkScene03(Game& game1, int branch_id);
 
     // 对话人物打印
 

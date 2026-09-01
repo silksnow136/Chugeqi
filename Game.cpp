@@ -57,10 +57,16 @@ void Game::gameCommand(const string& command) {
 	}
 	else if (command == "south" || command =="w" || command == "W") {
 		scene_id++;
+		if (scene_id > 4) {
+			scene_id = 4;
+		}
 		sceneManager.ShowBackground(scene_id);
 	}
 	else if (command == "north" || command == "n" || command == "N") {
 		scene_id--;
+		if (scene_id < 0) {
+			scene_id = 0;
+		}
 		sceneManager.ShowBackground(scene_id);
 	}
 	else if (command == "auto") {
