@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Chugeqi 架构图</title>
+<style>
+  body { font-family: "Microsoft YaHei", sans-serif; margin: 2em auto; max-width: 1100px; padding: 0 1em; color: #222; }
+  h1 { border-bottom: 2px solid #333; padding-bottom: .3em; }
+  h2 { margin-top: 2em; color: #0b4f8b; }
+  .diagram { border: 1px solid #ddd; border-radius: 6px; padding: 1em; margin: 1em 0; background: #fafafa; overflow-x: auto; }
+  pre { background: #f4f4f4; padding: 1em; border-radius: 6px; font-size: 12px; overflow-x: auto; display: none; }
+  .toggle { font-size: 12px; color: #555; cursor: pointer; user-select: none; }
+</style>
+</head>
+<body>
+<h1>Chugeqi 架构图</h1>
+<p>类图 + 流程图（精确到函数）。图由 Mermaid 渲染，展开 "查看源码" 可看原始语法。</p>
+
+<h2>1. 类图</h2>
+<div class="diagram" id="diagram-class"></div>
+<p class="toggle" onclick="toggleSrc('src-class')">查看源码</p>
+<pre id="src-class"></pre>
+
+<h2>2. 主流程（启动 → 存档 → 战斗 → 落库）</h2>
+<div class="diagram" id="diagram-main"></div>
+<p class="toggle" onclick="toggleSrc('src-main')">查看源码</p>
+<pre id="src-main"></pre>
+
+<h2>3. 战斗回合（startBattle 精确到函数）</h2>
+<div class="diagram" id="diagram-battle"></div>
+<p class="toggle" onclick="toggleSrc('src-battle')">查看源码</p>
+<pre id="src-battle"></pre>
+
+<h2>4. 回合内决策（manualTurn 精确到函数）</h2>
+<div class="diagram" id="diagram-turn"></div>
+<p class="toggle" onclick="toggleSrc('src-turn')">查看源码</p>
+<pre id="src-turn"></pre>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+function toggleSrc(id) {
+  const el = document.getElementById(id);
+  el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+}
+
+const CLASS_DIAGRAM = `classDiagram
+    class Character {
+        -string name
+        +getName() string
+    }
+    class Civil {
+        -string role
+        -vector~string~ dialogue
+        +getRole() string
+        +getDialogue(i) string
+    }
+    class Combatant {
+        -string id
+        -int hp
+        -int sp
+        -int level
+        -int exp
+        -int baseStats[4]
+        -int equipmentBonus[4]
+        -uint16_t statusFlags
+        -vector~StatusEffectInstance~ activeStatusEffects
+        -vector~SkillBase*~ skills
+        -map~string,int~ inventory
+        +isAlive() bool
+        +takeDamage(d)
+        +heal(a)
+        +restoreSP(a)
+        +addStatusEffect(...)
+        +updateStatusEffects()
+        +clearStatusEffect(t)
+        +getEffectiveStat(i) int
+        +addSkill(s)
+        +getSkills()
+        +addItem(id, count)
+        +consumeItem(id, count)
+        +addExp(a)
+        +levelUp()
+    }
+    class StatusEffectInstance {
+        +StatusEffect type
+        +int duration
+        +int targetStatIndex
+        +float multiplier
+    }
+    class SkillBase {
+        -string name
+        -string description
+        -int cost
+        -AttackScope scope
+        +getName() string
+        +getCost() int
+        +getScope() AttackScope
+    }
+    class DamageSkill {
+        -int power
+        -StatusEffect statusEffect
+        -float hitRate
+        +getPower() int
+        +getHitRate() float
+        +calculateDamage(str, def) int
+    }
+    class HealSkill {
+        -int healAmount
+        +getHealAmount() int
+    }
+    class ChargingSkill {
+        -float multiplier
+        -int targetStat
+        -int duration
+        +getMultiplier() float
+    }
+    class Item {
+        -string id
+        -string name
+        -string description
+        -int price
+        +getId() string
+        +getName() string
+    }
+    class Consumable {
+        -int healHP
+        -int healSP
+        -int statBonus
+        -int statIndex
+        -int duration
+    }
+    class Equipment {
+        -EquipmentSlot slot
+        -int statBonus[4]
+    }
+    class BattleLog {
+        -deque~string~ lines_
+        +add(msg)
+        +clear()
+        +render() string
+        +empty() bool
+    }
+    class CombatSystem {
+        -Combatant* player
+        -vector~Combatant*~ companions
+        -vector~Combatant*~ enemies
+        -CombatConfig config
+        -bool battleEnded
+        -bool playerWon
+        -BattleLog log
+        -mt19937 rng
+        +startBattle() bool
+        +getLog() deque~string~
+        -roll(upper) int
+        -manualTurn(actor, max) bool
+        -processPlayerTurn() bool
+        -processCompanionTurn(c) bool
+        -processEnemyTurn(e) bool
+        -performAttack(...)
+        -performSkill(...)
+        -performItem(...)
+        -attemptRun(...)
+        -calculateHitRate(...)
+        -calculateDamage(...)
+        -getAliveEnemies()
+        -getAliveAllies()
+    }
+    class CombatConfig {
+        +bool disableRun
+        +bool disableItems
+        +bool playerFirst
+    }
+    class DataLoader {
+        +readFileText(path) string
+        +loadSkills(path) SkillPool
+        +loadItems(path) ItemPool
+        +loadCombatant(path, pool) Combatant
+        +loadGameData(dir) GameData
+        +loadPartyTemplates(path, pool) vector
+        +loadBattle(path, data) Battle
+    }
+    class SaveManager {
+        -sqlite3* db
+        +hasSave() bool
+        +loadParty(pool) vector~Combatant~
+        +saveParty(party, pool)
+        +resetSave()
+    }
+    class GameData {
+        +SkillPool skillPool
+        +ItemPool itemPool
+    }
+    class Battle {
+        +vector~Combatant~ enemies
+        +CombatConfig config
+    }
+    class json_Value {
+        +parse(text) Value
+    }
+
+    Character <|-- Civil
+    Character <|-- Combatant
+    SkillBase <|-- DamageSkill
+    SkillBase <|-- HealSkill
+    SkillBase <|-- ChargingSkill
+    Item <|-- Consumable
+    Item <|-- Equipment
+
+    Combatant --> SkillBase : 持有技能(裸指针)
+    Combatant *-- StatusEffectInstance : 状态列表
+    CombatSystem --> Combatant : 参战角色
+    CombatSystem *-- CombatConfig : 配置
+    CombatSystem *-- BattleLog : 日志
+    CombatSystem --> SkillBase : 执行技能
+    DataLoader ..> Combatant : 创建(unique_ptr)
+    DataLoader ..> SkillBase : 创建(unique_ptr)
+    DataLoader ..> json_Value : 解析
+    SaveManager ..> Combatant : 读写存档
+    GameData *-- SkillPool
+    GameData *-- ItemPool
+    Battle *-- Combatant : 敌方`;
+
+const MAIN_FLOW = `flowchart TD
+    A[main] --> B[DataLoader::loadGameData]
+    B --> B1[loadSkills -> json_Value::parse]
+    B1 --> C[SaveManager 构造: 建表]
+    C --> D{save.loadParty<br/>是否已有存档?}
+    D -- 空 --> E[DataLoader::loadPartyTemplates]
+    E --> E1[loadCombatant 逐人]
+    E1 --> F[SaveManager::saveParty 建档]
+    D -- 非空 --> G[直接用存档队伍]
+    F --> G
+    G --> H[DataLoader::loadBattle]
+    H --> H1[loadCombatant 敌人]
+    H1 --> I[组装 player/companions/enemies 裸指针]
+    I --> J[CombatSystem 构造: rng.seed]
+    J --> K[CombatSystem::startBattle]
+    K --> L[SaveManager::saveParty 写回]
+    L --> M{console::readKey<br/>重置存档?}
+    M -- y/Y --> N[SaveManager::resetSave]
+    M -- 其他 --> O[保留]
+    N --> P[结束]
+    O --> P`;
+
+const BATTLE_FLOW = `flowchart TD
+    S[startBattle] --> S1[console::init]
+    S1 --> S2{battleEnded?}
+    S2 -- 否 --> P1{player->isAlive?}
+    P1 -- 是 --> P2[processPlayerTurn<br/>-> manualTurn player, 4]
+    P2 --> C1{getAliveEnemies 为空?}
+    P1 -- 否 --> C1
+    C1 -- 是 --> W[playerWon = true]
+    C1 -- 否 --> CO[遍历 companions]
+    CO --> CO1{companion 存活?}
+    CO1 -- 是 --> CO2[processCompanionTurn<br/>-> manualTurn companion, 2]
+    CO2 --> C2{getAliveEnemies 为空?}
+    CO1 -- 否 --> CO
+    C2 -- 是 --> W
+    C2 -- 否 --> EN[遍历敌人: processEnemyTurn 空实现]
+    EN --> S2
+    W --> EXP[胜利结算: player/companions addExp]
+    S2 -- 是 逃跑 --> L[playerWon = false]
+    EXP --> FIN[addLog -> displayBattle<br/>console::pause -> return playerWon]
+    L --> FIN`;
+
+const TURN_FLOW = `flowchart TD
+    MT[manualTurn actor, maxChoice] --> MT1[displayBattle]
+    MT1 --> MT2{readMenuChoice 1..maxChoice}
+    MT2 -- 1 攻击 --> A1[selectTarget getAliveEnemies]
+    A1 -- 取消 0/ESC --> MT1
+    A1 --> A2[performAttack]
+    A2 --> A2a[calculateHitRate]
+    A2a -- roll 未命中 --> A2b[addLog 未命中]
+    A2a -- 命中 --> A2c[calculateDamage<br/>-> target.takeDamage<br/>-> addLog]
+    MT2 -- 2 技能 --> SK[selectSkill]
+    SK -- 取消 --> MT1
+    SK --> BT[buildSkillTargets -> selectTarget]
+    BT -- 取消 --> MT1
+    BT --> PS[performSkill]
+    PS --> PS0{SP 足够?}
+    PS0 -- 否 --> PS1[addLog SP不足]
+    PS0 -- 是 --> PS2[restoreSP 扣费]
+    PS2 --> PS3{dynamic_cast}
+    PS3 -- DamageSkill --> PS4[计算命中/伤害 -> takeDamage]
+    PS3 -- HealSkill --> PS5[heal]
+    PS3 -- 其他 --> PS6[未实现提示]
+    MT2 -- 3 道具 --> IT[未实现提示 -> continue]
+    IT --> MT1
+    MT2 -- 4 逃跑 --> RUN[attemptRun]
+    RUN --> RUN1{disableRun?}
+    RUN1 -- 是 --> RUN2[addLog 禁止逃跑]
+    RUN1 -- 否 --> RUN3{roll 判定}
+    RUN3 -- 成功 --> RUN4[battleEnded=true<br/>playerWon=false]
+    RUN3 -- 失败 --> RUN5[addLog 逃跑失败]
+    A2b --> END[displayBattle -> console::pause -> return]
+    A2c --> END
+    PS1 --> END
+    PS4 --> END
+    PS5 --> END
+    PS6 --> END
+    RUN2 --> END
+    RUN4 --> END
+    RUN5 --> END`;
+
+const diagrams = [
+  { id: 'diagram-class',  code: CLASS_DIAGRAM },
+  { id: 'diagram-main',   code: MAIN_FLOW },
+  { id: 'diagram-battle', code: BATTLE_FLOW },
+  { id: 'diagram-turn',   code: TURN_FLOW }
+];
+
+document.getElementById('src-class').textContent  = CLASS_DIAGRAM;
+document.getElementById('src-main').textContent   = MAIN_FLOW;
+document.getElementById('src-battle').textContent = BATTLE_FLOW;
+document.getElementById('src-turn').textContent   = TURN_FLOW;
+
+mermaid.initialize({ startOnLoad: false, theme: 'default', flowchart: { curve: 'basis' } });
+for (const d of diagrams) {
+  mermaid.render(d.id + '-svg', d.code).then(({ svg }) => {
+    document.getElementById(d.id).innerHTML = svg;
+  });
+}
+</script>
+</body>
+</html>
