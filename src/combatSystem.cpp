@@ -109,10 +109,12 @@ bool CombatSystem::startBattle() {
         }
         if (getAliveEnemies().empty()) { battleEnded = true; playerWon = true; break; }
 
-        // 敌方回合：AI 未实现，敌人不会回击
+        // 敌方回合：敌人 AI 回击
         for (auto* enemy : getAliveEnemies()) {
             processEnemyTurn(enemy);
         }
+        // 我方全灭 → 失败结束
+        if (getAliveAllies().empty()) { battleEnded = true; playerWon = false; break; }
     }
 
     // 胜利结算：按敌人等级发放经验（用于演示存档持久化）
@@ -221,7 +223,44 @@ bool CombatSystem::manualTurn(Combatant* actor, int maxChoice) {
 }
 
 bool CombatSystem::processEnemyTurn(Combatant* enemy) {
-    // 敌人 AI：(未实现) —— 最简版本敌人不会回击，直接跳过其回合
+    // 敌人 AI：眩晕跳过；否则按策略选择普攻或技能，集火我方残血
+    if (enemy->hasStatusEffect(StatusEffect::Stun)) {
+        addLog(enemy->getName() + " 处于眩晕，无法行动！");
+        displayBattle();
+        console::pause();
+        return false;
+    }
+
+    auto targets = getAliveAllies();
+    if (targets.empty()) return false; // 无可攻击目标
+
+    // 决策：有可用伤害技能且 SP 足够时，约 60% 概率用技能，否则普攻
+    SkillBase* skill = chooseAISkill(enemy, targets, getAliveEnemies());
+    if (skill) {
+        // 全体技能自动选中全部我方，单体技能选 HP 最低者
+        std::vector<Combatant*> skillTargets;
+        if (skill->getScope() == AttackScope::All) {
+            skillTargets = targets;
+        } else {
+            Combatant* t = chooseAITarget(enemy, targets);
+            if (t) skillTargets.push_back(t);
+        }
+        if (!skillTargets.empty()) {
+            displayBattle();
+            performSkill(enemy, skill, skillTargets);
+            displayBattle();
+            console::pause();
+            return false;
+        }
+    }
+
+    // 普通攻击：集火 HP 最低的我方
+    Combatant* target = chooseAITarget(enemy, targets);
+    if (!target) return false;
+    displayBattle();
+    performAttack(enemy, target, true);
+    displayBattle();
+    console::pause();
     return false;
 }
 
@@ -364,13 +403,27 @@ void CombatSystem::applySlowEffect(Combatant* c) { /* 状态效果：(未实现)
 void CombatSystem::checkStun(Combatant* c) { /* 状态效果：(未实现) */ }
 
 SkillBase* CombatSystem::chooseAISkill(Combatant* ai, const std::vector<Combatant*>& enemies, const std::vector<Combatant*>& allies) {
-    // AI：(未实现) —— 同伴手动操控，敌人不会回击
-    return nullptr;
+    // 敌人进攻型 AI：只考虑伤害技能，且 SP 需足够
+    std::vector<SkillBase*> usable;
+    for (auto* s : ai->getSkills()) {
+        if (s->getCost() > ai->getSP()) continue;          // SP 不足
+        if (dynamic_cast<DamageSkill*>(s) == nullptr) continue; // 只选伤害技能
+        usable.push_back(s);
+    }
+    if (usable.empty()) return nullptr;                     // 无可用技能 → 走普攻
+    // 约 60% 概率施放技能，否则普攻（避免每次都放技能）
+    if (roll(100) >= 60) return nullptr;
+    return usable[roll(static_cast<int>(usable.size()))];   // 候选中随机
 }
 
 Combatant* CombatSystem::chooseAITarget(Combatant* ai, const std::vector<Combatant*>& potentialTargets) {
-    // AI：(未实现)
-    return nullptr;
+    if (potentialTargets.empty()) return nullptr;
+    // 策略：集火 HP 最低的我方（平手时取首个）
+    Combatant* best = potentialTargets[0];
+    for (auto* c : potentialTargets) {
+        if (c->getHP() < best->getHP()) best = c;
+    }
+    return best;
 }
 
 const std::deque<std::string>& CombatSystem::getLog() const {
