@@ -3,8 +3,10 @@
 #include"Game.h"
 #include <conio.h> // 控制台无回显按键读取
 #include"map.h"
-#include"StroyManager.h"
-
+#include "TalkManager.h"
+#include "PharManager.h"
+#include "ForgeManager.h"
+#include "BackGround.h"
 SceneManager::SceneManager(Game& game): game(game)
 {
 	current_scene_id = 0;//剧情初步存档,显示当前场景id
@@ -13,6 +15,8 @@ SceneManager::SceneManager(Game& game): game(game)
 
 	autoPlay = false;//判断是否自动播放剧情
 	unique_map_print = false;
+
+	talkManager.setSceneManager(this);
 }
 
 bool SceneManager::current_Auto() {
@@ -117,36 +121,67 @@ void choiceList_01() {
 	cout << "3. 锻造\n";
 	cout << "\n输入w继续游戏\n";
 }
+
+void SceneManager::refreshScene(int branch_id) {
+	//清屏
+	system("cls");
+	map_Manager(showScene_id(), branch_id);
+}
+
+//判断并执行命令
+bool SceneManager::handleCommand(Game& game1, const string& sceneCommand)
+{
+	// 判断是否为需要退出当前场景的指令
+	if (sceneCommand == "south" || sceneCommand == "w" ||  sceneCommand == "W" ||  
+		sceneCommand == "north" || sceneCommand == "n" || sceneCommand == "N" ||
+		sceneCommand == "quit" || sceneCommand == "start")
+	{
+		// 结束当前 SceneManager
+		return false;
+	}
+
+	// 清屏
+	system("cls");
+	game1.gameCommand(sceneCommand);
+
+	// 执行完普通指令后，等待玩家按键
+	cout << "输入任意按键返回";
+	_getch();
+	deleteWords("输入任意按键返回");
+	return true;
+}
+
+
+// 显示当前场景背景
+void SceneManager::showCurrentBackground() {
+	switch (showScene_id()) {
+	case 1:
+		backGround_01();
+		break;
+	case 2:
+		backGround_02();
+		break;
+	case 3:
+		backGround_03();
+		break;
+	case 4:
+		backGround_04();
+		break;
+	}
+}
 //场景功能管理,1对话系统+命令系统；2药店系统；3锻造系统
 void SceneManager::sceneManager(Game& game1, int branch_id) {
 	string sceneCommand;
-	bool choice=true;
-	int key1;//吃掉对话结束后的输入，方便返回上级交谈系统
-	string tip1 = "输入任意按键返回";
-	while (choice) {
+	scene = true;
+	while (scene) {
 		switch (current_state) {
 
 		//大世界场景
 		case SceneState::ORIGIN_SCENE:
 
-			//清屏
-			system("cls");
-			map_Manager(showScene_id(), branch_id);
+			refreshScene(branch_id);
 
-			switch (showScene_id()) {
-			case 1:
-				backGround_01();
-				break;
-			case 2:
-				backGround_02();
-				break;
-			case 3:
-				backGround_03();
-				break;
-			case 4:
-				backGround_04();
-				break;
-			}
+			showCurrentBackground();
 			
 			choiceList_01();
 
@@ -176,433 +211,35 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 				}
 			}
 			else {
-				if (sceneCommand == "south" || sceneCommand == "w" || sceneCommand == "W"
-					|| sceneCommand == "north" || sceneCommand == "n" || sceneCommand == "N"
-					|| sceneCommand == "quit" || sceneCommand == "start") {
-					choice = false;
-
-				}
-
-				//清屏
-				system("cls");
-
-				game1.gameCommand(sceneCommand);
-				if (choice) {
-					cout << tip1;
-					key1 = _getch();
-					deleteWords(tip1);
-				}
+				scene = handleCommand(game1, sceneCommand);
 			}
 			break;
 
 		// 选择对话人物
 		case SceneState::TALK:
 			
-			//清屏
-			system("cls");
-			map_Manager(showScene_id(), branch_id);
+			refreshScene(branch_id);
 
 			switch (showScene_id()) {
 				//第一幕
 			case 1:
-				talkScene_01();
-
-				cout << "\n> ";
-				cin >> sceneCommand;
-				if (sceneCommand == "1" || sceneCommand == "2" || sceneCommand == "3") {
-					int num = stoi(sceneCommand);//将string转化为int
-					switch (num) {
-					case 1:
-
-						//清屏
-						system("cls");
-						map_Manager(showScene_id(), branch_id);
-
-						//与小卒a对话
-						current_character = 1;
-						talk_character_contnt_01(current_character);
-
-						cout << tip1;
-						key1 = _getch();
-						deleteWords(tip1);
-
-						break;
-
-					case 2:
-
-						//清屏
-						system("cls");
-						map_Manager(showScene_id(), branch_id);
-
-						//与虞姬对话
-						current_character = 2;
-						talk_character_contnt_01(current_character);
-	
-						cout << tip1;
-						key1 = _getch();
-						deleteWords(tip1);
-
-						break;
-
-					case 3:
-						//返回
-						current_state = SceneState::ORIGIN_SCENE;
-						break;
-					}
-				}
-				else {
-
-					if (sceneCommand == "south" || sceneCommand == "w" || sceneCommand == "W"
-						|| sceneCommand == "north" || sceneCommand == "n" || sceneCommand == "N"
-						|| sceneCommand == "quit" || sceneCommand == "start") {
-						choice = false;
-
-					}
-
-					//清屏
-					system("cls");
-
-					game1.gameCommand(sceneCommand);
-					if (choice) {
-						cout << tip1;
-						key1 = _getch();
-						deleteWords(tip1);
-					}
-				}
+				scene=talkManager.talkScene01(game1, branch_id);
 				break;
 
 				//第二幕
 			case 2:
-				//走左边遇王翦
-				if (branch_id == 1) {
-					talkScene_021();
-
-					cout << "\n> ";
-					cin >> sceneCommand;
-					if (sceneCommand == "1" || sceneCommand == "2" || sceneCommand == "3") {
-						int num = stoi(sceneCommand);//将string转化为int
-						switch (num) {
-						case 1:
-
-							//清屏
-							system("cls");
-							map_Manager(showScene_id(), branch_id);
-
-							//与王翦对话
-							current_character = 1;
-							talk_character_contnt_021(current_character);
-
-							cout << tip1;
-							key1 = _getch();
-							deleteWords(tip1);
-
-							break;
-
-						case 2:
-
-							//清屏
-							system("cls");
-							map_Manager(showScene_id(), branch_id);
-
-							//与汉军对话
-							current_character = 2;
-							talk_character_contnt_021(current_character);
-
-							cout << tip1;
-							key1 = _getch();
-							deleteWords(tip1);
-
-							break;
-
-						case 3:
-							//返回
-							current_state = SceneState::ORIGIN_SCENE;
-							break;
-						}
-					}
-					else {
-
-						if (sceneCommand == "south" || sceneCommand == "w" || sceneCommand == "W"
-							|| sceneCommand == "north" || sceneCommand == "n" || sceneCommand == "N"
-							|| sceneCommand == "quit" || sceneCommand == "start") {
-							choice = false;
-
-						}
-
-						//清屏
-						system("cls");
-
-						game1.gameCommand(sceneCommand);
-						if (choice) {
-							cout << tip1;
-							key1 = _getch();
-							deleteWords(tip1);
-						}
-					}
-				}
-				//走右边进沼泽
-				else {
-					talkScene_022();
-
-					cout << "\n> ";
-					cin >> sceneCommand;
-					if (sceneCommand == "1" || sceneCommand == "2") {
-						int num = stoi(sceneCommand);//将string转化为int
-						switch (num) {
-						case 1:
-
-							//清屏
-							system("cls");
-							map_Manager(showScene_id(), branch_id);
-
-							//与副将对话
-							current_character = 1;
-							talk_character_contnt_022(current_character);
-
-							cout << tip1;
-							key1 = _getch();
-							deleteWords(tip1);
-
-							break;
-
-						case 2:
-							//返回
-							current_state = SceneState::ORIGIN_SCENE;
-							break;
-						}
-					}
-					else {
-
-						if (sceneCommand == "south" || sceneCommand == "w" || sceneCommand == "W"
-							|| sceneCommand == "north" || sceneCommand == "n" || sceneCommand == "N"
-							|| sceneCommand == "quit" || sceneCommand == "start") {
-							choice = false;
-
-						}
-
-						//清屏
-						system("cls");
-
-						game1.gameCommand(sceneCommand);
-						if (choice) {
-							cout << tip1;
-							key1 = _getch();
-							deleteWords(tip1);
-						}
-					}
-				}
+				scene=talkManager.talkScene02(game1, branch_id);
 				break;
 
 				//第三幕
 			case 3:
-				talkScene_03();
-
-				cout << "\n> ";
-				cin >> sceneCommand;
-				if (sceneCommand == "1" || sceneCommand == "2" || sceneCommand == "3"|| sceneCommand == "4"|| sceneCommand == "5") {
-					int num = stoi(sceneCommand);//将string转化为int
-					switch (num) {
-					case 1:
-
-						//清屏
-						system("cls");
-						map_Manager(showScene_id(), branch_id);
-
-						//与赤泉侯对话
-						current_character = 1;
-						talk_character_contnt_03(current_character);
-
-						cout << tip1;
-						key1 = _getch();
-						deleteWords(tip1);
-
-						break;
-
-					case 2:
-
-						//清屏
-						system("cls");
-						map_Manager(showScene_id(), branch_id);
-
-						//与秦时月对话
-						current_character = 2;
-						talk_character_contnt_03(current_character);
-
-						cout << tip1;
-						key1 = _getch();
-						deleteWords(tip1);
-
-						break;
-					case 3:
-
-						//清屏
-						system("cls");
-						map_Manager(showScene_id(), branch_id);
-
-						//与钟离昧对话
-						current_character = 3;
-						talk_character_contnt_03(current_character);
-
-						cout << tip1;
-						key1 = _getch();
-						deleteWords(tip1);
-
-						break;
-					case 4:
-
-						//清屏
-						system("cls");
-						map_Manager(showScene_id(), branch_id);
-
-						//与二十八骑对话
-						current_character = 4;
-						talk_character_contnt_03(current_character);
-
-						cout << tip1;
-						key1 = _getch();
-						deleteWords(tip1);
-
-						break;
-
-					case 5:
-						//返回
-						current_state = SceneState::ORIGIN_SCENE;
-						break;
-					}
-				}
-				else {
-
-					if (sceneCommand == "south" || sceneCommand == "w" || sceneCommand == "W"
-						|| sceneCommand == "north" || sceneCommand == "n" || sceneCommand == "N"
-						|| sceneCommand == "quit" || sceneCommand == "start") {
-						choice = false;
-
-					}
-
-					//清屏
-					system("cls");
-
-					game1.gameCommand(sceneCommand);
-					if (choice) {
-						cout << tip1;
-						key1 = _getch();
-						deleteWords(tip1);
-					}
-				}
+				scene=talkManager.talkScene03(game1, branch_id);
 				break;
 
 				//第四幕!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				//第四幕对话暂时没有地方插入，第四幕项羽死了不知道如何合理的进行对话
 			case 4:
-				talkScene_04();
-
-				cout << "\n> ";
-				cin >> sceneCommand;
-				if (sceneCommand == "1" || sceneCommand == "2" || sceneCommand == "3" || sceneCommand == "4" || sceneCommand == "5") {
-					int num = stoi(sceneCommand);//将string转化为int
-					switch (num) {
-					case 1:
-
-						//清屏
-						system("cls");
-						map_Manager(showScene_id(), branch_id);
-
-						//与韩信对话
-						current_character = 1;
-						talk_character_contnt_04(current_character);
-
-						cout << "输入任意按键继续";
-						
-						key1 = _getch();
-
-						break;
-
-					case 2:
-
-						//清屏
-						system("cls");
-						map_Manager(showScene_id(), branch_id);
-
-						//与汉军对话
-						current_character = 2;
-						talk_character_contnt_04(current_character);
-
-						cout << "输入任意按键继续";
-						
-						key1 = _getch();
-
-						break;
-					case 3:
-
-						//清屏
-						system("cls");
-						map_Manager(showScene_id(), branch_id);
-
-						//与钟离昧对话
-						current_character = 3;
-						talk_character_contnt_04(current_character);
-
-						cout << "输入任意按键继续";
-						
-						key1 = _getch();
-
-						break;
-					case 4:
-
-						//清屏
-						system("cls");
-						map_Manager(showScene_id(), branch_id);
-
-						//与二十八骑对话
-						current_character = 4;
-						talk_character_contnt_04(current_character);
-
-						cout << "输入任意按键继续";
-						
-						key1 = _getch();
-
-						break;
-					case 5:
-
-						//清屏
-						system("cls");
-						map_Manager(showScene_id(), branch_id);
-
-						//与乌江亭长对话
-						current_character = 5;
-						talk_character_contnt_04(current_character);
-
-						cout << "输入任意按键继续";
-						
-						key1 = _getch();
-
-						break;
-
-					case 6:
-						//返回
-						current_state = SceneState::ORIGIN_SCENE;
-						break;
-					}
-				}
-				else {
-
-					if (sceneCommand == "south" || sceneCommand == "w" || sceneCommand == "W"
-						|| sceneCommand == "north" || sceneCommand == "n" || sceneCommand == "N"
-						|| sceneCommand == "quit" || sceneCommand == "start") {
-						choice = false;
-
-					}
-
-					//清屏
-					system("cls");
-
-					game1.gameCommand(sceneCommand);
-					if (choice) {
-						cout << tip1;
-						key1 = _getch();
-						deleteWords(tip1);
-					}
-				}
+				
 				break;
 			}
 			
@@ -611,9 +248,7 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 			//药房
 		case SceneState::PHARMACY:
 
-			//清屏
-			system("cls");
-			map_Manager(showScene_id(), branch_id);
+			refreshScene(branch_id);
 
 			void phar();
 			cout << "输入任意数字返回。\n";
@@ -626,9 +261,7 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 			//锻造
 		case SceneState::FORGE:
 
-			//清屏
-			system("cls");
-			map_Manager(showScene_id(), branch_id);
+			refreshScene(branch_id);
 
 			void forge();
 			cout << "输入任意数字返回。\n";
@@ -647,7 +280,7 @@ SceneManager::SceneState SceneManager::getSceneState() const
 {
 	return current_state;
 }
-//进入新场景状态，便于从主世界进入对话
+//进入新场景状态，便于从主世界进入对话,便于切换场景
 void SceneManager::setSceneState(SceneState state)
 {
 	current_state = state;
@@ -663,6 +296,13 @@ void SceneManager::setCurrentCharacter(int character_id)
 	current_character = character_id;
 }
 
+void SceneManager::printWords(string tips,int color,int sleep) {
+	setColor(color);
+	cout << tips;
+	cout << "\n";
+	Sleep(sleep);
+	
+}
 void SceneManager::ShowBackground(int scene_id = 0) {
 	int key1;
 	int branch_id = 0;
@@ -672,52 +312,36 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 
 		//清屏
 		system("cls");
-
-		setColor(4);
-		cout << "第一幕：四面楚歌，垓下之围" << "\n";
-		Sleep(1000);
-		setColor(12);
+		printWords("第一幕：四面楚歌，垓下之围", 4, 1000);
 		cout << "\n";
-		cout << "公元前202年12月（上旬），垓下（今安徽灵璧东南）" << "\n";
-		Sleep(1000);
-		setColor(14);
-		cout << "项羽和虞姬被困，兵少食尽，人心惶惶。汉军围困重重，夜间楚歌四起。"
-			<< "帐中，霸王与虞姬对饮，虞姬舞剑，霸王悲怆，"
-			<< "诗曰“力拔山兮气盖世，时不利兮骓不逝，骓不逝兮可奈何，虞兮虞兮奈若何。”" << "\n";
-		Sleep(1000);
+		printWords("公元前202年12月（上旬），垓下（今安徽灵璧东南）",12,1000);
+		printWords("项羽和虞姬被困，兵少食尽，人心惶惶。汉军围困重重，夜间楚歌四起。帐中，霸王与虞姬对饮，虞姬舞剑，霸王悲怆，诗曰“力拔山兮气盖世，时不利兮骓不逝，骓不逝兮可奈何，虞兮虞兮奈若何。”", 14, 1000);
 		//弹出对话框暂时没有制作思路！！！！！！
-		cout << "\n小卒a来报" << "\n";
+		printWords("\n小卒a来报", 14, 0);
 		nextLine();
-		setColor(10);
-		cout << "小卒a:“大王，我们已经被汉军重重围困，楚歌四起，军内的粮草最多维持三日”" << "\n";
+		printWords("小卒a:“大王，我们已经被汉军重重围困，楚歌四起，军内的粮草最多维持三日”", 10, 0);
 		nextLine();
-		setColor(14);
-		cout << "\n" << "项羽与虞姬交谈" << "\n";
+		printWords("\n项羽与虞姬交谈", 14, 0);
 		nextLine();
-		setColor(10);
-		cout << "虞姬：“大王，酒温好了”" << "\n";
+		printWords("虞姬：“大王，酒温好了”", 10, 0);
 		nextLine();
-		cout << "项羽：“你听见了吗”" << "\n";
+		printWords("项羽：“你听见了吗”", 10, 0);
 		nextLine();
-		cout << "虞姬：“听见了”" << "\n";
+		printWords("虞姬：“听见了”", 10, 0);
 		nextLine();
-		cout << "项羽：“帐外楚歌声声，刘邦这斯，已经把我楚地子民全部收服了吗”" << "\n";
+		printWords("项羽：“帐外楚歌声声，刘邦这斯，已经把我楚地子民全部收服了吗”", 10, 0);
 		nextLine();
-		cout << "虞姬：“大王，楚地子民永远忠心于你”" << "\n";
+		printWords("虞姬：“大王，楚地子民永远忠心于你”", 10, 0);
 		nextLine();
-		cout << "虞姬：“大王，你累吗”" << "\n";
+		printWords("虞姬：“大王，你累吗”", 10, 0);
 		nextLine();
-		cout << "项羽：“吾少年起兵，南征北走，未曾一惧，何来累之一说”" << "\n";
+		printWords("项羽：“吾少年起兵，南征北走，未曾一惧，何来累之一说”", 10, 0);
 		nextLine();
-		cout << "项羽：“虞姬，你可有悔”" << "\n";
+		printWords("项羽：“虞姬，你可有悔”",10,0);
 		nextLine();
-		cout <<"虞姬：“妾随大王生死无悔”" << "\n";
+		printWords("虞姬：“妾随大王生死无悔”", 10, 0);
 		nextLine();
-		cout << "\n";
-		setColor(14);
-		cout << "长夜微凉，锦绣未央。虞姬的身姿映衬在烛火之下，翩翩起舞。"
-			<< "宝剑的光泽和着凄冷的月，一切似乎定格在这一刻......" << "\n"<<"\n";
-		Sleep(2000);
+		printWords("\n长夜微凉，锦绣未央。虞姬的身姿映衬在烛火之下，翩翩起舞。宝剑的光泽和着凄冷的月，一切似乎定格在这一刻......\n", 14, 2000);
 		cout << "输入任意按键继续";
 
 		key1 = _getch();
@@ -736,83 +360,61 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 
 		//清屏
 		system("cls");
-
-		setColor(4);
-		cout << "第二幕：突围南逃，淮河之阻" << "\n";
-		Sleep(1000);
-		setColor(12);
-		cout << "\n";
-		cout << "公元前202年12月（中旬），自垓下经淮河、阴陵（安徽滁州）至东城" << "\n";
-		Sleep(1000);
-		setColor(14);
-		cout << "霸王率麾下八百壮士，突围南逃，至破晓，渡淮河，余骑百人，汉军觉察。"
-			<<"灌婴以五千骑追之。至阴陵，迷失道。遇一田夫。" << "\n";
-		Sleep(1000);
-		cout << "\n" << "与田夫交谈" << "\n";
+		printWords("第二幕：突围南逃，淮河之阻",4,1000);
+		printWords("\n公元前202年12月（中旬），自垓下经淮河、阴陵（安徽滁州）至东城", 12, 1000);
+		printWords("霸王率麾下八百壮士，突围南逃，至破晓，渡淮河，余骑百人，汉军觉察。灌婴以五千骑追之。至阴陵，迷失道。遇一田夫。", 14, 1000);
+		printWords("\n与田夫交谈", 14, 0);
 		nextLine();
 		//弹出对话框暂时没有制作思路！！！！！！
-		setColor(10);
-		cout << "项羽（勒马，拱手）：“老丈，此处往乌江，该走哪条道”" << "\n";
+		printWords("项羽（勒马，拱手）：“老丈，此处往乌江，该走哪条道”", 10, 0);
 		nextLine();
-		setColor(14);
-		cout << "田夫：（不说话）：向左一指。"<<"\n";
-		cout << "\n";
+		printWords("田夫：（不说话）：向左一指。\n", 14, 0);
 		{
 			char choice;
 			bool choice_test = true;
 			do {
-				setColor(11);
-				cout << "请选择：A.走右边   B.走左边";
+				printWords("请选择：A.走右边   B.走左边", 11, 0);
 				cout << "\n" << ">";
 				cin >> choice;
 				switch (choice) {
 				case 'A':
 				case 'a':
-					setColor(14);
-					cout << "遇到大将王翦" << "\n";
+					printWords("遇到大将王翦", 14, 0);
+					nextLine();
+					printWords("王翦：“项将军何处去”", 10, 0);
+					//弹出对话框暂时没有制作思路！！！！！！
+					nextLine();
+					printWords("项羽：“兵败而已，你也敢来取笑吾？”", 10, 0);
+					nextLine();
+					printWords("王翦默默让手下形成合围之势", 14, 0);
 					nextLine();
 					setColor(10);
 					//弹出对话框暂时没有制作思路！！！！！！
-					cout << "王翦：“项将军何处去”" << "\n";
+					printWords("项羽：“天命而已，吾不信天命，汝可敢来阵前一战”", 10, 0);
 					nextLine();
-					cout << "项羽：“兵败而已，你也敢来取笑吾？”" << "\n";
-					nextLine();
-					setColor(14);
-					cout << "王翦默默让手下形成合围之势" << "\n";
-					nextLine();
-					setColor(10);
-					//弹出对话框暂时没有制作思路！！！！！！
-					cout << "项羽：“天命而已，吾不信天命，汝可敢来阵前一战”" << "\n";
-					nextLine();
-					cout << "王翦：“何惧，那便战”" << "\n";
+					printWords("王翦：“何惧，那便战”", 10, 0);
 					//-->此处进入两人回合制打斗！！！！！！！！！！！
-					setColor(14);
-					cout << "项羽突围，向南袭去" << "\n" << "\n";
+					printWords("项羽突围，向南袭去\n", 14, 0);
 					choice_test = false;
 					branch_id = 1;
 					break;
 
 				case 'B':
 				case 'b':
-					setColor(14);
-					cout << "项羽一行军队陷入沼泽，被困半天" << "\n";
+					printWords("项羽一行军队陷入沼泽，被困半天", 14, 0);
 					nextLine();
 					//弹出对话框暂时没有制作思路！！！！！！
-					setColor(10);
-					cout << "项羽：“哈哈哈哈哈哈哈，天意如此吗，吾征战一生，杀敌无数，陷阵夺旗，攻城斩将。今日竟为一沮洳所困。”" << "\n";
+					printWords("项羽：“哈哈哈哈哈哈哈，天意如此吗，吾征战一生，杀敌无数，陷阵夺旗，攻城斩将。今日竟为一沮洳所困。”", 10, 0);
 					nextLine();
-					cout << "副将：“将军不必气馁，我们越过此地继续南下，不远处就是乌江亭，待我们折回江东，卷土重来。”" << "\n";
+					printWords("副将：“将军不必气馁，我们越过此地继续南下，不远处就是乌江亭，待我们折回江东，卷土重来。”", 10, 0);
 					nextLine();
-					setColor(14);
-					cout << "项羽沉默" << "\n" << "\n";
+					printWords("项羽沉默\n", 14, 0);
 					choice_test = false;
 					branch_id = 2;
 					break;
 
 				default:
-					setColor(11);
-					cout << "未知分支，请重新选择！！！" << "\n" << "\n";
-					setColor(14);
+					printWords("未知分支，请重新选择！！！\n", 11, 0);
 				}
 			} while (choice_test);
 		}
@@ -827,7 +429,6 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 		cout << "已存档" << "\n";
 		current_scene_id = scene_id;
 		cout << "输入w或south继续剧情" << "\n";
-
 		showSceneManager(current_scene_id, branch_id);
 		break;
 
@@ -835,41 +436,26 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 
 		//清屏
 		system("cls");
-
-		setColor(4);
-		cout << "第三幕：东城快战，以一敌千" << "\n";
-		Sleep(1000);
-		setColor(12);
-		cout << "\n";
-		cout << "公元前202年12月（下旬），东城（今安徽定远东南）" << "\n";
-		Sleep(1000);
-		setColor(14);
-		cout << "霸王至东城，余二十八骑，勉诸将曰：“吾起兵至今八岁有余，"
-			<<"身经百战，战无不胜，攻无不克，遂霸天下。"
-			<<"今天公亡我，固死矣，且看吾溃围，斩将，刈旗。”" << "\n";
+		printWords("第三幕：东城快战，以一敌千", 4, 1000);
+		printWords("\n公元前202年12月（下旬），东城（今安徽定远东南）", 12, 1000);
+		printWords("霸王至东城，余二十八骑，勉诸将曰：“吾起兵至今八岁有余，身经百战，战无不胜，攻无不克，遂霸天下。今天公亡我，固死矣，且看吾溃围，斩将，刈旗。”", 14, 0);
 		//弹出对话框暂时没有制作思路！！！！！！
 		nextLine();
-		setColor(10);
-		cout << "项羽：“诸君，今日我项羽必败无疑，可惜我江东八千子弟，所向披靡，亡了秦的暴政，今日要折在刘邦这个狗贼手上。”" << "\n";
+		printWords("项羽：“诸君，今日我项羽必败无疑，可惜我江东八千子弟，所向披靡，亡了秦的暴政，今日要折在刘邦这个狗贼手上。”", 10, 0);
 		nextLine();
-		cout << "副将钟离昧：“大王，吾等誓死追随。”" << "\n";
+		printWords("副将钟离昧：“大王，吾等誓死追随。”",10,0);
 		nextLine();
-		cout << "身后众人：“誓死追随，无怨无悔。”" << "\n";
+		printWords("身后众人：“誓死追随，无怨无悔。”", 10, 0);
 		nextLine();
-		setColor(14);
-		cout << "项羽（大笑一声）"<<"\n";
+		printWords("项羽（大笑一声）", 14, 0);
 		//-->此处进入回合制打斗！！！！！！！！！！！
-		setColor(14);
-		cout << "项羽将此小将斩于马下，连杀数人，势如破竹" << "\n";
+		printWords("项羽将此小将斩于马下，连杀数人，势如破竹", 14, 0);
 		nextLine();
-		setColor(10);
-		cout << "副将钟离昧：“将军，赤泉候杨喜率众驰援”" << "\n";
+		printWords("副将钟离昧：“将军，赤泉候杨喜率众驰援”", 10, 0);
 		nextLine();
-		cout << "项羽（横枪立马，大喝一声）：“吾不杀无名之人，滚”" << "\n";
+		printWords("项羽（横枪立马，大喝一声）：“吾不杀无名之人，滚”", 10, 0);
 		nextLine();
-		setColor(14);
-		cout << "赤泉候退。" << "\n"<<"\n";
-		Sleep(2000);
+		printWords("赤泉候退。\n", 14, 2000);
 		cout << "输入任意按键继续";
 
 		key1 = _getch();
@@ -888,70 +474,49 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 
 		//清屏
 		system("cls");
-
-		setColor(4);
-		cout << "第四幕：乌江自刎，天地同悲" << "\n";
-		Sleep(1000);
-		setColor(12);
-		cout << "\n";
-		cout << "公元前202年12月（月底），乌江（今安徽和县东北乌江浦）" << "\n";
-		Sleep(1000);
-		setColor(14);
-		cout << "霸王欲渡乌江，数合间连斩数敌人，退至江边。"
-			<<"乌江亭长檥船待。忆起江东父老，心中怅然，停步江边，仰天长啸。"<< "\n";
+		printWords("第四幕：乌江自刎，天地同悲", 4, 1000);
+		printWords("\n公元前202年12月（月底），乌江（今安徽和县东北乌江浦）", 12, 1000);
+		printWords("霸王欲渡乌江，数合间连斩数敌人，退至江边。乌江亭长檥船待。忆起江东父老，心中怅然，停步江边，仰天长啸。", 14, 0);
 		//弹出对话框暂时没有制作思路！！！！！！
 		nextLine();
-		setColor(10);
-		cout << "项羽：“吾今日，真的要葬身于此么”" << "\n";
+		printWords("项羽：“吾今日，真的要葬身于此么”", 10, 0);
 		nextLine();
-		cout << "副将钟离昧：“将军速走，过了乌江就是吾等之乡，何惧不能东山再起”" << "\n";
+		printWords("副将钟离昧：“将军速走，过了乌江就是吾等之乡，何惧不能东山再起”", 10, 0);
 		nextLine();
-		cout << "乌江亭长：“霸王，速走”" << "\n";
+		printWords("乌江亭长：“霸王，速走”", 10, 0);
 		nextLine();
-		cout << "项羽：“吾一生未尝一败，今日之势，有死而已，况我江东八千子弟，今日只剩二十八人。吾何惧死，唯独无言面对江东父老。”" << "\n";
+		printWords("项羽：“吾一生未尝一败，今日之势，有死而已，况我江东八千子弟，今日只剩二十八人。吾何惧死，唯独无言面对江东父老。”", 10, 0);
 		nextLine();
-		cout << "虞姬：“大王，你心意已决吗”" << "\n";
+		printWords("虞姬：“大王，你心意已决吗”", 10, 0);
 		nextLine();
-		cout << "项羽：“吾心已死，汝与乌骓，吾之所系。”" << "\n";
+		printWords("项羽：“吾心已死，汝与乌骓，吾之所系。”", 10, 0);
 		nextLine();
-		setColor(14);
-		cout << "旁白：虞姬看着项羽，一如当年年少时在江边浣衣初见之时。" << "\n";
+		printWords("旁白：虞姬看着项羽，一如当年年少时在江边浣衣初见之时。", 14, 0);
 		nextLine();
-		setColor(10);
-		cout << "虞姬：“大王，臣妾为你温酒。待你归家”" << "\n";
-		setColor(14);
-		cout<<"言罢自刎。" << "\n";
+		printWords("虞姬：“大王，臣妾为你温酒。待你归家”", 10, 0);
 		nextLine();
-		setColor(10);
-		cout << "项羽（抱着虞姬，长啸一声）：“虞姬已死，吾今日绝不苟活。诸君可愿与吾再杀一场”" << "\n";
+		printWords("言罢自刎。", 14, 0);
 		nextLine();
-		cout << "众将士：“杀！”" << "\n";
+		printWords("项羽（抱着虞姬，长啸一声）：“虞姬已死，吾今日绝不苟活。诸君可愿与吾再杀一场”", 10, 0);
+		nextLine();
+		printWords("众将士：“杀！”", 10, 0);
 		nextLine();
 		//-->此处触发打斗，项羽与对方大将王翦、杨喜、吕胜、杨武轮番打斗。最终战败
 		//此处多轮战斗
-		setColor(10);
-		cout << "项羽：“刘邦，这天下，归你了”" << "\n";
+		printWords("项羽：“刘邦，这天下，归你了”", 10, 0);
 		nextLine();
-		setColor(14);
-		cout << "（项羽隔着千军万马与韩信相视而立）" << "\n";
+		printWords("（项羽隔着千军万马与韩信相视而立）", 14, 0);
 		nextLine();
-		setColor(10);
-		cout << "项羽：“吾去也。”" << "\n";
-		setColor(14);
-		cout<<"遂自刎而亡。" << "\n";
+		printWords("项羽：“吾去也。”", 10, 0);
 		nextLine();
-		setColor(14);
-		cout << "旁白：" << "\n";
-		Sleep(1500);
-		cout << "公元前202年，一场大雪涤净了天地的色彩。乌江之畔，一人持枪立马，傲立天地之间，鬼神不侵。" << "\n";
-		Sleep(1500);
-		cout<< "他是项羽，他去见他的虞姬了。一代霸王落幕，退出了楚汉相争的舞台。" << "\n";
-		Sleep(1500);
-		cout<<"东城荒野，无数的雪花自天边翩翩而落，天地也在为他的死而悲叹，送了他最后一程。" << "\n";
-		Sleep(1500);
-		cout << "马蹄声淹没了天地，烟尘吞噬了最后的视野，后来，那面残旗被风高高扬起，又被马蹄踩进土里，再也不见。" << "\n";
-		Sleep(1500);
-		cout << "往事越千年，魏武挥鞭，东临碣石有遗篇，萧瑟秋风今又是，换了人间。" << "\n";
+		printWords("遂自刎而亡。", 14, 0);
+		nextLine();
+		printWords("旁白：", 14,1500);
+		printWords("公元前202年，一场大雪涤净了天地的色彩。乌江之畔，一人持枪立马，傲立天地之间，鬼神不侵。", 14, 1500);
+		printWords("他是项羽，他去见他的虞姬了。一代霸王落幕，退出了楚汉相争的舞台。", 14, 1500);
+		printWords("东城荒野，无数的雪花自天边翩翩而落，天地也在为他的死而悲叹，送了他最后一程。", 14, 1500);
+		printWords("马蹄声淹没了天地，烟尘吞噬了最后的视野，后来，那面残旗被风高高扬起，又被马蹄踩进土里，再也不见。", 14, 1500);
+		printWords("往事越千年，魏武挥鞭，东临碣石有遗篇，萧瑟秋风今又是，换了人间。", 14, 0);
 		nextLine();
 		cout << "游戏结束，感谢您的游玩" << "\n"
 			<< "请输入任意键退出游戏" << "\n";
