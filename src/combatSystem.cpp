@@ -101,7 +101,13 @@ bool CombatSystem::startBattle() {
         }
         if (getAliveEnemies().empty()) { battleEnded = true; playerWon = true; break; }
 
-        // 同伴回合（手动操控）
+        // 同伴回合
+        // 防御：同伴全灭时清除同伴托管开关
+        if (companionAiAssisted) {
+            bool anyAlive = false;
+            for (auto* c : companions) { if (c->isAlive()) { anyAlive = true; break; } }
+            if (!anyAlive) companionAiAssisted = false;
+        }
         for (auto* companion : companions) {
             if (companion->isAlive()) {
                 processCompanionTurn(companion);
@@ -154,10 +160,12 @@ void CombatSystem::displayBattle() const {
     std::cout << "=▽战斗日志▽============" << std::endl;
     std::cout << log.render();
 
-    // 我方状态（托管中时显示标记）
+    // 我方状态（托管中时显示标记；同伴全灭则不显示同伴托管标记）
+    bool hasAliveCompanion = false;
+    for (auto* c : companions) { if (c->isAlive()) { hasAliveCompanion = true; break; } }
     std::cout << "=▽我方▽================"
               << (playerAiAssisted ? "  [全员AI托管中，ESC退出]"
-                                   : (companionAiAssisted ? "  [同伴AI托管中，ESC退出]" : ""))
+                                   : (companionAiAssisted && hasAliveCompanion ? "  [同伴AI托管中，ESC退出]" : ""))
               << std::endl;
     displayStatus(player);
     for (auto* companion : companions) {
@@ -244,6 +252,7 @@ bool CombatSystem::manualTurn(Combatant* actor, int maxChoice) {
                     addLog("全体我方角色进入了 AI 托管。");
                     return processAllyAITurn(actor); // actor 必为 player（仅玩家菜单含此项）
                 }
+                companionAiAssisted = false; // 全员关闭时一并清除同伴托管
                 addLog("全体我方角色退出了 AI 托管。");
                 std::cout << "已关闭全员 AI 托管。" << std::endl;
                 console::pause();
@@ -255,11 +264,12 @@ bool CombatSystem::manualTurn(Combatant* actor, int maxChoice) {
     }
 }
 
-// AI 行动后的等待：任意键继续；ESC 立即退出托管（优先退全员，其次退同伴），下一步即恢复手操
+// AI 行动后的等待：任意键继续；ESC 立即退出所有托管模式，下一步即恢复手操
 void CombatSystem::aiPause() {
     if (console::pauseEsc()) {
         if (playerAiAssisted) {
             playerAiAssisted = false;
+            companionAiAssisted = false; // 一并清除同伴托管
             addLog("全体我方角色退出了 AI 托管（ESC）。");
         } else if (companionAiAssisted) {
             companionAiAssisted = false;
