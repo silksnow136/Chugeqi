@@ -2,7 +2,6 @@
 // 战斗系统：负责回合流程、行动执行与界面显示。
 // 以下功能仅保留接口与定义，未实现
 //   - 道具使用
-//   - 状态效果（灼烧 / 迟缓 / 眩晕 / 充能）
 //   - 同伴与敌人的 AI（同伴手动操控，敌人不会回击）
 #include <vector>
 #include <memory>
@@ -82,7 +81,7 @@ private:
     std::vector<Combatant*> getAliveEnemies() const;
     std::vector<Combatant*> getAliveAllies() const;
 
-    // 状态效果（未实现）
+    // 状态效果结算
     void applyStatusEffects(Combatant* c);
     void applyBurnDamage(Combatant* c);
     void applySlowEffect(Combatant* c);

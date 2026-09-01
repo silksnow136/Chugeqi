@@ -91,7 +91,17 @@ void Combatant::recalcStatusFlags() {
 
 int Combatant::getEffectiveStat(int index) const {
     if (index < 0 || index >= 4) return 0;
-    return baseStats[index] + equipmentBonus[index];
+    int stat = baseStats[index] + equipmentBonus[index];
+    // 状态效果修正：迟缓降低敏捷，充能按倍率提升指定属性
+    for (const auto& inst : activeStatusEffects) {
+        if (inst.type == StatusEffect::Slow && index == 3) {
+            stat = stat * 3 / 5; // 迟缓：敏捷降为原来的 60%
+        } else if (inst.type == StatusEffect::Charge &&
+                   (inst.targetStatIndex == -1 || inst.targetStatIndex == index)) {
+            stat = static_cast<int>(stat * inst.multiplier);
+        }
+    }
+    return stat;
 }
 
 int Combatant::getHP() const { return hp; }
