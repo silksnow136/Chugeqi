@@ -99,7 +99,7 @@ Chugeqi/
 
 ```powershell
 # 1. 配置（用 Visual Studio 生成器，架构 x64）
-cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+cmake -S . -B build -G "Visual Studio 18 2026" -A x64
 
 # 2. 编译（Release）
 cmake --build build --config Release
