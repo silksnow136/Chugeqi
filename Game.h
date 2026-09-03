@@ -1,24 +1,20 @@
 #pragma once
 #include<string>
-#include <windows.h>
 #include "SceneManager.h"
-//¸ºÔğ¿ØÖÆÓÎÏ·³õÊ¼»¯ÒÔ¼°Ö¸Áî´¦Àí
-//ĞÂÔö£º¾çÇéÁ÷³Ì¹ÜÀí
+//è´Ÿè´£æ§åˆ¶æ¸¸æˆåˆå§‹åŒ–ä»¥åŠæŒ‡ä»¤å¤„ç†
+//æ–°å¢ï¼šå‰§æƒ…æµç¨‹ç®¡ç†
 using namespace std;
-
-//ÉèÖÃ×ÖÌåÑÕÉ«
-void setColor(int colorCode);
 
 class Game {
 public:
 	Game();
 	void run();
-	void gameCommand(const string& command);//´¦ÀíÍæ¼ÒÊäÈë
+	void gameCommand(const string& command);//å¤„ç†ç©å®¶è¾“å…¥
 private:
 	bool running = true;
 
 	void initialize();
-	void gameLoop();//ÓÎÏ·Ö÷Ñ­»·
+	void gameLoop();//æ¸¸æˆä¸»å¾ªç¯
 	
 
 	void showWelcome();

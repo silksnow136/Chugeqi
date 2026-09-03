@@ -1,15 +1,11 @@
-﻿#include "Game.h"
+#include "Game.h"
 #include<iostream>
 #include "map.h"
 #include"SceneManager.h"
+#include "console.h"
+#include <cstdlib>
 
 Game::Game(): sceneManager(*this){}//创建 SceneManager 的时候，把当前这个 Game 对象传给它
-
-void setColor(int colorCode) {
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTextAttribute(hConsole, colorCode);
-}
-
 
 void Game::run() {
 	initialize();
@@ -51,9 +47,9 @@ void Game::gameCommand(const string& command) {
 		return;
 	}
 	else if (command == "map") {
-		setColor(3);
+		console::setColor(3);
 		map();
-		setColor(14);
+		console::setColor(14);
 	}
 	else if (command == "south" || command =="w" || command == "W") {
 		scene_id++;
@@ -90,14 +86,14 @@ void Game::gameCommand(const string& command) {
 }
 
 void Game::showWelcome(){
-	setColor(4);
+	console::setColor(4);
 	cout << "========================================" << "\n"
 		<< "       楚歌起--霸王之陨，长乐未央    " << "\n"
 		<< "========================================" << "\n";
-	setColor(4);
+	console::setColor(4);
 	cout<< "     力拔山兮气盖世，破釜沉舟破强秦。" << "\n"
 		<< "     乌江耻渡千秋义，霸业虽忘骨亦雄。" << "\n";
-	setColor(14);
+	console::setColor(14);
 	cout << "\n";
 	cout << "1.开始游戏" << "   " << "2.继续征途" << "   " << "3.退出游戏" <<"   " << "4.帮助";
 	

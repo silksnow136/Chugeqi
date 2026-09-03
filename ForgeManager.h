@@ -1,11 +1,11 @@
 #pragma once
-//¶ÍÔì¹ÜÀí
+//é”»é€ ç®¡ç†
 using namespace std;
 
 class ForgeManager
 {
 public:
 
-    // ½øÈë¶ÍÔìÏµÍ³
+    // è¿›å…¥é”»é€ ç³»ç»Ÿ
     void forge();
 };

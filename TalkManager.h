@@ -6,7 +6,7 @@ using namespace std;
 class Game;
 class SceneManager;
 
-// ¶Ô»°ÏµÍ³¹ÜÀí
+// å¯¹è¯ç³»ç»Ÿç®¡ç†
 class TalkManager
 {
 public:
@@ -14,33 +14,33 @@ public:
 
     void setSceneManager(SceneManager* manager);
 
-    // ½øÈë¶Ô»°ÏµÍ³
+    // è¿›å…¥å¯¹è¯ç³»ç»Ÿ
     void talkManager(int scene_id = 0, int branch_id = 0);
 
-    // ¶Ô»°ÏµÍ³
+    // å¯¹è¯ç³»ç»Ÿ
     bool talkScene(Game& game1, int branch_id);
-    // µÚÒ»Ä»
+    // ç¬¬ä¸€å¹•
     void talkScene01(Game& game1, int branch_id);
-    // µÚ¶şÄ»
+    // ç¬¬äºŒå¹•
     void talkScene02(Game& game1, int branch_id);
-    // µÚÈıÄ»
+    // ç¬¬ä¸‰å¹•
     void talkScene03(Game& game1, int branch_id);
 
-    // ¶Ô»°ÈËÎï´òÓ¡
+    // å¯¹è¯äººç‰©æ‰“å°
 
-    void talkScene_01();   // Óİ¼§¡¢Ğ¡×äa
-    void talkScene_020();  // Å©·ò
-    void talkScene_021();  // Íõôå¡¢³ş¾ü
-    void talkScene_022();  // ¸±½«¡¢³ş¾ü
-    void talkScene_03();   // ÖÓÀëÃÁ
-    void talkScene_04();   // ÖÓÀëÃÁ¡¢ÎÚ½­Í¤³¤¡¢ÖÚ½«Ê¿¡¢º«ĞÅ
+    void talkScene_01();   // è™å§¬ã€å°å’a
+    void talkScene_020();  // å†œå¤«
+    void talkScene_021();  // ç‹ç¿¦ã€æ¥šå†›
+    void talkScene_022();  // å‰¯å°†ã€æ¥šå†›
+    void talkScene_03();   // é’Ÿç¦»æ˜§
+    void talkScene_04();   // é’Ÿç¦»æ˜§ã€ä¹Œæ±Ÿäº­é•¿ã€ä¼—å°†å£«ã€éŸ©ä¿¡
 
-    //¶Ô»°ÈËÎïÑ¡Ôñ
+    //å¯¹è¯äººç‰©é€‰æ‹©
     void talkCharacter_01(int character_id, int branch_id);
     void talkCharacter_02(int character_id, int branch_id);
     void talkCharacter_03(int character_id, int branch_id);
 
-    // µ±Ç°½ÇÉ«¶Ô»°
+    // å½“å‰è§’è‰²å¯¹è¯
 
     void talk_character_contnt_01(int current_character);
 
@@ -54,7 +54,7 @@ public:
 
     void talk_character_contnt_04(int current_character);
 
-    //´òÓ¡·µ»ØÎÄ×Ö
+    //æ‰“å°è¿”å›æ–‡å­—
     void waitForReturn();
 private:
     SceneManager* sceneManager = nullptr;

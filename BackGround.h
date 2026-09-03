@@ -1,10 +1,10 @@
 #pragma once
-//背景
+//鑳屾櫙
 using namespace std;
 
-//垓下大帐
+//鍨撲笅澶у笎
 void backGround_01();
-void backGround_02();//淮河
-void backGround_03();//东城
-void backGround_04();//乌江
+void backGround_02();//娣渤
+void backGround_03();//涓滃煄
+void backGround_04();//涔屾睙
 

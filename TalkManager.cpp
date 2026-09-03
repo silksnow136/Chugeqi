@@ -1,8 +1,8 @@
 #include<iostream>
 #include"Game.h"
-#include <conio.h> // ¿ØÖÆÌ¨ÎŞ»ØÏÔ°´¼ü¶ÁÈ¡
 #include "TalkManager.h"
 #include "SceneManager.h"
+#include "console.h"
 TalkManager::TalkManager()
 {
 	sceneManager = nullptr;
@@ -13,20 +13,20 @@ void TalkManager::setSceneManager(SceneManager* manager)
 	sceneManager = manager;
 }
 
-//µÚÒ»Ä»
+//ç¬¬ä¸€å¹•
 void TalkManager::talkScene01(Game& game1, int branch_id) {
 	talkScene_01();
 	string sceneCommand1;
 	cout << "\n> ";
 	cin >> sceneCommand1;
 	if (sceneCommand1 == "1" || sceneCommand1 == "2" || sceneCommand1 == "3") {
-		int num = stoi(sceneCommand1);//½«string×ª»¯Îªint
+		int num = stoi(sceneCommand1);//å°†stringè½¬åŒ–ä¸ºint
 		if (num == 3) {
-			//·µ»Ø
+			//è¿”å›
 			sceneManager->setSceneState(SceneManager::SceneState::ORIGIN_SCENE);
 		}
 		else {
-			//ÓëĞ¡±ø/Óİ¼§¶Ô»°
+			//ä¸å°å…µ/è™å§¬å¯¹è¯
 			talkCharacter_01(num, branch_id);
 		}
 	}
@@ -36,7 +36,7 @@ void TalkManager::talkScene01(Game& game1, int branch_id) {
 	}
 }
 
-//µÚ¶şÕÂ
+//ç¬¬äºŒç« 
 void TalkManager::talkScene02(Game& game1, int branch_id) {
 	if (branch_id == 1) {
 		talkScene_021();
@@ -44,13 +44,13 @@ void TalkManager::talkScene02(Game& game1, int branch_id) {
 		cout << "\n> ";
 		cin >> sceneCommand1;
 		if (sceneCommand1 == "1" || sceneCommand1 == "2" || sceneCommand1 == "3") {
-			int num = stoi(sceneCommand1);//½«string×ª»¯Îªint
+			int num = stoi(sceneCommand1);//å°†stringè½¬åŒ–ä¸ºint
 			if (num == 3) {
-				//·µ»Ø
+				//è¿”å›
 				sceneManager->setSceneState(SceneManager::SceneState::ORIGIN_SCENE);
 			}
 			else {
-				//Íõôå/ºº¾ü
+				//ç‹ç¿¦/æ±‰å†›
 				talkCharacter_02(num, branch_id);
 			}
 		}
@@ -65,13 +65,13 @@ void TalkManager::talkScene02(Game& game1, int branch_id) {
 		cout << "\n> ";
 		cin >> sceneCommand1;
 		if (sceneCommand1 == "1" || sceneCommand1 == "2") {
-			int num = stoi(sceneCommand1);//½«string×ª»¯Îªint
+			int num = stoi(sceneCommand1);//å°†stringè½¬åŒ–ä¸ºint
 			if (num == 2) {
-				//·µ»Ø
+				//è¿”å›
 				sceneManager->setSceneState(SceneManager::SceneState::ORIGIN_SCENE);
 			}
 			else {
-				//¸±½«
+				//å‰¯å°†
 				talkCharacter_02(num, branch_id);
 			}
 		}
@@ -82,20 +82,20 @@ void TalkManager::talkScene02(Game& game1, int branch_id) {
 	}
 }
 
-//µÚÈıÕÂ
+//ç¬¬ä¸‰ç« 
 void TalkManager::talkScene03(Game& game1, int branch_id) {
 	talkScene_03();
 	string sceneCommand1;
 	cout << "\n> ";
 	cin >> sceneCommand1;
 	if (sceneCommand1 == "1" || sceneCommand1 == "2" || sceneCommand1 == "3" || sceneCommand1 == "4" || sceneCommand1 == "5") {
-		int num = stoi(sceneCommand1);//½«string×ª»¯Îªint
+		int num = stoi(sceneCommand1);//å°†stringè½¬åŒ–ä¸ºint
 		if (num == 5) {
-			//·µ»Ø
+			//è¿”å›
 			sceneManager->setSceneState(SceneManager::SceneState::ORIGIN_SCENE);
 		}
 		else {
-			//Óë³àÈªºî/ÇØÊ±ÔÂ/ÖÓÀëÃÁ/¶şÊ®°ËÆï¶Ô»°
+			//ä¸èµ¤æ³‰ä¾¯/ç§¦æ—¶æœˆ/é’Ÿç¦»æ˜§/äºŒåå…«éª‘å¯¹è¯
 			talkCharacter_03(num, branch_id);
 		}
 	}
@@ -105,32 +105,32 @@ void TalkManager::talkScene03(Game& game1, int branch_id) {
 }
 
 void TalkManager::waitForReturn() {
-	string tip1 = "ÊäÈëÈÎÒâ°´¼ü·µ»Ø";
+	string tip1 = "è¾“å…¥ä»»æ„æŒ‰é”®è¿”å›";
 	cout << tip1;
-	_getch();
+	console::pause();
 	sceneManager->deleteWords(tip1);
 
 }
-//µÚÒ»Ä»¶Ô»°²¥·Å
+//ç¬¬ä¸€å¹•å¯¹è¯æ’­æ”¾
 void TalkManager::talkCharacter_01(int character_id, int branch_id) {
 	
-	// Ë¢ĞÂ³¡¾°
+	// åˆ·æ–°åœºæ™¯
 	sceneManager->refreshScene(branch_id);
-	// ÉèÖÃµ±Ç°ÈËÎï
+	// è®¾ç½®å½“å‰äººç‰©
 	sceneManager->setCurrentCharacter(character_id);
-	// ²¥·ÅÈËÎï¶Ô»°
+	// æ’­æ”¾äººç‰©å¯¹è¯
 	talk_character_contnt_01(character_id);
 
 	waitForReturn();
 }
-//µÚ¶şÕÂ¶Ô»°²¥·Å
+//ç¬¬äºŒç« å¯¹è¯æ’­æ”¾
 void TalkManager::talkCharacter_02(int character_id, int branch_id) {
 	
-	// Ë¢ĞÂ³¡¾°
+	// åˆ·æ–°åœºæ™¯
 	sceneManager->refreshScene(branch_id);
-	// ÉèÖÃµ±Ç°ÈËÎï
+	// è®¾ç½®å½“å‰äººç‰©
 	sceneManager->setCurrentCharacter(character_id);
-	// ²¥·ÅÈËÎï¶Ô»°
+	// æ’­æ”¾äººç‰©å¯¹è¯
 	if (branch_id == 1) {
 		talk_character_contnt_021(character_id);
 	}
@@ -140,93 +140,93 @@ void TalkManager::talkCharacter_02(int character_id, int branch_id) {
 
 	waitForReturn();
 }
-//µÚÈıÄ»¶Ô»°²¥·Å
+//ç¬¬ä¸‰å¹•å¯¹è¯æ’­æ”¾
 void TalkManager::talkCharacter_03(int character_id, int branch_id) {
 	
-	// Ë¢ĞÂ³¡¾°
+	// åˆ·æ–°åœºæ™¯
 	sceneManager->refreshScene(branch_id);
-	// ÉèÖÃµ±Ç°ÈËÎï
+	// è®¾ç½®å½“å‰äººç‰©
 	sceneManager->setCurrentCharacter(character_id);
-	// ²¥·ÅÈËÎï¶Ô»°
+	// æ’­æ”¾äººç‰©å¯¹è¯
 	talk_character_contnt_03(character_id);
 
 	waitForReturn();
 }
-//¶Ô»°ÏµÍ³
+//å¯¹è¯ç³»ç»Ÿ
 void TalkManager::talkScene_01() {
 	cout << "\n";
 	cout << "================================\n";
-	cout << "              ¶Ô»°\n";
+	cout << "              å¯¹è¯\n";
 	cout << "================================\n";
 
-	cout << "1. Ğ¡×äa\n";
-	cout << "2. Óİ¼§\n";
-	cout << "3. ·µ»Ø\n";
-	cout << "\nÊäÈëw¼ÌĞøÓÎÏ·\n";
+	cout << "1. å°å’a\n";
+	cout << "2. è™å§¬\n";
+	cout << "3. è¿”å›\n";
+	cout << "\nè¾“å…¥wç»§ç»­æ¸¸æˆ\n";
 
 }
 void TalkManager::talkScene_020() {
 	cout << "\n";
 	cout << "================================\n";
-	cout << "              ¶Ô»°\n";
+	cout << "              å¯¹è¯\n";
 	cout << "================================\n";
 
 	cout << "1. \n";
 	cout << "2. \n";
-	cout << "3. ·µ»Ø\n";
-	cout << "\nÊäÈëw¼ÌĞøÓÎÏ·\n";
+	cout << "3. è¿”å›\n";
+	cout << "\nè¾“å…¥wç»§ç»­æ¸¸æˆ\n";
 
 }
 void TalkManager::talkScene_021() {
 	cout << "\n";
 	cout << "================================\n";
-	cout << "              ¶Ô»°\n";
+	cout << "              å¯¹è¯\n";
 	cout << "================================\n";
 
-	cout << "1. Íõôå\n";
-	cout << "2. ºº¾ü\n";
-	cout << "3. ·µ»Ø\n";
-	cout << "\nÊäÈëw¼ÌĞøÓÎÏ·\n";
+	cout << "1. ç‹ç¿¦\n";
+	cout << "2. æ±‰å†›\n";
+	cout << "3. è¿”å›\n";
+	cout << "\nè¾“å…¥wç»§ç»­æ¸¸æˆ\n";
 
 }
 void TalkManager::talkScene_022() {
 	cout << "\n";
 	cout << "================================\n";
-	cout << "              ¶Ô»°\n";
+	cout << "              å¯¹è¯\n";
 	cout << "================================\n";
 
-	cout << "1. ¸±½«\n";
-	cout << "2. ·µ»Ø\n";
-	cout << "\nÊäÈëw¼ÌĞøÓÎÏ·\n";
+	cout << "1. å‰¯å°†\n";
+	cout << "2. è¿”å›\n";
+	cout << "\nè¾“å…¥wç»§ç»­æ¸¸æˆ\n";
 
 }
 void TalkManager::talkScene_03() {
 	cout << "\n";
 	cout << "================================\n";
-	cout << "              ¶Ô»°\n";
+	cout << "              å¯¹è¯\n";
 	cout << "================================\n";
 
-	cout << "1. ³àÈªºî\n";
-	cout << "2. ÇØÊ±ÔÂ\n";
-	cout << "3. ÖÓÀëÃÁ\n";
-	cout << "4. ¶şÊ®°ËÆï\n";
-	cout << "5. ·µ»Ø\n";
-	cout << "\nÊäÈëw¼ÌĞøÓÎÏ·\n";
+	cout << "1. èµ¤æ³‰ä¾¯\n";
+	cout << "2. ç§¦æ—¶æœˆ\n";
+	cout << "3. é’Ÿç¦»æ˜§\n";
+	cout << "4. äºŒåå…«éª‘\n";
+	cout << "5. è¿”å›\n";
+	cout << "\nè¾“å…¥wç»§ç»­æ¸¸æˆ\n";
 
 }
 void TalkManager::talkScene_04() {
 	cout << "\n";
 	cout << "================================\n";
-	cout << "              ¶Ô»°\n";
+	cout << "              å¯¹è¯\n";
 	cout << "================================\n";
 
-	cout << "1. º«ĞÅ\n";
-	cout << "2. ºº¾ü\n";
-	cout << "3. ÖÓÀëÃÁ\n";
-	cout << "4. ¶şÊ®°ËÆï\n";
-	cout << "5. ÎÚ½­Í¤³¤\n";
-	cout << "6. ·µ»Ø\n";
-	cout << "\nÊäÈëw¼ÌĞøÓÎÏ·\n";
+	cout << "1. éŸ©ä¿¡\n";
+	cout << "2. æ±‰å†›\n";
+	cout << "3. é’Ÿç¦»æ˜§\n";
+	cout << "4. äºŒåå…«éª‘\n";
+	cout << "5. ä¹Œæ±Ÿäº­é•¿\n";
+	cout << "6. è¿”å›\n";
+	cout << "\nè¾“å…¥wç»§ç»­æ¸¸æˆ\n";
 
 }
 
@@ -234,13 +234,13 @@ void TalkManager::talkScene_04() {
 void TalkManager::talk_character_contnt_01(int current_character) {
 	switch (current_character) {
 	case 1:
-		//Ğ¡×äa
-		cout << "Ğ¡×äaµÄ¶Ô»°Ã»Ğ´"<<"\n";
+		//å°å’a
+		cout << "å°å’açš„å¯¹è¯æ²¡å†™"<<"\n";
 		break;
 
 	case 2:
-		//Óİ¼§
-		cout << "Óİ¼§µÄ¶Ô»°Ã»Ğ´"<<"\n";
+		//è™å§¬
+		cout << "è™å§¬çš„å¯¹è¯æ²¡å†™"<<"\n";
 		break;
 	}
 }
@@ -250,21 +250,21 @@ void TalkManager::talk_character_contnt_020(int current_character) {
 void TalkManager::talk_character_contnt_021(int current_character) {
 	switch (current_character) {
 	case 1:
-		//Íõôå
-		cout << "ÍõôåµÄ¶Ô»°Ã»Ğ´" << "\n";
+		//ç‹ç¿¦
+		cout << "ç‹ç¿¦çš„å¯¹è¯æ²¡å†™" << "\n";
 		break;
 
 	case 2:
-		//ºº¾ü
-		cout << "ºº¾üµÄ¶Ô»°Ã»Ğ´" << "\n";
+		//æ±‰å†›
+		cout << "æ±‰å†›çš„å¯¹è¯æ²¡å†™" << "\n";
 		break;
 	}
 }
 void TalkManager::talk_character_contnt_022(int current_character) {
 	switch (current_character) {
 	case 1:
-		//¸±½«
-		cout << "¸±½«µÄ¶Ô»°Ã»Ğ´" << "\n";
+		//å‰¯å°†
+		cout << "å‰¯å°†çš„å¯¹è¯æ²¡å†™" << "\n";
 		break;
 
 	}
@@ -272,22 +272,22 @@ void TalkManager::talk_character_contnt_022(int current_character) {
 void TalkManager::talk_character_contnt_03(int current_character) {
 	switch (current_character) {
 	case 1:
-		//³àÈªºî
-		cout << "³àÈªºîµÄ¶Ô»°Ã»Ğ´" << "\n";
+		//èµ¤æ³‰ä¾¯
+		cout << "èµ¤æ³‰ä¾¯çš„å¯¹è¯æ²¡å†™" << "\n";
 		break;
 
 	case 2:
-		//ÇØÊ±ÔÂ
-		cout << "ÇØÊ±ÔÂµÄ¶Ô»°Ã»Ğ´" << "\n";
+		//ç§¦æ—¶æœˆ
+		cout << "ç§¦æ—¶æœˆçš„å¯¹è¯æ²¡å†™" << "\n";
 		break;
 
 	case 3:
-		//ÖÓÀëÃÁ
-		cout << "ÖÓÀëÃÁµÄ¶Ô»°Ã»Ğ´" << "\n";
+		//é’Ÿç¦»æ˜§
+		cout << "é’Ÿç¦»æ˜§çš„å¯¹è¯æ²¡å†™" << "\n";
 		break;
 	case 4:
-		//¶şÊ®°ËÆï
-		cout << "¶şÊ®°ËÆïµÄ¶Ô»°Ã»Ğ´" << "\n";
+		//äºŒåå…«éª‘
+		cout << "äºŒåå…«éª‘çš„å¯¹è¯æ²¡å†™" << "\n";
 		break;
 	}
 }

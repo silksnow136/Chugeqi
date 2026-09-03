@@ -1,10 +1,9 @@
 #include<iostream>
-#include <conio.h> // ¿ØÖÆÌ¨ÎŞ»ØÏÔ°´¼ü¶ÁÈ¡
 #include"ForgeManager.h"
 
-//¶ÍÔì
+//é”»é€ 
 void ForgeManager::forge() {
 	cout << "\n";
-	cout << "¶ÍÔì¹¦ÄÜÔİÎ´¿ª·Å¡£\n";
+	cout << "é”»é€ åŠŸèƒ½æš‚æœªå¼€æ”¾ã€‚\n";
 
 }

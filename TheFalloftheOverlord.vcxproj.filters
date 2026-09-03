@@ -57,6 +57,9 @@
     <ClCompile Include="BackGround.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="console.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -69,6 +72,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="TalkManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="console.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
