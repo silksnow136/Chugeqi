@@ -1,9 +1,8 @@
 #include<iostream>
-#include <conio.h> // 控制台无回显按键读取
 #include"PharManager.h"
-//药房
+//鑽埧
 void PharManager::phar() {
 	cout << "\n";
-	cout << "药房功能暂未开放。\n";
+	cout << "鑽埧鍔熻兘鏆傛湭寮�鏀俱�俓n";
 }
 

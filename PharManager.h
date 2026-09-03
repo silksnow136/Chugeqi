@@ -1,11 +1,11 @@
 #pragma once
-//药店管理
+//鑽簵绠＄悊
 using namespace std;
 
 class PharManager
 {
 public:
 
-    // 进入药房系统
+    // 杩涘叆鑽埧绯荤粺
     void phar();
 };

@@ -1,7 +1,6 @@
 #pragma once
-#include<windows.h>
 
 using namespace std;
 
-void map();//世界地图
-void map_Manager(int scene_id,int branch_id);//场景地图
+void map();//涓栫晫鍦板浘
+void map_Manager(int scene_id,int branch_id);//鍦烘櫙鍦板浘

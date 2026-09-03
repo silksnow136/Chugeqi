@@ -1,7 +1,7 @@
 #pragma once
-//¸ºÔğ¹ÊÊÂ±³¾°ÏÔÊ¾
-//¸ºÔğÏÔÊ¾¾çÇé
-//¸ºÔğÏÔÊ¾³¡¾°ÒÔ¼°³¡¾°½»»¥
+//è´Ÿè´£æ•…äº‹èƒŒæ™¯æ˜¾ç¤º
+//è´Ÿè´£æ˜¾ç¤ºå‰§æƒ…
+//è´Ÿè´£æ˜¾ç¤ºåœºæ™¯ä»¥åŠåœºæ™¯äº¤äº’
 #include "TalkManager.h"
 using namespace std;
 
@@ -13,45 +13,45 @@ class SceneManager {
 public:
 	SceneManager(Game& game);
 
-//ÅĞ¶Ïµ±Ç°³¡¾°Ëù´¦×´Ì¬£¬·½±ãÌí¼Ó¶à¼¶ÏµÍ³
+//åˆ¤æ–­å½“å‰åœºæ™¯æ‰€å¤„çŠ¶æ€ï¼Œæ–¹ä¾¿æ·»åŠ å¤šçº§ç³»ç»Ÿ
 	enum class SceneState
 	{
-		ORIGIN_SCENE,	//µ±Ç°³¡¾°
-		TALK,			//½øÈë¶Ô»°ÏµÍ³,Ñ¡Ôñ½ÇÉ«¶Ô»°
-		PHARMACY,		//½øÈëÒ©µê
-		FORGE			//½øÈë¶ÍÔì
+		ORIGIN_SCENE,	//å½“å‰åœºæ™¯
+		TALK,			//è¿›å…¥å¯¹è¯ç³»ç»Ÿ,é€‰æ‹©è§’è‰²å¯¹è¯
+		PHARMACY,		//è¿›å…¥è¯åº—
+		FORGE			//è¿›å…¥é”»é€ 
 	};
 
 	void ShowBackground(int scene_id);
 
-	void changeAuto();//×Ô¶¯/ÊÖ¶¯ÇĞ»»
-	bool current_Auto();//µ±Ç°µÄ×Ô¶¯/ÊÖ¶¯Ä£Ê½
-	//³õ²½¾çÇé´æµµ,»ñµÃµ±Ç°³¡¾°id
+	void changeAuto();//è‡ªåŠ¨/æ‰‹åŠ¨åˆ‡æ¢
+	bool current_Auto();//å½“å‰çš„è‡ªåŠ¨/æ‰‹åŠ¨æ¨¡å¼
+	//åˆæ­¥å‰§æƒ…å­˜æ¡£,è·å¾—å½“å‰åœºæ™¯id
 	int showScene_id();
-	// ĞŞ¸Ä³¡¾°
+	// ä¿®æ”¹åœºæ™¯
 	void changeScene(int scene_id);
-	//³¡¾°¹¦ÄÜÏÔÊ¾¹ÜÀí
+	//åœºæ™¯åŠŸèƒ½æ˜¾ç¤ºç®¡ç†
 	void showSceneManager(int scene_id = 0, int branch_id = 0);
-	//³¡¾°¹¦ÄÜ¹ÜÀí,1¶Ô»°ÏµÍ³ÒÔ¼°¶Ô»°·ÖÖ§+Ö¸ÁîÏµÍ³£»2.Ò©µêÏµÍ³£»3.¶ÍÔìÏµÍ³
+	//åœºæ™¯åŠŸèƒ½ç®¡ç†,1å¯¹è¯ç³»ç»Ÿä»¥åŠå¯¹è¯åˆ†æ”¯+æŒ‡ä»¤ç³»ç»Ÿï¼›2.è¯åº—ç³»ç»Ÿï¼›3.é”»é€ ç³»ç»Ÿ
 	void sceneManager(Game& game1, int branch_id);
 
 	void nextLine();
 
-	// »ñÈ¡µ±Ç°×´Ì¬
+	// è·å–å½“å‰çŠ¶æ€
 	SceneState getSceneState() const;
-	// ÉèÖÃµ±Ç°×´Ì¬
+	// è®¾ç½®å½“å‰çŠ¶æ€
 	void setSceneState(SceneState state);
 
-	// »ñµÃ¶Ô»°ÈËÎï
+	// è·å¾—å¯¹è¯äººç‰©
 	int getCurrentCharacter() const;
-	// ÉèÖÃ¶Ô»°ÈËÎï
+	// è®¾ç½®å¯¹è¯äººç‰©
 	void setCurrentCharacter(int character_id);
 
 	void deleteWords(string tip);
 
-	// µ±Ç°Ñ¡ÔñµÄÈËÎï
+	// å½“å‰é€‰æ‹©çš„äººç‰©
 	int current_character = 0;
-	//ÊÇ·ñ·µ»ØµØÍ¼³¡¾°
+	//æ˜¯å¦è¿”å›åœ°å›¾åœºæ™¯
 	bool scene = true;
 private:
 
@@ -61,32 +61,32 @@ private:
 	PharManager* pharManager = nullptr;
 	ForgeManager* forgeManager = nullptr;
 
-	// µ±Ç°³¡¾°ID
+	// å½“å‰åœºæ™¯ID
 	int current_scene_id = 0;
 
-	// µ±Ç°³¡¾°×´Ì¬
+	// å½“å‰åœºæ™¯çŠ¶æ€
 	SceneState current_state = SceneState::ORIGIN_SCENE;
 
-	// ÊÇ·ñ×Ô¶¯²¥·Å¾çÇé
+	// æ˜¯å¦è‡ªåŠ¨æ’­æ”¾å‰§æƒ…
 	bool autoPlay = false;
 
-	// ±ÜÃâµØÍ¼ÖØ¸´´òÓ¡
+	// é¿å…åœ°å›¾é‡å¤æ‰“å°
 	bool unique_map_print = false;
 
 	// =====================================
-	// Í¨ÓÃ¸¨Öúº¯Êı
+	// é€šç”¨è¾…åŠ©å‡½æ•°
 	// =====================================
 public:
-	// ÇåÆÁ²¢ÏÔÊ¾µØÍ¼
+	// æ¸…å±å¹¶æ˜¾ç¤ºåœ°å›¾
 	void refreshScene(int branch_id);
 
-	// ÅĞ¶Ï²¢Ö´ĞĞÃüÁî
+	// åˆ¤æ–­å¹¶æ‰§è¡Œå‘½ä»¤
 	bool handleCommand(Game& game1, const string& command);
 
-	// ÏÔÊ¾µ±Ç°³¡¾°±³¾°
+	// æ˜¾ç¤ºå½“å‰åœºæ™¯èƒŒæ™¯
 	void showCurrentBackground();
 
-	//Êä³ö¾çÇé¶Ô»°
-	void printWords(string tips,int color, int sleep,int sleep1);
+	//è¾“å‡ºå‰§æƒ…å¯¹è¯
+	void printWords(string tips,int color, int sleep,int sleep1 = 100);
 };
 
