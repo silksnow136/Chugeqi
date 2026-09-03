@@ -1,5 +1,11 @@
 # 构建产物
 build/
+x64/
+Debug/
+Release/
+*.obj
+*.pdb
+*.exe
 
 # 运行时生成的存档数据库
 save.db
@@ -7,3 +13,9 @@ save.db
 
 # IDE 配置
 .vscode/
+.vs/
+*.vcxproj.user
+*.suo
+
+# TheFall 遗留
+TheFallo.b76738bc/
