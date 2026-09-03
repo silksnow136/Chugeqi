@@ -9,11 +9,12 @@
   },
   "fireball": {
     "name": "火球",
-    "description": "发射火球",
+    "description": "发射火球，附带灼烧",
     "type": "damage",
     "cost": 10,
     "power": 8,
-    "scope": "single"
+    "scope": "single",
+    "statusEffect": "burn"
   },
   "heal": {
     "name": "治疗",
@@ -21,6 +22,16 @@
     "type": "heal",
     "cost": 8,
     "healAmount": 30,
+    "scope": "single"
+  },
+  "charge_boost": {
+    "name": "聚力",
+    "description": "蓄力提升全属性",
+    "type": "charge",
+    "cost": 10,
+    "multiplier": 1.5,
+    "targetStat": -1,
+    "duration": 3,
     "scope": "single"
   }
 }
