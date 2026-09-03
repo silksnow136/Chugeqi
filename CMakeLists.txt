@@ -6,23 +6,35 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(MSVC)
     add_compile_options(/utf-8)
-    add_compile_options(/W0)
 endif()
 
 add_executable(Chugeqi
-    src/combatTestMain.cpp
+    # 剧情/场景系统（TheFall）
+    main.cpp
+    Game.cpp
+    SceneManager.cpp
+    TalkManager.cpp
+    map.cpp
+    BackGround.cpp
+    ForgeManager.cpp
+    PharManager.cpp
+    story.cpp
+    # 战斗系统（Chugeqi）
     src/battleLog.cpp
     src/character.cpp
     src/combatSystem.cpp
-    src/console.cpp
     src/dataLoader.cpp
     src/item.cpp
     src/skill.cpp
     src/saveManager.cpp
+    # 平台抽象层
+    src/console.cpp
+    # 第三方
     third_party/sqlite/sqlite3.c
 )
 
 target_include_directories(Chugeqi PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/src"
     "${CMAKE_CURRENT_SOURCE_DIR}/third_party/sqlite"
 )
 
