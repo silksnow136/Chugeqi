@@ -2,6 +2,7 @@
 //负责故事背景显示
 //负责显示剧情
 //负责显示场景以及场景交互
+#include "story.h"
 #include "TalkManager.h"
 using namespace std;
 
@@ -72,6 +73,13 @@ private:
 
 	// 避免地图重复打印
 	bool unique_map_print = false;
+
+	// 剧情数据（构造时从 data/story.json 载入一次）
+	std::vector<Scene> scenes;
+
+	// 播放叙事行 / 分支选择
+	void playLines(const std::vector<StoryLine>& lines);
+	void playChoice(const Scene& scene, int& branch_id);
 
 	// =====================================
 	// 通用辅助函数

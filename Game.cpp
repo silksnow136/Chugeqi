@@ -8,6 +8,7 @@
 Game::Game(): sceneManager(*this){}//创建 SceneManager 的时候，把当前这个 Game 对象传给它
 
 void Game::run() {
+	console::init();//初始化控制台编码（UTF-8）
 	initialize();
 	gameLoop();
 }
