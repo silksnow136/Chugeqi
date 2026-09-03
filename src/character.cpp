@@ -49,7 +49,7 @@ void Combatant::restoreSP(int amount) {
 void Combatant::addStatusEffect(StatusEffect type, int duration, int targetStat, float mult) {
     // 如果已有同类型，刷新持续时间
     auto it = std::find_if(activeStatusEffects.begin(), activeStatusEffects.end(),
-        [type](const StatusEffectInstance& inst) { return inst.type == type; });
+        [type](const StatusEffectInstance& effect) { return effect.type == type; });
     if (it != activeStatusEffects.end()) {
         it->duration = duration;
         if (type == StatusEffect::Charge) {
@@ -57,8 +57,8 @@ void Combatant::addStatusEffect(StatusEffect type, int duration, int targetStat,
             it->multiplier = mult;
         }
     } else {
-        StatusEffectInstance inst{type, duration, targetStat, mult};
-        activeStatusEffects.push_back(inst);
+        StatusEffectInstance effect{type, duration, targetStat, mult};
+        activeStatusEffects.push_back(effect);
     }
     recalcStatusFlags();
 }
@@ -78,21 +78,32 @@ void Combatant::updateStatusEffects() {
 void Combatant::clearStatusEffect(StatusEffect type) {
     activeStatusEffects.erase(
         std::remove_if(activeStatusEffects.begin(), activeStatusEffects.end(),
-            [type](const StatusEffectInstance& inst) { return inst.type == type; }),
+            [type](const StatusEffectInstance& effect) { return effect.type == type; }),
         activeStatusEffects.end());
     recalcStatusFlags();
 }
 
 void Combatant::recalcStatusFlags() {
     statusFlags = 0;
-    for (const auto& inst : activeStatusEffects) {
-        statusFlags |= static_cast<uint16_t>(inst.type);
+    for (const auto& effect : activeStatusEffects) {
+        statusFlags |= static_cast<uint16_t>(effect.type);
     }
 }
 
 int Combatant::getEffectiveStat(int index) const {
     if (index < 0 || index >= 4) return 0;
-    return baseStats[index] + equipmentBonus[index];
+    int stat = baseStats[index] + equipmentBonus[index];
+    // 状态效果修正：迟缓降低敏捷，充能按倍率提升指定属性。
+    // 均以 baseStats + equipmentBonus 为基准逐项乘算，天然幂等（不会随查询次数累积）。
+    for (const auto& effect : activeStatusEffects) {
+        if (effect.type == StatusEffect::Slow && index == 3) {
+            stat = stat * 3 / 5; // 迟缓：敏捷降为原来的 60%
+        } else if (effect.type == StatusEffect::Charge &&
+                   (effect.targetStatIndex == -1 || effect.targetStatIndex == index)) {
+            stat = static_cast<int>(stat * effect.multiplier);
+        }
+    }
+    return stat;
 }
 
 int Combatant::getHP() const { return hp; }

@@ -2,6 +2,7 @@
 #include "console.h"
 #include <iostream>
 #include <random>
+#include <algorithm>
 
 // ---------------------------------------------------------------------------
 // 文件内部辅助函数（不对外暴露）
@@ -68,6 +69,25 @@ static std::vector<Combatant*> buildSkillTargets(const std::vector<Combatant*>& 
     return {t};
 }
 
+// 状态效果中文名（战斗日志与界面显示共用，避免硬编码散落）
+static const char* statusName(StatusEffect e) {
+    switch (e) {
+        case StatusEffect::Burn:   return "灼烧";
+        case StatusEffect::Slow:   return "迟缓";
+        case StatusEffect::Stun:   return "眩晕";
+        case StatusEffect::Charge: return "充能";
+        default:                   return "未知";
+    }
+}
+
+// 伤害技能附带状态的默认持续回合数（skill.json 未配置持续回合时使用）
+static int defaultStatusDuration(StatusEffect e) {
+    switch (e) {
+        case StatusEffect::Stun: return 1; // 眩晕仅持续一回合
+        default:                 return 3;
+    }
+}
+
 // ---------------------------------------------------------------------------
 // 构造 / 析构
 // ---------------------------------------------------------------------------
@@ -93,9 +113,12 @@ bool CombatSystem::startBattle() {
     battleEnded = false;
     playerWon = false;
 
-    // 主循环：我方（玩家 + 同伴）→ 敌方（未实现，不会回击）
+    // 主循环：我方（玩家 + 同伴）→ 敌方。每轮统一在轮首结算、轮末递减状态。
     while (!battleEnded) {
-        // 玩家回合（手动，内部会刷新界面）
+        // 回合开始：灼烧扣血、迟缓提示（眩晕的行动跳过在各回合函数内处理）
+        applyRoundStartStatus();
+
+        // 玩家回合（手动或 AI 托管，内部会刷新界面）
         if (player->isAlive()) {
             processPlayerTurn();
         }
@@ -121,6 +144,9 @@ bool CombatSystem::startBattle() {
         }
         // 我方全灭 → 失败结束
         if (getAliveAllies().empty()) { battleEnded = true; playerWon = false; break; }
+
+        // 回合结束：状态持续回合递减（对仍存活者）
+        applyRoundEndStatus();
     }
 
     // 胜利结算：按敌人等级发放经验（用于演示存档持久化）
@@ -185,7 +211,21 @@ void CombatSystem::displayBattle() const {
 void CombatSystem::displayStatus(const Combatant* c) const {
     std::cout << c->getName() << "  Lv." << c->getLevel()
               << "  HP:" << c->getHP() << "  SP:" << c->getSP()
-              << "  特殊状态：(未实现)" << std::endl;
+              << "  状态：";
+    std::vector<std::string> statuses;
+    if (c->hasStatusEffect(StatusEffect::Burn))   statuses.push_back(statusName(StatusEffect::Burn));
+    if (c->hasStatusEffect(StatusEffect::Slow))   statuses.push_back(statusName(StatusEffect::Slow));
+    if (c->hasStatusEffect(StatusEffect::Stun))   statuses.push_back(statusName(StatusEffect::Stun));
+    if (c->hasStatusEffect(StatusEffect::Charge)) statuses.push_back(statusName(StatusEffect::Charge));
+    if (statuses.empty()) {
+        std::cout << "无" << std::endl;
+    } else {
+        for (size_t i = 0; i < statuses.size(); i++) {
+            if (i) std::cout << "/";
+            std::cout << statuses[i];
+        }
+        std::cout << std::endl;
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -204,6 +244,13 @@ bool CombatSystem::processCompanionTurn(Combatant* companion) {
 
 // 手动回合：玩家(maxChoice=5，含全员托管切换)与同伴(maxChoice=3，含同伴托管切换)共用
 bool CombatSystem::manualTurn(Combatant* actor, int maxChoice) {
+    // 眩晕：跳过本回合行动（状态持续回合在轮末统一递减）
+    if (actor->hasStatusEffect(StatusEffect::Stun)) {
+        addLog(actor->getName() + " 处于眩晕，无法行动！");
+        displayBattle();
+        console::pause();
+        return false;
+    }
     while (true) {
         displayBattle(); // 行动前刷新一次界面
         if (maxChoice >= 5)
@@ -223,7 +270,13 @@ bool CombatSystem::manualTurn(Combatant* actor, int maxChoice) {
             case 2: { // 技能：单体手动选择目标
                 SkillBase* s = selectSkill(actor);
                 if (!s) continue; // 取消，返回主菜单
-                auto targets = buildSkillTargets(getAliveAllies(), getAliveEnemies(), s);
+                std::vector<Combatant*> targets;
+                if (dynamic_cast<ChargingSkill*>(s) != nullptr) {
+                    // 充能技能：目标固定为施法者自己
+                    targets.push_back(actor);
+                } else {
+                    targets = buildSkillTargets(getAliveAllies(), getAliveEnemies(), s);
+                }
                 if (targets.empty()) continue; // 取消，返回主菜单
                 performSkill(actor, s, targets);
                 break;
@@ -432,6 +485,12 @@ bool CombatSystem::performSkill(Combatant* user, SkillBase* skill, std::vector<C
             int damage = dmg->calculateDamage(user->getEffectiveStat(0), target->getEffectiveStat(2));
             target->takeDamage(damage);
             addLog(user->getName() + " 对 " + target->getName() + " 使用「" + skill->getName() + "」，造成 " + std::to_string(damage) + " 点伤害。");
+            // 命中后附加技能附带的状态效果（skill.json 未配置则不附加）
+            StatusEffect se = dmg->getStatusEffect();
+            if (se != StatusEffect::None && target->isAlive()) {
+                target->addStatusEffect(se, defaultStatusDuration(se));
+                addLog(target->getName() + " 陷入「" + statusName(se) + "」状态！");
+            }
         }
     } else if (auto* heal = dynamic_cast<HealSkill*>(skill)) {
         // 治疗技能
@@ -439,8 +498,13 @@ bool CombatSystem::performSkill(Combatant* user, SkillBase* skill, std::vector<C
             target->heal(heal->getHealAmount());
             addLog(user->getName() + " 对 " + target->getName() + " 使用「" + skill->getName() + "」，恢复 " + std::to_string(heal->getHealAmount()) + " 点 HP。");
         }
+    } else if (auto* charge = dynamic_cast<ChargingSkill*>(skill)) {
+        // 充能技能：给自己附加充能状态（倍率与持续回合取自技能配置）
+        user->addStatusEffect(StatusEffect::Charge, charge->getDuration(),
+                              charge->getTargetStat(), charge->getMultiplier());
+        addLog(user->getName() + " 使用「" + skill->getName() + "」，进入充能状态！");
     } else {
-        // 其他技能类型（如充能）：状态效果已移除（未实现）
+        // 其他未实现的技能类型
         std::cout << "该技能类型：(未实现)" << std::endl;
         console::pause();
     }
@@ -521,13 +585,35 @@ std::vector<Combatant*> CombatSystem::getAliveAllies() const {
 }
 
 // ---------------------------------------------------------------------------
-// 状态效果 / AI（均未实现，仅保留空实现）
+// 状态效果结算
 // ---------------------------------------------------------------------------
 
-void CombatSystem::applyStatusEffects(Combatant* c) { /* 状态效果：(未实现) */ }
-void CombatSystem::applyBurnDamage(Combatant* c) { /* 状态效果：(未实现) */ }
-void CombatSystem::applySlowEffect(Combatant* c) { /* 状态效果：(未实现) */ }
-void CombatSystem::checkStun(Combatant* c) { /* 状态效果：(未实现) */ }
+// 回合开始：对单个战斗者结算持续型状态效果。
+// 真实效果分工：灼烧在此扣血；迟缓的敏捷降低在 Combatant::getEffectiveStat 中生效；
+// 眩晕的行动跳过在回合流程（manualTurn / processEnemyTurn / processAllyAITurn）中处理。
+void CombatSystem::applyStatusEffects(Combatant* c) {
+    if (!c->isAlive()) return;
+
+    if (c->hasStatusEffect(StatusEffect::Burn)) {
+        int damage = std::max(1, c->getEffectiveStat(1) * 10); // 灼烧伤害按魔力结算，至少 1 点
+        c->takeDamage(damage);
+        addLog(c->getName() + " 被灼烧，受到 " + std::to_string(damage) + " 点伤害。");
+    }
+
+    if (c->hasStatusEffect(StatusEffect::Slow)) {
+        addLog(c->getName() + " 处于迟缓状态，敏捷降低。");
+    }
+}
+
+void CombatSystem::applyRoundStartStatus() {
+    for (auto* c : getAliveAllies()) applyStatusEffects(c);
+    for (auto* e : getAliveEnemies()) applyStatusEffects(e);
+}
+
+void CombatSystem::applyRoundEndStatus() {
+    for (auto* c : getAliveAllies()) c->updateStatusEffects();
+    for (auto* e : getAliveEnemies()) e->updateStatusEffects();
+}
 
 SkillBase* CombatSystem::chooseAISkill(Combatant* ai, const std::vector<Combatant*>& enemies, const std::vector<Combatant*>& allies) {
     // 敌人进攻型 AI：只考虑伤害技能，且 SP 需足够
