@@ -11,4 +11,7 @@ namespace console {
     int  readKey();     // 读取一个按键（无回显）
     void pause();       // 等待任意按键
     bool pauseEsc();    // 等待按键，若按下 ESC 返回 true
+    void setColor(int colorCode); // 设置文字颜色（0~15，Windows 控制台色码）
+    void sleep(int ms); // 延时（毫秒）
+    bool kbhit();       // 非阻塞检测是否有按键
 }
