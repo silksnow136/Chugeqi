@@ -2,7 +2,7 @@
 #include"Game.h"
 #include "TalkManager.h"
 #include "SceneManager.h"
-#include "console.h"
+#include "core/console.h"
 TalkManager::TalkManager()
 {
 	sceneManager = nullptr;

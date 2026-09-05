@@ -1,4 +1,4 @@
-#include "Game.h"
+#include "story/Game.h"
 
 int main()
 {

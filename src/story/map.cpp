@@ -2,7 +2,7 @@
 #include "map.h"
 #include "Game.h"
 #include"SceneManager.h"
-#include "console.h"
+#include "core/console.h"
 void map(){
 	cout << "\n";
 	//旧版地图

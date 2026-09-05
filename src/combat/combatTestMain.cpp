@@ -1,7 +1,7 @@
 #include "combatSystem.h"
-#include "dataLoader.h"
+#include "core/dataLoader.h"
 #include "saveManager.h"
-#include "console.h"
+#include "core/console.h"
 #include <iostream>
 #include <exception>
 
