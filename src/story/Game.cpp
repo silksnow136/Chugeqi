@@ -2,7 +2,7 @@
 #include<iostream>
 #include "map.h"
 #include"SceneManager.h"
-#include "console.h"
+#include "core/console.h"
 #include <cstdlib>
 
 Game::Game(): sceneManager(*this){}//创建 SceneManager 的时候，把当前这个 Game 对象传给它

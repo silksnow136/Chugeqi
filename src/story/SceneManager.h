@@ -2,7 +2,7 @@
 //负责故事背景显示
 //负责显示剧情
 //负责显示场景以及场景交互
-#include "story.h"
+#include "core/dataLoader.h"
 #include "TalkManager.h"
 using namespace std;
 

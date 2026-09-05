@@ -6,7 +6,7 @@
 #include "PharManager.h"
 #include "ForgeManager.h"
 #include "BackGround.h"
-#include "console.h"
+#include "core/console.h"
 #include <cctype>
 
 SceneManager::SceneManager(Game& game): game(game)
@@ -19,7 +19,7 @@ SceneManager::SceneManager(Game& game): game(game)
 	unique_map_print = false;
 
 	// 启动时载入剧情数据（仅一次）
-	scenes = loadStory("data/story.json").scenes;
+	scenes = DataLoader::loadStory("data/story.json").scenes;
 
 	talkManager.setSceneManager(this);
 }
