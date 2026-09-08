@@ -14,6 +14,8 @@
 #include <vector>
 #include <string>
 #include <functional>
+#include "combat/character.h"
+#include "combat/item.h"
 
 enum class TileType {
     EMPTY,      // 可通行空地（空格）
@@ -98,3 +100,29 @@ private:
     bool isValid(int row, int col) const;
     void triggerInteraction(TileType type, const std::string& name);
 };
+
+// =========================================================================
+// 通用交互工具（地图场景共用：背包界面/拾取/命令输入）
+// =========================================================================
+
+// 背包条目（分组显示用）
+struct BagEntry {
+    std::string itemId;
+    std::string name;
+    int count;
+    std::string category; // equipment 装备 / potion 药水 / material 材料
+    int slot;             // 装备槽位，非装备为 -1
+};
+
+// 按名称在物品池中查找物品（地图物品格常用中文名标注）
+const Item* findItemByName(const ItemPool& pool, const std::string& name);
+
+// 读取一行命令（逐字符读取并回显；回车结束，ESC 返回空串）
+std::string readCommandLine();
+
+// 收集背包条目并按 装备->药水->材料 排序
+void collectBagEntries(Combatant* player, const ItemPool& pool, std::vector<BagEntry>& out);
+
+// 背包界面：显示当前装备与分类物品清单；
+// equip+编号 装配 / unequip+编号 卸下 / use+编号 使用药水；回车或ESC返回地图
+void showBackpack(Combatant* player, const ItemPool& pool);

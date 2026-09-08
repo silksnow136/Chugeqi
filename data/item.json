@@ -67,5 +67,67 @@
     "category": "equipment",
     "slot": "accessory",
     "bonus": [2, 0, 0, 0]
+  },
+  "dc_banner": {
+    "name": "楚军大旗",
+    "description": "大旗展开，二十八骑齐声高呼。",
+    "price": 0,
+    "category": "material"
+  },
+  "dc_tai_a": {
+    "name": "太阿剑",
+    "description": "太阿出鞘，寒光照夜。",
+    "price": 200,
+    "type": "equipment",
+    "category": "equipment",
+    "slot": "weapon",
+    "bonus": [4, 0, 0, 0]
+  },
+  "dc_wine_r": {
+    "name": "楚酒（残）",
+    "description": "残酒洒地，祭阵亡弟兄。",
+    "price": 0,
+    "category": "potion",
+    "healSP": 5
+  },
+  "wj_mirror": {
+    "name": "虞姬铜镜",
+    "description": "铜镜背面映出一张疲惫的面容。",
+    "price": 0,
+    "category": "material"
+  },
+  "wj_banner": {
+    "name": "楚军残旗",
+    "description": "旗上血迹已干，楚字犹在。",
+    "price": 0,
+    "category": "material"
+  },
+  "wj_wine_h": {
+    "name": "楚酒（半坛）",
+    "description": "半坛残酒，敬江东父老。",
+    "price": 0,
+    "category": "potion",
+    "healSP": 5
+  },
+  "hr_map": {
+    "name": "渡河图",
+    "description": "渡河路径图，标注了浅滩位置。",
+    "price": 0,
+    "category": "material"
+  },
+  "hr_banner": {
+    "name": "残破楚旗",
+    "description": "沾血的楚军大旗，士气之所系。",
+    "price": 0,
+    "category": "material"
+  },
+  "hr_raincoat": {
+    "name": "蓑衣",
+    "description": "渔夫的蓑衣，渡河时可避寒水。",
+    "price": 30,
+    "type": "equipment",
+    "category": "equipment",
+    "slot": "armor",
+    "bonus": [0, 0, 1, 0]
   }
 }
