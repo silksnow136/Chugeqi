@@ -204,6 +204,7 @@ void MapGrid::render() const {
     std::cout << "> ";
 
     console::setCursorVisible(true);
+    console::clearToEnd();  // 清掉交互后残留的对话文字
 }
 
 // =========================================================================
@@ -256,15 +257,11 @@ bool MapGrid::move(char direction) {
         playerRow = newRow;
         playerCol = newCol;
         grid[newRow][newCol] = Tile("项羽", TileType::PLAYER, "项羽");
-        // 拾取后会输出提示文字，下次渲染需要 cls 彻底清屏
-        firstRender = true;
         return true;
     }
     interactionType = target.type;
     interactionName = target.name;
     triggerInteraction(target.type, target.name);
-    // 交互后会输出对话/战斗等内容，下次渲染需要 cls 彻底清屏
-    firstRender = true;
     return true;
 }
 
