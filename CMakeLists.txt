@@ -66,7 +66,11 @@ add_executable(mapTest
 add_executable(gaiXiaMap
     src/story/gaiXiaMap.cpp
     src/story/MapGrid.cpp
+    src/combat/character.cpp
+    src/combat/skill.cpp
+    src/combat/item.cpp
     src/core/console.cpp
+    src/core/dataLoader.cpp
 )
 
 # 第二幕淮河突围地图展示（独立入口）
