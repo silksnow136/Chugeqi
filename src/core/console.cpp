@@ -20,6 +20,18 @@ namespace console {
     }
     void sleep(int ms) { Sleep(ms); }
     bool kbhit() { return _kbhit() != 0; }
+    void moveCursor(int row, int col) {
+        HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+        COORD pos = { static_cast<SHORT>(col), static_cast<SHORT>(row) };
+        SetConsoleCursorPosition(h, pos);
+    }
+    void setCursorVisible(bool visible) {
+        HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+        CONSOLE_CURSOR_INFO info;
+        GetConsoleCursorInfo(h, &info);
+        info.bVisible = visible ? TRUE : FALSE;
+        SetConsoleCursorInfo(h, &info);
+    }
 }
 #else
 #include <cstdio>
@@ -43,5 +55,7 @@ namespace console {
     }
     void sleep(int ms) { std::this_thread::sleep_for(std::chrono::milliseconds(ms)); }
     bool kbhit() { return false; } // 非 Windows 下暂不实现非阻塞检测
+    void moveCursor(int row, int col) { std::printf("\033[%d;%dH", row + 1, col + 1); }
+    void setCursorVisible(bool visible) { std::printf(visible ? "\033[?25h" : "\033[?25l"); }
 }
 #endif
