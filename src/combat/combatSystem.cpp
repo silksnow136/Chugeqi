@@ -117,6 +117,9 @@ bool CombatSystem::startBattle() {
     while (!battleEnded) {
         // 回合开始：灼烧扣血、迟缓提示（眩晕的行动跳过在各回合函数内处理）
         applyRoundStartStatus();
+        // 灼烧等持续伤害可能在轮首直接击杀，需在此即时判定胜负
+        if (getAliveEnemies().empty()) { battleEnded = true; playerWon = true; break; }
+        if (getAliveAllies().empty()) { battleEnded = true; playerWon = false; break; }
 
         // 玩家回合（手动或 AI 托管，内部会刷新界面）
         if (player->isAlive()) {
