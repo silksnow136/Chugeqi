@@ -80,7 +80,7 @@ void PharManager::showShop()
         const Consumable* medicine =
             dynamic_cast<const Consumable*>(item);
 
-        if (medicine == nullptr)
+        if (medicine == nullptr || medicine->getCategory() != "potion")
             continue;
 
         found = true;
@@ -137,7 +137,7 @@ void PharManager::buyItem(Combatant& player)
 
     const Consumable* medicine = findMedicine(itemId);
 
-    if (medicine == nullptr)
+    if (medicine == nullptr || medicine->getCategory() != "potion")
     {
         cout << "没有找到这个药品。\n";
         return;
@@ -172,6 +172,8 @@ void PharManager::useItem(Combatant& player)
     string itemId;
     getline(cin, itemId);
 
+   
+
     if (!player.hasItem(itemId))
     {
         cout << "你没有这个药品。\n";
@@ -185,7 +187,14 @@ void PharManager::useItem(Combatant& player)
         cout << "找不到该药品的数据。\n";
         return;
     }
+    
+    if (medicine->getCategory() != "potion")
+    {
+        cout << "这不是药品\n";
+        return;
+    }
 
+      
     // 恢复 HP
     if (medicine->getHealHP() > 0)
     {
@@ -226,7 +235,7 @@ void PharManager::showMedicineBag(Combatant& player)
 
         const Consumable* medicine = findMedicine(itemId);
 
-        if (medicine == nullptr)
+        if (medicine == nullptr || medicine->getCategory() != "potion")
             continue;
 
         found = true;
