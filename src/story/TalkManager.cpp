@@ -263,7 +263,7 @@ void TalkManager::loadDialogue(int scene_id, int branch_id, int character_id)
 		// 读取 talk.json
 		string text = DataLoader::readFileText("data/talk.json");
 
-		// 使用项目自己的 JSON 解析器
+		// 使用 JSON 解析器
 		json::Value root = json::Value::parse(text);
 
 		// 获取 scenes
