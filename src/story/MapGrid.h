@@ -3,9 +3,10 @@
 // 网格地图系统：WASD 控制项羽移动，边界检测，碰撞触发交互
 //
 // 设计：
-//   - 二维网格，每格为一个 Tile（显示字符 + 类型 + 名称）
+//   - 二维网格，每格为一个 Tile（显示字符串 + 类型 + 名称）
+//   - 每格固定占 4 个控制台列宽（= 2 个中文字符），不足补空格
 //   - 玩家（项羽）用 WASD 移动，每次移动一格
-//   - 不能越过边界墙（#），不能覆盖其他文字单位
+//   - 不能越过边界墙，不能覆盖其他文字单位
 //   - 试图覆盖单位时触发交互：友方→对话，敌方→战斗，药店→购买，铁匠铺→锻造
 // ---------------------------------------------------------------------------
 
@@ -14,22 +15,22 @@
 #include <functional>
 
 enum class TileType {
-    EMPTY,      // 可通行空地（.）
-    WALL,       // 边界/墙壁（#）
-    PLAYER,     // 项羽（玩家，@）
-    FRIEND,     // 友方单位 → 触发对话（F）
-    ENEMY,      // 敌方单位 → 触发战斗（E）
-    PHARMACY,   // 药店 → 触发购买（P）
-    FORGE       // 铁匠铺 → 触发锻造（S）
+    EMPTY,      // 可通行空地（空格）
+    WALL,       // 边界/墙壁（█）
+    PLAYER,     // 项羽（玩家，项羽）
+    FRIEND,     // 友方单位 → 触发对话
+    ENEMY,      // 敌方单位 → 触发战斗
+    PHARMACY,   // 药店 → 触发购买
+    FORGE       // 铁匠铺 → 触发锻造
 };
 
 struct Tile {
-    char display = '.';     // 显示字符
+    std::string display;    // 显示字符串（可多字符，如"虞姬"）
     TileType type = TileType::EMPTY;
-    std::string name;       // 单位名称（交互时显示，如"虞姬"）
+    std::string name;       // 单位名称（交互时显示）
 
     Tile() = default;
-    Tile(char d, TileType t, const std::string& n = "")
+    Tile(const std::string& d, TileType t, const std::string& n = "")
         : display(d), type(t), name(n) {}
 };
 
@@ -39,7 +40,7 @@ public:
     MapGrid(int rows, int cols);
 
     // 设置某格内容（不覆盖玩家位置）
-    void setTile(int row, int col, char display, TileType type, const std::string& name = "");
+    void setTile(int row, int col, const std::string& display, TileType type, const std::string& name = "");
 
     // 设置玩家初始位置
     void setPlayer(int row, int col);
