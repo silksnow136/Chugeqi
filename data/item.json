@@ -1,0 +1,33 @@
+{
+    "small_hp": {
+        "name": "小还丹",
+        "description": "恢复30点生命值",
+        "price": 20,
+        "healHP": 30,
+        "healSP": 0
+    },
+
+    "large_hp": {
+        "name": "大还丹",
+        "description": "恢复80点生命值",
+        "price": 50,
+        "healHP": 80,
+        "healSP": 0
+    },
+
+    "small_sp": {
+        "name": "凝神丹",
+        "description": "恢复20点技能值",
+        "price": 25,
+        "healHP": 0,
+        "healSP": 20
+    },
+
+    "mixed_potion": {
+        "name": "龙虎丹",
+        "description": "同时恢复生命值和技能值",
+        "price": 60,
+        "healHP": 50,
+        "healSP": 30
+    }
+}

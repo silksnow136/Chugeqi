@@ -134,6 +134,9 @@ GameData DataLoader::loadGameData(const std::string& dataDir) {
     GameData data;
     data.skillPool = loadSkills(dataDir + "skill.json");
     // 道具未实现：data.itemPool 保持为空（实现后在此 loadItems(dataDir + "item.json")）
+    //暂定（测试中)
+    data.itemPool = loadItems(dataDir + "item.json");
+
     return data;
 }
 

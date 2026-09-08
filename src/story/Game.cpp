@@ -14,6 +14,13 @@ void Game::run() {
 }
 
 void Game::initialize() {
+	gameData = DataLoader::loadGameData("data/");
+
+	player = DataLoader::loadCombatant(
+		"data/player.json",
+		gameData.skillPool
+	);
+
 	showWelcome();
 }
 
@@ -116,3 +123,17 @@ void Game::showHelp() {
 		<< "===========================" << "\n";
 }
 
+Combatant& Game::getPlayer()
+{
+	return *player;
+}
+
+ItemPool& Game::getItemPool()
+{
+	return gameData.itemPool;
+}
+
+int& Game::getGold()
+{
+	return gold;
+}

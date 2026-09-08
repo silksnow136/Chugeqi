@@ -4,6 +4,7 @@
 //负责显示场景以及场景交互
 #include "core/dataLoader.h"
 #include "TalkManager.h"
+#include <memory>
 using namespace std;
 
 class Game;
@@ -13,6 +14,8 @@ class ForgeManager;
 class SceneManager {
 public:
 	SceneManager(Game& game);
+	~SceneManager();
+
 
 //判断当前场景所处状态，方便添加多级系统
 	enum class SceneState
@@ -59,7 +62,7 @@ private:
 	Game& game;
 
 	TalkManager talkManager;
-	PharManager* pharManager = nullptr;
+	unique_ptr<PharManager> pharManager = nullptr;
 	ForgeManager* forgeManager = nullptr;
 
 	// 当前场景ID
