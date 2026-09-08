@@ -64,7 +64,7 @@ private:
     // 界面
     void addLog(const std::string& msg);
     void displayBattle() const;
-    void displayStatus(const Combatant* c) const;
+    std::string displayStatus(const Combatant* c) const; // 返回单行状态文本
 
     // 回合处理
     bool processPlayerTurn();

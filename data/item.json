@@ -1,33 +1,133 @@
 {
-    "small_hp": {
-        "name": "小还丹",
-        "description": "恢复30点生命值",
-        "price": 20,
-        "healHP": 30,
-        "healSP": 0
-    },
-
-    "large_hp": {
-        "name": "大还丹",
-        "description": "恢复80点生命值",
-        "price": 50,
-        "healHP": 80,
-        "healSP": 0
-    },
-
-    "small_sp": {
-        "name": "凝神丹",
-        "description": "恢复20点技能值",
-        "price": 25,
-        "healHP": 0,
-        "healSP": 20
-    },
-
-    "mixed_potion": {
-        "name": "龙虎丹",
-        "description": "同时恢复生命值和技能值",
-        "price": 60,
-        "healHP": 50,
-        "healSP": 30
-    }
+  "herb_potion": {
+    "name": "伤药",
+    "description": "金创药，恢复30点生命。",
+    "price": 20,
+    "category": "potion",
+    "healHP": 30
+  },
+  "sp_potion": {
+    "name": "凝神露",
+    "description": "清心凝神，恢复20点内力。",
+    "price": 20,
+    "category": "potion",
+    "healSP": 20
+  },
+  "charcoal": {
+    "name": "木炭",
+    "description": "灰烬中的木炭，突围时可绘制地图。",
+    "price": 0,
+    "category": "material"
+  },
+  "chu_wine": {
+    "name": "楚酒",
+    "description": "半坛楚酒，饮下提士气，但会微醺。",
+    "price": 0,
+    "category": "potion",
+    "healSP": 10
+  },
+  "bronze_mirror": {
+    "name": "铜镜",
+    "description": "虞姬的半面铜镜，似有故事。",
+    "price": 0,
+    "category": "material"
+  },
+  "iron_sword": {
+    "name": "铁剑",
+    "description": "楚军制式长剑，锋利坚韧。",
+    "price": 100,
+    "type": "equipment",
+    "category": "equipment",
+    "slot": "weapon",
+    "bonus": [3, 0, 0, 0]
+  },
+  "iron_armor": {
+    "name": "铁甲",
+    "description": "楚军制式铁甲，坚不可摧。",
+    "price": 120,
+    "type": "equipment",
+    "category": "equipment",
+    "slot": "armor",
+    "bonus": [0, 0, 2, 0]
+  },
+  "speed_boots": {
+    "name": "疾风靴",
+    "description": "轻便迅捷的靴子，来去如风。",
+    "price": 80,
+    "type": "equipment",
+    "category": "equipment",
+    "slot": "shoes",
+    "bonus": [0, 0, 0, 2]
+  },
+  "power_ring": {
+    "name": "蛮力戒",
+    "description": "镌刻蛮牛纹的戒指，蕴含千钧之力。",
+    "price": 90,
+    "type": "equipment",
+    "category": "equipment",
+    "slot": "accessory",
+    "bonus": [2, 0, 0, 0]
+  },
+  "dc_banner": {
+    "name": "楚军大旗",
+    "description": "大旗展开，二十八骑齐声高呼。",
+    "price": 0,
+    "category": "material"
+  },
+  "dc_tai_a": {
+    "name": "太阿剑",
+    "description": "太阿出鞘，寒光照夜。",
+    "price": 200,
+    "type": "equipment",
+    "category": "equipment",
+    "slot": "weapon",
+    "bonus": [4, 0, 0, 0]
+  },
+  "dc_wine_r": {
+    "name": "楚酒（残）",
+    "description": "残酒洒地，祭阵亡弟兄。",
+    "price": 0,
+    "category": "potion",
+    "healSP": 5
+  },
+  "wj_mirror": {
+    "name": "虞姬铜镜",
+    "description": "铜镜背面映出一张疲惫的面容。",
+    "price": 0,
+    "category": "material"
+  },
+  "wj_banner": {
+    "name": "楚军残旗",
+    "description": "旗上血迹已干，楚字犹在。",
+    "price": 0,
+    "category": "material"
+  },
+  "wj_wine_h": {
+    "name": "楚酒（半坛）",
+    "description": "半坛残酒，敬江东父老。",
+    "price": 0,
+    "category": "potion",
+    "healSP": 5
+  },
+  "hr_map": {
+    "name": "渡河图",
+    "description": "渡河路径图，标注了浅滩位置。",
+    "price": 0,
+    "category": "material"
+  },
+  "hr_banner": {
+    "name": "残破楚旗",
+    "description": "沾血的楚军大旗，士气之所系。",
+    "price": 0,
+    "category": "material"
+  },
+  "hr_raincoat": {
+    "name": "蓑衣",
+    "description": "渔夫的蓑衣，渡河时可避寒水。",
+    "price": 30,
+    "type": "equipment",
+    "category": "equipment",
+    "slot": "armor",
+    "bonus": [0, 0, 1, 0]
+  }
 }

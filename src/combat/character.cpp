@@ -18,6 +18,7 @@ Combatant::Combatant(const std::string& name, int level, int hp, int sp, int exp
     : Character(name), id(id), hp(hp), sp(sp), level(level), exp(exp), statusFlags(0), skills(skills), inventory(inventory) {
     std::copy(baseStats, baseStats + 4, this->baseStats);
     std::fill(equipmentBonus, equipmentBonus + 4, 0);
+    std::fill(&slotBonuses[0][0], &slotBonuses[0][0] + 16, 0);
 }
 
 const std::string& Combatant::getId() const { return id; }
@@ -117,6 +118,32 @@ void Combatant::setEquipmentBonus(const int bonus[4]) {
 
 void Combatant::clearEquipmentBonus() {
     std::fill(equipmentBonus, equipmentBonus + 4, 0);
+}
+
+bool Combatant::equipItem(int slot, const std::string& itemId, const int bonus[4]) {
+    if (slot < 0 || slot > 3) return false;
+    if (!equippedItemIds[slot].empty()) unequipItem(slot); // 同槽已有装备则先卸下
+    equippedItemIds[slot] = itemId;
+    for (int i = 0; i < 4; i++) {
+        slotBonuses[slot][i] = bonus[i];
+        equipmentBonus[i] += bonus[i];
+    }
+    return true;
+}
+
+void Combatant::unequipItem(int slot) {
+    if (slot < 0 || slot > 3 || equippedItemIds[slot].empty()) return;
+    for (int i = 0; i < 4; i++) {
+        equipmentBonus[i] -= slotBonuses[slot][i];
+        slotBonuses[slot][i] = 0;
+    }
+    equippedItemIds[slot].clear();
+}
+
+const std::string& Combatant::getEquippedItemId(int slot) const {
+    static const std::string empty;
+    if (slot < 0 || slot > 3) return empty;
+    return equippedItemIds[slot];
 }
 
 void Combatant::addSkill(SkillBase* skill) {

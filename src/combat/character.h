@@ -89,6 +89,11 @@ public:
     void setEquipmentBonus(const int bonus[4]); // 四项属性加成
     void clearEquipmentBonus();
 
+    // 装备槽位管理（槽位与 EquipmentSlot 一致：0=防具 1=武器 2=鞋子 3=配饰）
+    bool equipItem(int slot, const std::string& itemId, const int bonus[4]); // 装配装备（同槽已有则先卸下）
+    void unequipItem(int slot);                                              // 卸下指定槽位装备
+    const std::string& getEquippedItemId(int slot) const;                    // 当前装备物品ID，空串=未装备
+
     // 技能管理
     void addSkill(SkillBase* skill);
     const std::vector<SkillBase*>& getSkills() const;
@@ -110,6 +115,8 @@ public:
     void levelUp(); // 升级时全属性+1，并恢复满HP/SP
 
 private:
-    int equipmentBonus[4]; // 四项属性加成
+    int equipmentBonus[4];         // 四项属性加成（各槽位加成之和）
+    std::string equippedItemIds[4]; // 每槽位装备的物品ID（空串=未装备）
+    int slotBonuses[4][4];          // 每槽位对四项属性的加成
     void recalcStatusFlags(); // 根据activeStatusEffects更新statusFlags
 };

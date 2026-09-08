@@ -62,7 +62,51 @@ add_executable(mapTest
     third_party/sqlite/sqlite3.c
 )
 
-foreach(TGT Chugeqi combatTest mapTest)
+# 第一幕垓下营地地图展示（独立入口）
+add_executable(gaiXiaMap
+    src/story/gaiXiaMap.cpp
+    src/story/MapGrid.cpp
+    src/combat/character.cpp
+    src/combat/skill.cpp
+    src/combat/item.cpp
+    src/core/console.cpp
+    src/core/dataLoader.cpp
+)
+
+# 第二幕淮河突围地图展示（独立入口）
+add_executable(huaiRiverMap
+    src/story/huaiRiverMap.cpp
+    src/story/MapGrid.cpp
+    src/combat/character.cpp
+    src/combat/skill.cpp
+    src/combat/item.cpp
+    src/core/console.cpp
+    src/core/dataLoader.cpp
+)
+
+# 第三幕东城快战地图展示（独立入口）
+add_executable(dongchengMap
+    src/story/dongchengMap.cpp
+    src/story/MapGrid.cpp
+    src/combat/character.cpp
+    src/combat/skill.cpp
+    src/combat/item.cpp
+    src/core/console.cpp
+    src/core/dataLoader.cpp
+)
+
+# 第四幕乌江自刎地图展示（独立入口）
+add_executable(wujiangMap
+    src/story/wujiangMap.cpp
+    src/story/MapGrid.cpp
+    src/combat/character.cpp
+    src/combat/skill.cpp
+    src/combat/item.cpp
+    src/core/console.cpp
+    src/core/dataLoader.cpp
+)
+
+foreach(TGT Chugeqi combatTest mapTest gaiXiaMap huaiRiverMap dongchengMap wujiangMap)
     target_include_directories(${TGT} PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/src"
         "${CMAKE_CURRENT_SOURCE_DIR}/third_party/sqlite"
