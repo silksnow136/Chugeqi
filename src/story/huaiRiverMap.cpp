@@ -8,11 +8,18 @@
 
 #include "story/MapGrid.h"
 #include "core/console.h"
+#include "combat/character.h"
+#include "combat/item.h"
+#include "core/dataLoader.h"
 #include <iostream>
 #include <cctype>
 
 int main(int argc, char* argv[]) {
     console::init();
+
+    // 加载物品/技能数据与玩家角色（含初始背包）
+    GameData gameData = DataLoader::loadGameData("data/");
+    auto player = DataLoader::loadCombatant("data/player.json", gameData.skillPool);
 
     MapGrid grid(37, 27);
     grid.setPlayer(30, 13);  // 项羽从南岸出发
@@ -96,13 +103,21 @@ int main(int argc, char* argv[]) {
         console::pause();
     };
 
-    grid.onItem = [](const std::string& name) {
+    grid.onItem = [&](const std::string& name) {
         console::setColor(14);
         std::cout << "\n[拾取] 获得「" << name << "」！" << std::endl;
         console::setColor(7);
         if (name == "渡河图")      std::cout << "渡河路径图，标注了浅滩位置。" << std::endl;
         else if (name == "残破楚旗") std::cout << "沾血的楚军大旗，士气之所系。" << std::endl;
         else if (name == "蓑衣")   std::cout << "渔夫的蓑衣，渡河时可避寒水。" << std::endl;
+        // 拾取入包：按名称匹配物品池定义，加入角色背包
+        const Item* it = findItemByName(gameData.itemPool, name);
+        if (it != nullptr) {
+            player->addItem(it->getId(), 1);
+            std::cout << "「" << name << "」已放入背包。（按 B 打开背包查看）" << std::endl;
+        } else {
+            std::cout << "（物品池中未找到「" << name << "」的定义）" << std::endl;
+        }
         console::pause();
     };
 
@@ -133,13 +148,16 @@ int main(int argc, char* argv[]) {
     grid.render();
     if (argc > 1) return 0;
 
-    std::cout << "淮河突围 —— WASD 移动项羽，ESC 退出" << std::endl;
+    std::cout << "淮河突围 —— WASD 移动项羽，B 背包，ESC 退出" << std::endl;
     while (true) {
         int key = console::readKey();
         if (key == 27) break;
         char dir = static_cast<char>(std::tolower(key));
         if (dir == 'w' || dir == 'a' || dir == 's' || dir == 'd') {
             grid.move(dir);
+            grid.render();
+        } else if (dir == 'b') {
+            showBackpack(player.get(), gameData.itemPool);
             grid.render();
         }
     }
