@@ -16,4 +16,5 @@ namespace console {
     bool kbhit();       // 非阻塞检测是否有按键
     void moveCursor(int row, int col); // 移动光标到 (row, col)，0 起始（用于覆盖重绘防闪烁）
     void setCursorVisible(bool visible); // 显示/隐藏光标（渲染时隐藏，防光标乱闪）
+    void clearToEnd(); // 清光标到屏幕底（覆盖重绘后清掉尾部残留）
 }
