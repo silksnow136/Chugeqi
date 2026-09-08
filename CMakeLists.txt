@@ -47,7 +47,22 @@ add_executable(combatTest
     third_party/sqlite/sqlite3.c
 )
 
-foreach(TGT Chugeqi combatTest)
+# 地图移动测试（独立入口）
+add_executable(mapTest
+    src/story/mapTestMain.cpp
+    src/story/MapGrid.cpp
+    src/combat/battleLog.cpp
+    src/combat/character.cpp
+    src/combat/combatSystem.cpp
+    src/combat/item.cpp
+    src/combat/skill.cpp
+    src/combat/saveManager.cpp
+    src/core/console.cpp
+    src/core/dataLoader.cpp
+    third_party/sqlite/sqlite3.c
+)
+
+foreach(TGT Chugeqi combatTest mapTest)
     target_include_directories(${TGT} PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/src"
         "${CMAKE_CURRENT_SOURCE_DIR}/third_party/sqlite"
