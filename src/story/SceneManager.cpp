@@ -89,34 +89,9 @@ void SceneManager::changeScene(int scene_id)
 
 //场景功能显示管理
 void SceneManager::showSceneManager(int scene_id, int branch_id) {
-	switch (scene_id) {
-	case 1:
 		map_Manager(scene_id, branch_id);
 		console::setColor(14);
 		sceneManager(game, branch_id);
-		break;
-
-	case  2:
-		map_Manager(scene_id, branch_id);
-		console::setColor(14);
-		sceneManager(game, branch_id);
-		break;
-
-	case 3:
-		map_Manager(scene_id, branch_id);
-		console::setColor(14);
-		sceneManager(game, branch_id);
-		break;
-
-	case 4:
-		map_Manager(scene_id, branch_id);
-		console::setColor(14);
-		sceneManager(game, branch_id);
-		break;
-
-	default:
-		break;
-	}
 }
 
 
