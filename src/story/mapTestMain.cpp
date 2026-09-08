@@ -75,26 +75,26 @@ int main() {
     try {
         console::init();
 
-        // 创建 15x25 的网格地图
-        MapGrid grid(15, 25);
+        // 创建 13x16 的网格地图（每格 4 列宽 → 总宽 64 字符，适合终端）
+        MapGrid grid(13, 16);
 
         // 设置玩家（项羽）初始位置
-        grid.setPlayer(7, 3);
+        grid.setPlayer(6, 2);
 
-        // 放置友方单位（虞姬、小卒a、副将）
-        grid.setTile(3, 5, 'F', TileType::FRIEND, "虞姬");
-        grid.setTile(5, 10, 'F', TileType::FRIEND, "小卒a");
-        grid.setTile(11, 18, 'F', TileType::FRIEND, "副将");
+        // 放置友方单位（全称显示）
+        grid.setTile(2, 4, "虞姬", TileType::FRIEND, "虞姬");
+        grid.setTile(4, 8, "小卒", TileType::FRIEND, "小卒a");
+        grid.setTile(9, 12, "副将", TileType::FRIEND, "副将");
 
-        // 放置敌方单位（汉军、王翦）
-        grid.setTile(3, 20, 'E', TileType::ENEMY, "汉军小队");
-        grid.setTile(10, 5, 'E', TileType::ENEMY, "王翦");
+        // 放置敌方单位
+        grid.setTile(2, 12, "汉军", TileType::ENEMY, "汉军小队");
+        grid.setTile(8, 4, "王翦", TileType::ENEMY, "王翦");
 
         // 放置药店
-        grid.setTile(12, 12, 'P', TileType::PHARMACY, "军营药店");
+        grid.setTile(10, 8, "药店", TileType::PHARMACY, "军营药店");
 
         // 放置铁匠铺
-        grid.setTile(3, 15, 'S', TileType::FORGE, "军营铁匠");
+        grid.setTile(2, 8, "铁匠", TileType::FORGE, "军营铁匠");
 
         // 设置交互回调
         grid.onTalk = [](const std::string& name) {
