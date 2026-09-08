@@ -6,5 +6,9 @@
   "sp": 50,
   "exp": 0,
   "baseStats": [10, 5, 8, 12],
-  "skills": ["fireball", "heal", "charge_boost"]
+  "skills": ["fireball", "heal", "charge_boost"],
+  "inventory": {
+    "herb_potion": 2,
+    "iron_sword": 1
+  }
 }

@@ -66,7 +66,11 @@ add_executable(mapTest
 add_executable(gaiXiaMap
     src/story/gaiXiaMap.cpp
     src/story/MapGrid.cpp
+    src/combat/character.cpp
+    src/combat/skill.cpp
+    src/combat/item.cpp
     src/core/console.cpp
+    src/core/dataLoader.cpp
 )
 
 foreach(TGT Chugeqi combatTest mapTest gaiXiaMap)

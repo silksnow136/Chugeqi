@@ -1,0 +1,71 @@
+{
+  "herb_potion": {
+    "name": "伤药",
+    "description": "金创药，恢复30点生命。",
+    "price": 20,
+    "category": "potion",
+    "healHP": 30
+  },
+  "sp_potion": {
+    "name": "凝神露",
+    "description": "清心凝神，恢复20点内力。",
+    "price": 20,
+    "category": "potion",
+    "healSP": 20
+  },
+  "charcoal": {
+    "name": "木炭",
+    "description": "灰烬中的木炭，突围时可绘制地图。",
+    "price": 0,
+    "category": "material"
+  },
+  "chu_wine": {
+    "name": "楚酒",
+    "description": "半坛楚酒，饮下提士气，但会微醺。",
+    "price": 0,
+    "category": "potion",
+    "healSP": 10
+  },
+  "bronze_mirror": {
+    "name": "铜镜",
+    "description": "虞姬的半面铜镜，似有故事。",
+    "price": 0,
+    "category": "material"
+  },
+  "iron_sword": {
+    "name": "铁剑",
+    "description": "楚军制式长剑，锋利坚韧。",
+    "price": 100,
+    "type": "equipment",
+    "category": "equipment",
+    "slot": "weapon",
+    "bonus": [3, 0, 0, 0]
+  },
+  "iron_armor": {
+    "name": "铁甲",
+    "description": "楚军制式铁甲，坚不可摧。",
+    "price": 120,
+    "type": "equipment",
+    "category": "equipment",
+    "slot": "armor",
+    "bonus": [0, 0, 2, 0]
+  },
+  "speed_boots": {
+    "name": "疾风靴",
+    "description": "轻便迅捷的靴子，来去如风。",
+    "price": 80,
+    "type": "equipment",
+    "category": "equipment",
+    "slot": "shoes",
+    "bonus": [0, 0, 0, 2]
+  },
+  "power_ring": {
+    "name": "蛮力戒",
+    "description": "镌刻蛮牛纹的戒指，蕴含千钧之力。",
+    "price": 90,
+    "type": "equipment",
+    "category": "equipment",
+    "slot": "accessory",
+    "bonus": [2, 0, 0, 0]
+  }
+}

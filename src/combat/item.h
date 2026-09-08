@@ -11,13 +11,16 @@ protected:
     std::string name;
     std::string description;
     int price;
+    std::string category; // 物品分类：equipment 装备 / potion 药水 / material 材料
 public:
-    Item(const std::string& id, const std::string& name, const std::string& description, int price);
+    Item(const std::string& id, const std::string& name, const std::string& description, int price,
+         const std::string& category = "material");
     virtual ~Item() = default;
     const std::string& getId() const;
     const std::string& getName() const;
     const std::string& getDescription() const;
     int getPrice() const;
+    const std::string& getCategory() const;
 };
 
 // 消耗品（使用效果类似技能）
@@ -30,7 +33,8 @@ private:
     int duration;      // 持续回合数，0表示立即生效
 public:
     Consumable(const std::string& id, const std::string& name, const std::string& description, int price,
-               int healHP, int healSP, int statBonus = 0, int statIndex = -1, int duration = 0);
+               int healHP, int healSP, int statBonus = 0, int statIndex = -1, int duration = 0,
+               const std::string& category = "material");
     int getHealHP() const;
     int getHealSP() const;
     int getStatBonus() const;
@@ -52,7 +56,7 @@ private:
     int statBonus[4];   // 对strength, magic, endurance, agility的加成
 public:
     Equipment(const std::string& id, const std::string& name, const std::string& description, int price,
-              EquipmentSlot slot, const int bonus[4]);
+              EquipmentSlot slot, const int bonus[4], const std::string& category = "equipment");
     EquipmentSlot getSlot() const;
     void getStatBonus(int out[4]) const;
 };
