@@ -19,6 +19,14 @@ AttackScope parseScope(const std::string& s) {
     return (s == "all") ? AttackScope::All : AttackScope::Single;
 }
 
+// 装备槽位字符串 -> 枚举（与 item.h EquipmentSlot 一致：armor/weapon/shoes/accessory）
+EquipmentSlot parseSlot(const std::string& s) {
+    if (s == "weapon") return EquipmentSlot::Weapon;
+    if (s == "armor") return EquipmentSlot::Armor;
+    if (s == "shoes") return EquipmentSlot::Shoes;
+    return EquipmentSlot::Accessory;
+}
+
 StoryLine parseLine(const json::Value& v) {
     StoryLine line;
     line.text = v.has("text") ? v["text"].asString() : "";
@@ -81,6 +89,28 @@ ItemPool DataLoader::loadItems(const std::string& path) {
         std::string name = it["name"].asString();
         std::string desc = it.has("description") ? it["description"].asString() : "";
         int price = it.has("price") ? it["price"].asInt() : 0;
+
+        // 物品分类：JSON 显式 category 优先；否则按类型推断（装备/有恢复效果的药水/其余为材料）
+        std::string category;
+        if (it.has("category")) category = it["category"].asString();
+        else if (it.has("type") && it["type"].asString() == "equipment") category = "equipment";
+        else if ((it.has("healHP") && it["healHP"].asInt() > 0) ||
+                 (it.has("healSP") && it["healSP"].asInt() > 0)) category = "potion";
+        else category = "material";
+
+        // 装备：type == "equipment"，带 slot 与四项属性加成 bonus[s,m,e,a]
+        if (it.has("type") && it["type"].asString() == "equipment") {
+            EquipmentSlot slot = parseSlot(it.has("slot") ? it["slot"].asString() : "");
+            int bonus[4] = {0, 0, 0, 0};
+            if (it.has("bonus")) {
+                const auto& b = it["bonus"];
+                for (size_t i = 0; i < 4 && i < b.size(); i++) bonus[i] = b[i].asInt();
+            }
+            pool[id] = std::make_unique<Equipment>(id, name, desc, price, slot, bonus, category);
+            continue;
+        }
+
+        // 消耗品
         int healHP = it.has("healHP") ? it["healHP"].asInt() : 0;
         int healSP = it.has("healSP") ? it["healSP"].asInt() : 0;
         int statBonus = 0;
@@ -91,7 +121,7 @@ ItemPool DataLoader::loadItems(const std::string& path) {
         if (it.has("buffMultiplier") && it["buffMultiplier"].asDouble() > 1.0) {
             statBonus = static_cast<int>((it["buffMultiplier"].asDouble() - 1.0) * 100.0);
         }
-        pool[id] = std::make_unique<Consumable>(id, name, desc, price, healHP, healSP, statBonus, statIndex, duration);
+        pool[id] = std::make_unique<Consumable>(id, name, desc, price, healHP, healSP, statBonus, statIndex, duration, category);
     }
     return pool;
 }
@@ -133,7 +163,7 @@ std::unique_ptr<Combatant> DataLoader::loadCombatant(const std::string& path,
 GameData DataLoader::loadGameData(const std::string& dataDir) {
     GameData data;
     data.skillPool = loadSkills(dataDir + "skill.json");
-    // 道具未实现：data.itemPool 保持为空（实现后在此 loadItems(dataDir + "item.json")）
+    data.itemPool = loadItems(dataDir + "item.json"); // 加载物品（消耗品 + 装备）
     return data;
 }
 
