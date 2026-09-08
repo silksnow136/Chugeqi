@@ -230,10 +230,10 @@ int main(int argc, char* argv[]) {
     grid.buildWater( 33, 5, 22);  // 南部护城河
 
     // ===== 门 =====
-    grid.setTile(2, 13, "门", TileType::EMPTY, "北门");
-    grid.setTile(2, 14, "门", TileType::EMPTY, "北门");
-    grid.setTile(30, 13, "门", TileType::EMPTY, "南门");
-    grid.setTile(30, 14, "门", TileType::EMPTY, "南门");
+    grid.setTile(2, 13, "门", TileType::DOOR, "北门");
+    grid.setTile(2, 14, "门", TileType::DOOR, "北门");
+    grid.setTile(30, 13, "门", TileType::DOOR, "南门");
+    grid.setTile(30, 14, "门", TileType::DOOR, "南门");
 
     // ===== 友方 NPC =====
     grid.setTile(5, 5, "粮仓", TileType::FRIEND, "粮仓");
