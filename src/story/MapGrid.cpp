@@ -149,12 +149,7 @@ void MapGrid::render() const {
     std::cout << "WASD: 移动  |  项羽=玩家  友方(绿)→对话  敌方(红)→战斗  物品(黄)→拾取  药店(青)→购买  铁匠(紫)→锻造  █=墙" << std::endl;
     std::cout << "> ";
     console::setCursorVisible(true);  // 渲染完恢复光标（停在提示符处）
-
-    // 清空对话残留区（"> " 之后的 N 行），再把光标移回提示符
-    for (int i = 0; i < 4; i++) {
-        std::cout << "                                                                                                    " << std::endl;
-    }
-    console::moveCursor(static_cast<int>(grid.size()) + 3, 2);
+    console::clearToEnd();  // 清掉 "> " 之后的对话残留（底部提示动态附着）
 }
 
 bool MapGrid::move(char direction) {
