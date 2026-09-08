@@ -45,7 +45,7 @@ void SceneManager::deleteWords(string tip) {
 }
 void SceneManager::nextLine() {
 	if (autoPlay) {
-		string tip = "  【按ESC手动对话】";
+		string tip = "  【按ESC手动对话，按q加速当前对话】";
 		cout << tip;
 		console::sleep(1500);//1500ms后播放下一条剧情
 		deleteWords(tip);
@@ -59,7 +59,7 @@ void SceneManager::nextLine() {
 		}
 	}
 	else {
-		string tip = "  【按ESC自动对话，按其他键继续对话】";
+		string tip = "  【按ESC自动对话，按其他键继续对话，按q加速当前对话】";
 		cout << tip;
 		int key;
 		key=console::readKey(); // 读取键盘按键，但不是显示键盘输入
@@ -297,6 +297,14 @@ void SceneManager::printWords(string tips,int color,int sleep,int sleep1) {
 		{
 			cout << tips.substr(i, 3);
 			i += 3;
+		}
+		//按q\Q加速剧情
+		if (console::kbhit()) {
+			int key;
+			key = console::readKey(); // 读取键盘按键，但不是显示键盘输入
+			if (key == 113 || key == 81) {
+				sleep1=1;
+			}
 		}
 		cout << flush;
 		console::sleep(sleep1);
