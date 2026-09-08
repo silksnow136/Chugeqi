@@ -10,6 +10,12 @@ static const int CELL_WIDTH = 4;
 static const std::string EMPTY_DISP = "    ";   // 4 个空格
 static const std::string WALL_DISP  = "████";   // 4 个全块字符，终端中占 4 列
 
+// 拟物装饰字符（各场景复用）
+static const std::string ACCOUNT = "====";   // 帐墙（帐篷布横纹）
+static const std::string FENCE   = "║║║║";   // 栅栏（木条）
+static const std::string CHEVAL  = "╳╳╳╳";   // 拒马（交叉木）
+static const std::string WATER   = "~~~~";   // 水
+
 // 计算 UTF-8 字符串的控制台显示宽度（CJK 字符 = 2，ASCII = 1）
 static int displayWidth(const std::string& s) {
     int width = 0;
@@ -63,11 +69,11 @@ MapGrid::MapGrid(int rows, int cols) {
     }
 }
 
-void MapGrid::setTile(int row, int col, const std::string& display, TileType type, const std::string& name) {
+void MapGrid::setTile(int row, int col, const std::string& display, TileType type, const std::string& name, int color) {
     if (!isValid(row, col)) return;
     // 不覆盖玩家位置
     if (row == playerRow && col == playerCol) return;
-    grid[row][col] = Tile(display, type, name);
+    grid[row][col] = Tile(display, type, name, color);
 }
 
 void MapGrid::setPlayer(int row, int col) {
@@ -79,48 +85,76 @@ void MapGrid::setPlayer(int row, int col) {
     grid[row][col] = Tile("项羽", TileType::PLAYER, "项羽");
 }
 
+// 帐墙房间：四边墙 + 南墙留门
+void MapGrid::buildRoom(int r1, int c1, int r2, int c2, int doorCol) {
+    for (int c = c1; c <= c2; c++) setTile(r1, c, ACCOUNT, TileType::WALL, "", 7);
+    for (int c = c1; c <= c2; c++) if (c != doorCol) setTile(r2, c, ACCOUNT, TileType::WALL, "", 7);
+    for (int r = r1; r <= r2; r++) setTile(r, c1, ACCOUNT, TileType::WALL, "", 7);
+    for (int r = r1; r <= r2; r++) setTile(r, c2, ACCOUNT, TileType::WALL, "", 7);
+}
+
+// 栅栏壁垒：横向墙 + 中间留门
+void MapGrid::buildFence(int row, int c1, int c2, int doorC1, int doorC2) {
+    for (int c = c1; c <= c2; c++) if (c < doorC1 || c > doorC2) setTile(row, c, FENCE, TileType::WALL, "", 6);
+}
+
+// 横向水沟
+void MapGrid::buildWater(int row, int c1, int c2) {
+    for (int c = c1; c <= c2; c++) setTile(row, c, WATER, TileType::WALL, "", 1);
+}
+
+// 单个拒马
+void MapGrid::buildCheval(int row, int col) {
+    setTile(row, col, CHEVAL, TileType::WALL, "", 8);
+}
+
 void MapGrid::render() const {
-    console::clearScreen();
-    console::setColor(14);
+    // 首次清屏，之后光标回顶覆盖重绘（避免清屏闪烁）
+    static bool firstRender = true;
+    if (firstRender) {
+        console::clearScreen();
+        firstRender = false;
+    } else {
+        console::moveCursor(0, 0);
+    }
+    console::setCursorVisible(false);  // 渲染期间隐藏光标，避免光标乱闪
+    console::setColor(15);
     std::cout << "========== 场景地图 ==========" << std::endl;
     console::setColor(7);
 
     for (const auto& row : grid) {
         for (const auto& tile : row) {
-            // 根据类型着色
+            // 根据类型取默认色（低饱和深色系），若格内指定了颜色则覆盖
+            int color = 7;
             switch (tile.type) {
-                case TileType::WALL:
-                    console::setColor(8);  // 暗灰
-                    break;
-                case TileType::PLAYER:
-                    console::setColor(12); // 亮红
-                    break;
-                case TileType::FRIEND:
-                    console::setColor(10); // 亮绿
-                    break;
-                case TileType::ENEMY:
-                    console::setColor(12); // 亮红
-                    break;
-                case TileType::PHARMACY:
-                    console::setColor(11); // 亮青
-                    break;
-                case TileType::FORGE:
-                    console::setColor(13); // 亮紫
-                    break;
-                default:
-                    console::setColor(7);  // 灰白
-                    break;
+                case TileType::WALL:      color = 8;  break;  // 灰（边框）
+                case TileType::PLAYER:    color = 6;  break;  // 棕（项羽）
+                case TileType::FRIEND:    color = 2;  break;  // 深绿
+                case TileType::ENEMY:     color = 4;  break;  // 深红
+                case TileType::PHARMACY:  color = 3;  break;  // 深青
+                case TileType::FORGE:     color = 5;  break;  // 深紫
+                case TileType::ITEM:      color = 14; break;  // 黄（拾取亮点）
+                default:                  color = 7;  break;
             }
+            if (tile.color >= 0) color = tile.color;
+            console::setColor(color);
             std::cout << padToWidth(tile.display, CELL_WIDTH);
         }
         std::cout << std::endl;
     }
 
-    console::setColor(14);
+    console::setColor(15);
     std::cout << "-------------------------------" << std::endl;
     console::setColor(7);
-    std::cout << "WASD: 移动  |  项羽=玩家  友方(绿)→对话  敌方(红)→战斗  药店(青)→购买  铁匠(紫)→锻造  █=墙" << std::endl;
+    std::cout << "WASD: 移动  |  项羽=玩家  友方(绿)→对话  敌方(红)→战斗  物品(黄)→拾取  药店(青)→购买  铁匠(紫)→锻造  █=墙" << std::endl;
     std::cout << "> ";
+    console::setCursorVisible(true);  // 渲染完恢复光标（停在提示符处）
+
+    // 清空对话残留区（"> " 之后的 N 行），再把光标移回提示符
+    for (int i = 0; i < 4; i++) {
+        std::cout << "                                                                                                    " << std::endl;
+    }
+    console::moveCursor(static_cast<int>(grid.size()) + 3, 2);
 }
 
 bool MapGrid::move(char direction) {
@@ -154,6 +188,18 @@ bool MapGrid::move(char direction) {
         return false;  // 未触发交互
     }
 
+    // 物品：拾取后消失，玩家移动过去
+    if (target.type == TileType::ITEM) {
+        interactionType = TileType::ITEM;
+        interactionName = target.name;
+        triggerInteraction(TileType::ITEM, target.name);
+        grid[playerRow][playerCol] = Tile(EMPTY_DISP, TileType::EMPTY);
+        playerRow = newRow;
+        playerCol = newCol;
+        grid[newRow][newCol] = Tile("项羽", TileType::PLAYER, "项羽");
+        return true;  // 触发了拾取
+    }
+
     // 其他单位：不移动，触发交互
     interactionType = target.type;
     interactionName = target.name;
@@ -179,6 +225,9 @@ void MapGrid::triggerInteraction(TileType type, const std::string& name) {
             break;
         case TileType::FORGE:
             if (onForge) onForge(name);
+            break;
+        case TileType::ITEM:
+            if (onItem) onItem(name);
             break;
         default:
             break;

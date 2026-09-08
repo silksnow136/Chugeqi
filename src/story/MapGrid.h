@@ -21,17 +21,19 @@ enum class TileType {
     FRIEND,     // 友方单位 → 触发对话
     ENEMY,      // 敌方单位 → 触发战斗
     PHARMACY,   // 药店 → 触发购买
-    FORGE       // 铁匠铺 → 触发锻造
+    FORGE,      // 铁匠铺 → 触发锻造
+    ITEM        // 物品 → 触发拾取（拾取后消失）
 };
 
 struct Tile {
     std::string display;    // 显示字符串（可多字符，如"虞姬"）
+    int color = -1;         // 指定颜色；-1 表示按 type 取默认色
     TileType type = TileType::EMPTY;
     std::string name;       // 单位名称（交互时显示）
 
     Tile() = default;
-    Tile(const std::string& d, TileType t, const std::string& n = "")
-        : display(d), type(t), name(n) {}
+    Tile(const std::string& d, TileType t, const std::string& n = "", int c = -1)
+        : display(d), type(t), name(n), color(c) {}
 };
 
 class MapGrid {
@@ -39,11 +41,17 @@ public:
     // 构造：指定网格大小，自动用墙壁围边框
     MapGrid(int rows, int cols);
 
-    // 设置某格内容（不覆盖玩家位置）
-    void setTile(int row, int col, const std::string& display, TileType type, const std::string& name = "");
+    // 设置某格内容（不覆盖玩家位置）。color 为 -1 时用类型默认色
+    void setTile(int row, int col, const std::string& display, TileType type, const std::string& name = "", int color = -1);
 
     // 设置玩家初始位置
     void setPlayer(int row, int col);
+
+    // —— 地图构建辅助（拟物装饰，供各场景复用）——
+    void buildRoom(int r1, int c1, int r2, int c2, int doorCol);      // 帐墙房间，南墙留门
+    void buildFence(int row, int c1, int c2, int doorC1, int doorC2); // 栅栏壁垒，中间留门
+    void buildWater(int row, int c1, int c2);                         // 横向水沟
+    void buildCheval(int row, int col);                               // 单个拒马
 
     // 渲染整个地图到控制台
     void render() const;
@@ -65,6 +73,7 @@ public:
     std::function<void(const std::string&)> onBattle;     // 敌方战斗
     std::function<void(const std::string&)> onPharmacy;   // 药店
     std::function<void(const std::string&)> onForge;      // 铁匠铺
+    std::function<void(const std::string&)> onItem;       // 物品拾取
 
 private:
     std::vector<std::vector<Tile>> grid;
