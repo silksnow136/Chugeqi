@@ -3,6 +3,8 @@
 #include "TalkManager.h"
 #include "SceneManager.h"
 #include "core/console.h"
+#include "core/json.h"
+
 TalkManager::TalkManager()
 {
 	sceneManager = nullptr;
@@ -27,7 +29,7 @@ void TalkManager::talkScene01(Game& game1, int branch_id) {
 		}
 		else {
 			//与小兵/虞姬对话
-			talkCharacter_01(num, branch_id);
+			talkCharacter(1,num, branch_id);
 		}
 	}
 	else {
@@ -51,7 +53,7 @@ void TalkManager::talkScene02(Game& game1, int branch_id) {
 			}
 			else {
 				//王翦/汉军
-				talkCharacter_02(num, branch_id);
+				talkCharacter(2,num, branch_id);
 			}
 		}
 		else {
@@ -72,7 +74,7 @@ void TalkManager::talkScene02(Game& game1, int branch_id) {
 			}
 			else {
 				//副将
-				talkCharacter_02(num, branch_id);
+				talkCharacter(2,num, branch_id);
 			}
 		}
 		else {
@@ -96,11 +98,50 @@ void TalkManager::talkScene03(Game& game1, int branch_id) {
 		}
 		else {
 			//与赤泉侯/秦时月/钟离昧/二十八骑对话
-			talkCharacter_03(num, branch_id);
+			talkCharacter(3,num, branch_id);
 		}
 	}
 	else {
 		sceneManager->scene = sceneManager->handleCommand(game1, sceneCommand1);
+	}
+}
+
+// 第四幕
+void TalkManager::talkScene04(Game& game1, int branch_id)
+{
+	talkScene_04();
+
+	string sceneCommand1;
+
+	cout << "\n> ";
+	cin >> sceneCommand1;
+
+	if (sceneCommand1 == "1" ||
+		sceneCommand1 == "2" ||
+		sceneCommand1 == "3" ||
+		sceneCommand1 == "4" ||
+		sceneCommand1 == "5" ||
+		sceneCommand1 == "6")
+	{
+		int num = stoi(sceneCommand1);
+
+		if (num == 6)
+		{
+			// 返回大世界
+			sceneManager->setSceneState(
+				SceneManager::SceneState::ORIGIN_SCENE
+			);
+		}
+		else
+		{
+			// 播放第四幕对应人物对话
+			talkCharacter(4,num, branch_id);
+		}
+	}
+	else
+	{
+		sceneManager->scene =
+			sceneManager->handleCommand(game1, sceneCommand1);
 	}
 }
 
@@ -111,47 +152,21 @@ void TalkManager::waitForReturn() {
 	sceneManager->deleteWords(tip1);
 
 }
-//第一幕对话播放
-void TalkManager::talkCharacter_01(int character_id, int branch_id) {
-	
+
+//对话播放
+void TalkManager::talkCharacter(int scene_id,int character_id, int branch_id) {
+
 	// 刷新场景
 	sceneManager->refreshScene(branch_id);
 	// 设置当前人物
 	sceneManager->setCurrentCharacter(character_id);
 	// 播放人物对话
-	talk_character_contnt_01(character_id);
+	// 从 talk.json 读取
+	loadDialogue(scene_id,branch_id,character_id);
 
 	waitForReturn();
 }
-//第二章对话播放
-void TalkManager::talkCharacter_02(int character_id, int branch_id) {
-	
-	// 刷新场景
-	sceneManager->refreshScene(branch_id);
-	// 设置当前人物
-	sceneManager->setCurrentCharacter(character_id);
-	// 播放人物对话
-	if (branch_id == 1) {
-		talk_character_contnt_021(character_id);
-	}
-	else {
-		talk_character_contnt_022(character_id);
-	}
 
-	waitForReturn();
-}
-//第三幕对话播放
-void TalkManager::talkCharacter_03(int character_id, int branch_id) {
-	
-	// 刷新场景
-	sceneManager->refreshScene(branch_id);
-	// 设置当前人物
-	sceneManager->setCurrentCharacter(character_id);
-	// 播放人物对话
-	talk_character_contnt_03(character_id);
-
-	waitForReturn();
-}
 //对话系统
 void TalkManager::talkScene_01() {
 	cout << "\n";
@@ -230,67 +245,167 @@ void TalkManager::talkScene_04() {
 
 }
 
+//播放一句话
+void TalkManager::playDialogue(string speaker, string text)
+{	
+	
+	string words = speaker + "：" + text;
 
-void TalkManager::talk_character_contnt_01(int current_character) {
-	switch (current_character) {
-	case 1:
-		//小卒a
-		cout << "小卒a的对话没写"<<"\n";
-		break;
+	sceneManager->printWords(words,14,800,80);
+	sceneManager->nextLine();
+	console::setColor(14);
+}
+//从json中读取对话
+void TalkManager::loadDialogue(int scene_id, int branch_id, int character_id)
+{
+	try
+	{
+		// 读取 talk.json
+		string text = DataLoader::readFileText("data/talk.json");
 
-	case 2:
-		//虞姬
-		cout << "虞姬的对话没写"<<"\n";
-		break;
+		// 使用项目自己的 JSON 解析器
+		json::Value root = json::Value::parse(text);
+
+		// 获取 scenes
+		const auto& scenes = root["scenes"];
+
+		// =========================
+		// 第一步：寻找 scene_id
+		// =========================
+
+		for (size_t i = 0; i < scenes.size(); i++)
+		{
+			const auto& scene = scenes[i];
+
+			if (scene["scene_id"].asInt() != scene_id)
+			{
+				continue;
+			}
+
+			// =========================
+			// 第二幕：需要 branch_id
+			// =========================
+
+			if (scene_id == 2)
+			{
+				if (!scene.has("branches"))
+				{
+					cout << "第二幕没有找到 branches！" << endl;
+					return;
+				}
+
+				const auto& branches = scene["branches"];
+
+				for (size_t j = 0; j < branches.size(); j++)
+				{
+					const auto& branch = branches[j];
+
+					if (branch["branch_id"].asInt() != branch_id)
+					{
+						continue;
+					}
+
+					if (!branch.has("characters"))
+					{
+						cout << "没有找到人物数据！" << endl;
+						return;
+					}
+
+					const auto& characters = branch["characters"];
+
+					// =========================
+					// 寻找人物
+					// =========================
+
+					for (size_t k = 0; k < characters.size(); k++)
+					{
+						const auto& character = characters[k];
+
+						if (character["character_id"].asInt() != character_id)
+						{
+							continue;
+						}
+
+						const auto& dialogues = character["dialogue"];
+
+						// =========================
+						// 播放所有对话
+						// =========================
+
+						for (size_t l = 0; l < dialogues.size(); l++)
+						{
+							const auto& dialogue = dialogues[l];
+
+							string speaker = dialogue["speaker"].asString();
+							string text = dialogue["text"].asString();
+
+							playDialogue(speaker, text);
+						}
+
+						return;
+					}
+
+					cout << "没有找到对应人物的对话！" << endl;
+					return;
+				}
+
+				cout << "没有找到对应的 branch_id！" << endl;
+				return;
+			}
+
+			// =========================
+			// 第一、三、四幕
+			// =========================
+
+			if (!scene.has("characters"))
+			{
+				cout << "当前场景没有找到人物数据！" << endl;
+				return;
+			}
+
+			const auto& characters = scene["characters"];
+
+			// =========================
+			// 寻找人物
+			// =========================
+
+			for (size_t j = 0; j < characters.size(); j++)
+			{
+				const auto& character = characters[j];
+
+				if (character["character_id"].asInt() != character_id)
+				{
+					continue;
+				}
+
+				const auto& dialogues = character["dialogue"];
+
+				// =========================
+				// 播放所有对话
+				// =========================
+
+				for (size_t k = 0; k < dialogues.size(); k++)
+				{
+					const auto& dialogue = dialogues[k];
+
+					string speaker = dialogue["speaker"].asString();
+					string text = dialogue["text"].asString();
+
+					playDialogue(speaker, text);
+				}
+
+				return;
+			}
+
+			cout << "没有找到对应人物的对话！" << endl;
+			return;
+		}
+
+		cout << "没有找到对应的 scene_id！" << endl;
 	}
-}
-void TalkManager::talk_character_contnt_020(int current_character) {
-
-}
-void TalkManager::talk_character_contnt_021(int current_character) {
-	switch (current_character) {
-	case 1:
-		//王翦
-		cout << "王翦的对话没写" << "\n";
-		break;
-
-	case 2:
-		//汉军
-		cout << "汉军的对话没写" << "\n";
-		break;
+	catch (const std::exception& e)
+	{
+		cout << "读取 talk.json 失败！" << endl;
+		cout << e.what() << endl;
 	}
-}
-void TalkManager::talk_character_contnt_022(int current_character) {
-	switch (current_character) {
-	case 1:
-		//副将
-		cout << "副将的对话没写" << "\n";
-		break;
-
-	}
-}
-void TalkManager::talk_character_contnt_03(int current_character) {
-	switch (current_character) {
-	case 1:
-		//赤泉侯
-		cout << "赤泉侯的对话没写" << "\n";
-		break;
-
-	case 2:
-		//秦时月
-		cout << "秦时月的对话没写" << "\n";
-		break;
-
-	case 3:
-		//钟离昧
-		cout << "钟离昧的对话没写" << "\n";
-		break;
-	case 4:
-		//二十八骑
-		cout << "二十八骑的对话没写" << "\n";
-		break;
-	}
-}
-void TalkManager::talk_character_contnt_04(int current_character) {
-
 }
