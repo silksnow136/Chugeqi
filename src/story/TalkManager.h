@@ -19,13 +19,16 @@ public:
 
     // 对话系统
     bool talkScene(Game& game1, int branch_id);
+    //播放对话
+    void talkCharacter(int scene_id, int character_id, int branch_id);
     // 第一幕
     void talkScene01(Game& game1, int branch_id);
     // 第二幕
     void talkScene02(Game& game1, int branch_id);
     // 第三幕
     void talkScene03(Game& game1, int branch_id);
-
+    //第四幕
+    void talkScene04(Game& game1, int branch_id);
     // 对话人物打印
 
     void talkScene_01();   // 虞姬、小卒a
@@ -35,24 +38,19 @@ public:
     void talkScene_03();   // 钟离昧
     void talkScene_04();   // 钟离昧、乌江亭长、众将士、韩信
 
-    //对话人物选择
-    void talkCharacter_01(int character_id, int branch_id);
-    void talkCharacter_02(int character_id, int branch_id);
-    void talkCharacter_03(int character_id, int branch_id);
+    
+    // 从 JSON 读取对话
+    void TalkManager::loadDialogue(
+        int scene_id,
+        int branch_id,
+        int character_id
+    );
 
-    // 当前角色对话
-
-    void talk_character_contnt_01(int current_character);
-
-    void talk_character_contnt_020(int current_character);
-
-    void talk_character_contnt_021(int current_character);
-
-    void talk_character_contnt_022(int current_character);
-
-    void talk_character_contnt_03(int current_character);
-
-    void talk_character_contnt_04(int current_character);
+    // 播放一句对话
+    void playDialogue(
+        std::string speaker,
+        std::string text
+    );
 
     //打印返回文字
     void waitForReturn();

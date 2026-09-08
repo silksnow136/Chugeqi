@@ -1,0 +1,738 @@
+{
+    "scenes": [
+        {
+            "scene_id": 1,
+            "scene_name": "四面楚歌，垓下之围",
+            "characters": [
+                {
+                    "character_id": 1,
+                    "character_name": "小卒a",
+                    "dialogue": [
+                        {
+                            "speaker": "项羽",
+                            "text": "军中情况如何？"
+                        },
+                        {
+                            "speaker": "小卒a",
+                            "text": "回大王，将士们已经三日未曾饱食，战马也所剩不多。"
+                        },
+                        {
+                            "speaker": "小卒a",
+                            "text": "许多兄弟身上都有伤……但他们都不肯走。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "为何？"
+                        },
+                        {
+                            "speaker": "小卒a",
+                            "text": "他们说，只要大王还在，他们便还跟着大王。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "这些人，都是跟着我从江东一路杀过来的。"
+                        },
+                        {
+                            "speaker": "小卒a",
+                            "text": "是。大王当年破秦、入关，兄弟们都相信，只要大王下令，我们便能杀出去。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "杀出去？"
+                        },
+                        {
+                            "speaker": "小卒a",
+                            "text": "是！"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "你怕死吗？"
+                        },
+                        {
+                            "speaker": "小卒a",
+                            "text": "怕。"
+                        },
+                        {
+                            "speaker": "小卒a",
+                            "text": "可是……若是跟着大王，我不怕死。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "好。有你这句话，便够了。"
+                        },
+                        {
+                            "speaker": "小卒a",
+                            "text": "大王，我们什么时候出兵？"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "等天黑。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "传令下去，让所有将士准备好兵器。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "今晚……随我杀出重围。"
+                        },
+                        {
+                            "speaker": "小卒a",
+                            "text": "诺！"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "告诉兄弟们。此战之后，无论生死，我项羽，绝不会忘了他们。"
+                        },
+                        {
+                            "speaker": "小卒a",
+                            "text": "诺！"
+                        }
+                    ]
+                },
+                {
+                    "character_id": 2,
+                    "character_name": "虞姬",
+                    "dialogue": [
+                        {
+                            "speaker": "虞姬",
+                            "text": "大王。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "你还未睡？"
+                        },
+                        {
+                            "speaker": "虞姬",
+                            "text": "睡不着。"
+                        },
+                        {
+                            "speaker": "虞姬",
+                            "text": "妾记得，当年大王还在江东的时候，也曾这样与妾饮酒。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "那时候……天下还没有这么乱。"
+                        },
+                        {
+                            "speaker": "虞姬",
+                            "text": "那时候的大王，也没有如今这样累。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "吾何时累过？"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "虞姬，你是不是觉得……我这一战，赢不了了？"
+                        },
+                        {
+                            "speaker": "虞姬",
+                            "text": "妾不知道。"
+                        },
+                        {
+                            "speaker": "虞姬",
+                            "text": "妾只知道，无论大王去哪里，妾都会跟着。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "若是此次杀不出去呢？"
+                        },
+                        {
+                            "speaker": "虞姬",
+                            "text": "那便陪大王留下。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "若是我死了呢？"
+                        },
+                        {
+                            "speaker": "虞姬",
+                            "text": "那妾便陪大王一起。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "胡说。吾若死了，你便活下去。"
+                        },
+                        {
+                            "speaker": "虞姬",
+                            "text": "妾这一生，所求不过一人。"
+                        },
+                        {
+                            "speaker": "虞姬",
+                            "text": "既已选了大王，便没有后悔的道理。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "虞姬。"
+                        },
+                        {
+                            "speaker": "虞姬",
+                            "text": "嗯？"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "若有来世，吾仍娶你。"
+                        },
+                        {
+                            "speaker": "虞姬",
+                            "text": "那便好。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "今日不谈生死。饮酒。"
+                        },
+                        {
+                            "speaker": "虞姬",
+                            "text": "好。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "敬江东。"
+                        },
+                        {
+                            "speaker": "虞姬",
+                            "text": "敬江东。"
+                        },
+                        {
+                            "speaker": "虞姬",
+                            "text": "大王。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "何事？"
+                        },
+                        {
+                            "speaker": "虞姬",
+                            "text": "天亮之后……陪妾再看一次江南，好吗？"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "好。等杀出去，吾带你回江东。"
+                        },
+                        {
+                            "speaker": "虞姬",
+                            "text": "一言为定。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "一言为定。"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "scene_id": 2,
+            "scene_name": "突围南逃，淮河之阻",
+            "branches": [
+                {
+                    "branch_id": 1,
+                    "characters": [
+                        {
+                            "character_id": 1,
+                            "character_name": "王翦",
+                            "dialogue": [
+                                {
+                                    "speaker": "王翦",
+                                    "text": "项羽！没想到你竟然逃到了这里。"
+                                },
+                                {
+                                    "speaker": "项羽",
+                                    "text": "汉军追得倒是够快。"
+                                },
+                                {
+                                    "speaker": "王翦",
+                                    "text": "今日你已经无路可逃。"
+                                },
+                                {
+                                    "speaker": "项羽",
+                                    "text": "无路可逃？"
+                                },
+                                {
+                                    "speaker": "项羽",
+                                    "text": "那便看看，是谁先倒下！"
+                                },
+                                {
+                                    "speaker": "王翦",
+                                    "text": "杀！"
+                                },
+                                {
+                                    "speaker": "项羽",
+                                    "text": "来！"
+                                },
+                                {
+                                    "speaker": "王翦",
+                                    "text": "项羽，你果然名不虚传。"
+                                },
+                                {
+                                    "speaker": "项羽",
+                                    "text": "今日我不取你性命。让开！"
+                                },
+                                {
+                                    "speaker": "王翦",
+                                    "text": "你以为这样便能逃走吗？"
+                                },
+                                {
+                                    "speaker": "项羽",
+                                    "text": "至少今日，你拦不住我。"
+                                }
+                            ]
+                        },
+                        {
+                            "character_id": 2,
+                            "character_name": "汉军",
+                            "dialogue": [
+                                {
+                                    "speaker": "汉军",
+                                    "text": "发现项羽了！就在前面！"
+                                },
+                                {
+                                    "speaker": "汉军",
+                                    "text": "快追！不能让他逃走！"
+                                },
+                                {
+                                    "speaker": "项羽",
+                                    "text": "就凭你们，也想留下我？"
+                                },
+                                {
+                                    "speaker": "汉军",
+                                    "text": "他只有这么点人，冲上去！"
+                                },
+                                {
+                                    "speaker": "项羽",
+                                    "text": "挡我者，退！"
+                                },
+                                {
+                                    "speaker": "汉军",
+                                    "text": "快退！"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "branch_id": 2,
+                    "characters": [
+                        {
+                            "character_id": 1,
+                            "character_name": "副将",
+                            "dialogue": [
+                                {
+                                    "speaker": "副将",
+                                    "text": "大王，前方道路泥泞，战马已经难以前行。"
+                                },
+                                {
+                                    "speaker": "项羽",
+                                    "text": "还能走吗？"
+                                },
+                                {
+                                    "speaker": "副将",
+                                    "text": "若继续向前，恐怕还要耽搁半日。"
+                                },
+                                {
+                                    "speaker": "项羽",
+                                    "text": "半日便半日。"
+                                },
+                                {
+                                    "speaker": "副将",
+                                    "text": "可是汉军很快便会追上来。"
+                                },
+                                {
+                                    "speaker": "项羽",
+                                    "text": "那就走得更快些。"
+                                },
+                                {
+                                    "speaker": "副将",
+                                    "text": "大王，我们还有二十余骑。"
+                                },
+                                {
+                                    "speaker": "项羽",
+                                    "text": "只要还有一人，便继续向南。"
+                                },
+                                {
+                                    "speaker": "副将",
+                                    "text": "诺！"
+                                },
+                                {
+                                    "speaker": "项羽",
+                                    "text": "东城在前。活着的人，随我杀出去。"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "scene_id": 3,
+            "scene_name": "东城快战，以一敌千",
+            "characters": [
+                {
+                    "character_id": 1,
+                    "character_name": "赤泉侯",
+                    "dialogue": [
+                        {
+                            "speaker": "赤泉侯",
+                            "text": "项羽，你已经只剩这二十八骑了。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "二十八骑，足够了。"
+                        },
+                        {
+                            "speaker": "赤泉侯",
+                            "text": "你以为凭这点人还能战胜汉军？"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "能不能，试过便知道。"
+                        },
+                        {
+                            "speaker": "赤泉侯",
+                            "text": "全军听令，围住项羽！"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "今日，我便让你们看看什么叫霸王。"
+                        },
+                        {
+                            "speaker": "赤泉侯",
+                            "text": "杀！"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "来战！"
+                        },
+                        {
+                            "speaker": "赤泉侯",
+                            "text": "撤！快撤！"
+                        }
+                    ]
+                },
+                {
+                    "character_id": 2,
+                    "character_name": "秦时月",
+                    "dialogue": [
+                        {
+                            "speaker": "秦时月",
+                            "text": "项羽，今日便让我领教霸王的本事。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "年轻人，有胆量。"
+                        },
+                        {
+                            "speaker": "秦时月",
+                            "text": "我不会因为你是霸王，就后退半步。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "很好。这样的对手，才值得我出枪。"
+                        },
+                        {
+                            "speaker": "秦时月",
+                            "text": "接招！"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "你的枪法不错。"
+                        },
+                        {
+                            "speaker": "秦时月",
+                            "text": "还没结束！"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "结束了。"
+                        },
+                        {
+                            "speaker": "秦时月",
+                            "text": "怎么可能……"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "可惜了。"
+                        }
+                    ]
+                },
+                {
+                    "character_id": 3,
+                    "character_name": "钟离昧",
+                    "dialogue": [
+                        {
+                            "speaker": "钟离昧",
+                            "text": "大王，汉军又追上来了！"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "来了多少人？"
+                        },
+                        {
+                            "speaker": "钟离昧",
+                            "text": "前后都是汉军，怕是已经有上千人。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "上千人又如何？"
+                        },
+                        {
+                            "speaker": "钟离昧",
+                            "text": "大王，我们只剩二十八骑。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "二十八骑，足以破敌。"
+                        },
+                        {
+                            "speaker": "钟离昧",
+                            "text": "末将愿随大王死战。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "好。今日便再杀一次。"
+                        }
+                    ]
+                },
+                {
+                    "character_id": 4,
+                    "character_name": "二十八骑",
+                    "dialogue": [
+                        {
+                            "speaker": "二十八骑",
+                            "text": "大王！"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "诸君，今日我们已经无路可退。"
+                        },
+                        {
+                            "speaker": "二十八骑",
+                            "text": "愿随大王死战到底！"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "好！"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "今日不是他们死，就是我们亡！"
+                        },
+                        {
+                            "speaker": "二十八骑",
+                            "text": "杀！"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "随我冲锋！"
+                        },
+                        {
+                            "speaker": "二十八骑",
+                            "text": "杀！杀！杀！"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "scene_id": 4,
+            "scene_name": "乌江自刎，天地同悲",
+            "characters": [
+                {
+                    "character_id": 1,
+                    "character_name": "韩信",
+                    "dialogue": [
+                        {
+                            "speaker": "韩信",
+                            "text": "项王，今日你已经无路可走。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "韩信。"
+                        },
+                        {
+                            "speaker": "韩信",
+                            "text": "昔日你横扫天下，如今却只剩一人。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "胜负而已。"
+                        },
+                        {
+                            "speaker": "韩信",
+                            "text": "若你愿降，汉王或许还能留你一命。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "我项羽一生，从未向人低头。"
+                        },
+                        {
+                            "speaker": "韩信",
+                            "text": "那今日，便是霸王末路。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "末路？"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "天下可以亡我，不能辱我。"
+                        },
+                        {
+                            "speaker": "韩信",
+                            "text": "动手。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "来！"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "今日这一战，我无愧于天地。"
+                        }
+                    ]
+                },
+                {
+                    "character_id": 2,
+                    "character_name": "汉军",
+                    "dialogue": [
+                        {
+                            "speaker": "汉军",
+                            "text": "项羽就在前方！"
+                        },
+                        {
+                            "speaker": "汉军",
+                            "text": "不要让他靠近乌江！"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "来吧。"
+                        },
+                        {
+                            "speaker": "汉军",
+                            "text": "上！"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "还有谁？"
+                        },
+                        {
+                            "speaker": "汉军",
+                            "text": "他已经受伤了，继续围上去！"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "即便如此，你们也奈何不了我。"
+                        }
+                    ]
+                },
+                {
+                    "character_id": 3,
+                    "character_name": "钟离昧",
+                    "dialogue": [
+                        {
+                            "speaker": "钟离昧",
+                            "text": "大王，乌江就在眼前。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "乌江……终于到了。"
+                        },
+                        {
+                            "speaker": "钟离昧",
+                            "text": "大王，江东父老还在等着您。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "我无颜再见江东父老。"
+                        },
+                        {
+                            "speaker": "钟离昧",
+                            "text": "大王！"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "不必多言。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "今日，我项羽便留在这里。"
+                        }
+                    ]
+                },
+                {
+                    "character_id": 4,
+                    "character_name": "二十八骑",
+                    "dialogue": [
+                        {
+                            "speaker": "二十八骑",
+                            "text": "大王，我们还可以继续战！"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "你们已经跟随我走到最后了。"
+                        },
+                        {
+                            "speaker": "二十八骑",
+                            "text": "愿随大王共赴黄泉！"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "不必。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "能活下来的，替我回江东。"
+                        },
+                        {
+                            "speaker": "二十八骑",
+                            "text": "大王……"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "这是命令。"
+                        }
+                    ]
+                },
+                {
+                    "character_id": 5,
+                    "character_name": "乌江亭长",
+                    "dialogue": [
+                        {
+                            "speaker": "乌江亭长",
+                            "text": "项王，请上船吧！"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "江东子弟八千人随我而出，如今却无一人归来。"
+                        },
+                        {
+                            "speaker": "乌江亭长",
+                            "text": "江东虽小，亦足以容身。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "纵使江东父老怜我，我又有何颜面见他们？"
+                        },
+                        {
+                            "speaker": "乌江亭长",
+                            "text": "大王，留得性命，便还有机会。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "天亡我，非战之罪。"
+                        },
+                        {
+                            "speaker": "项羽",
+                            "text": "今日，我便不渡乌江。"
+                        },
+                        {
+                            "speaker": "乌江亭长",
+                            "text": "大王……"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
