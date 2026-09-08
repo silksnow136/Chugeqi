@@ -62,7 +62,14 @@ add_executable(mapTest
     third_party/sqlite/sqlite3.c
 )
 
-foreach(TGT Chugeqi combatTest mapTest)
+# 第一幕垓下营地地图展示（独立入口）
+add_executable(gaiXiaMap
+    src/story/gaiXiaMap.cpp
+    src/story/MapGrid.cpp
+    src/core/console.cpp
+)
+
+foreach(TGT Chugeqi combatTest mapTest gaiXiaMap)
     target_include_directories(${TGT} PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/src"
         "${CMAKE_CURRENT_SOURCE_DIR}/third_party/sqlite"
