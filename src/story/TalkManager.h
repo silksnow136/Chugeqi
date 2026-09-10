@@ -40,7 +40,7 @@ public:
 
     
     // 从 JSON 读取对话
-    void TalkManager::loadDialogue(
+    void loadDialogue(
         int scene_id,
         int branch_id,
         int character_id

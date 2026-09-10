@@ -62,7 +62,7 @@ private:
 	Game& game;
 
 	TalkManager talkManager;
-	unique_ptr<PharManager> pharManager = nullptr;
+	unique_ptr<PharManager> pharManager;
 	ForgeManager* forgeManager = nullptr;
 
 	// 当前场景ID
