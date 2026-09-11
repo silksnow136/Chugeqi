@@ -49,13 +49,73 @@ namespace console {
 #include <cstdlib>
 #include <thread>
 #include <chrono>
+#include <termios.h>
+#include <unistd.h>
+#include <poll.h>
+
+namespace {
+
+    termios g_original{};
+    bool g_saved = false;
+    bool g_raw = false;
+
+    void restoreTerm();
+
+    // 进入原始模式：关闭行缓冲(ICANON)与回显(ECHO)，逐字节即时读取
+    void ensureRaw() {
+        if (g_raw) return;
+        if (tcgetattr(STDIN_FILENO, &g_original) != 0) return;
+        g_saved = true;
+        termios raw = g_original;
+        raw.c_lflag &= ~static_cast<tcflag_t>(ICANON | ECHO);
+        raw.c_iflag &= ~static_cast<tcflag_t>(ICRNL | IXON);
+        raw.c_cc[VMIN] = 1;
+        raw.c_cc[VTIME] = 0;
+        if (tcsetattr(STDIN_FILENO, TCSANOW, &raw) == 0) {
+            g_raw = true;
+            std::atexit(restoreTerm);
+        }
+    }
+
+    void restoreTerm() {
+        if (g_saved) tcsetattr(STDIN_FILENO, TCSANOW, &g_original);
+        g_raw = false;
+    }
+
+    // 非阻塞检测 stdin 是否有可读字节
+    bool pollIn(int timeoutMs) {
+        pollfd pfd{STDIN_FILENO, POLLIN, 0};
+        return poll(&pfd, 1, timeoutMs) > 0;
+    }
+}
 
 namespace console {
-    void init() {}
+    void init() { ensureRaw(); }
     void clearScreen() { std::system("clear"); }
-    int readKey() { return std::getchar(); }
-    void pause() { std::getchar(); }
-    bool pauseEsc() { return std::getchar() == 27; } // ESC 的键码为 27
+
+    int readKey() {
+        ensureRaw();
+        int c = std::getchar();
+        if (c == EOF) return c;
+        if (c != 27) return c;          // 普通按键
+        // ESC：可能是裸 ESC，也可能是方向键转义序列 \033[A/B/C/D
+        if (!pollIn(20)) return 27;
+        int c2 = std::getchar();
+        if (c2 == EOF || c2 != '[') return 27;
+        if (!pollIn(20)) return 27;
+        int c3 = std::getchar();
+        switch (c3) {
+            case 'A': return KEY_UP;
+            case 'B': return KEY_DOWN;
+            case 'C': return KEY_RIGHT;
+            case 'D': return KEY_LEFT;
+            default:  return 27;
+        }
+    }
+
+    void pause() { readKey(); }
+    bool pauseEsc() { return readKey() == 27; }
+
     void setColor(int colorCode) {
         // Windows 色码 → ANSI 前景色（0~15 → 30~37 / 90~97）
         static const char* fg[] = {
@@ -65,7 +125,7 @@ namespace console {
         if (colorCode >= 0 && colorCode <= 15) std::printf("\033[%sm", fg[colorCode]);
     }
     void sleep(int ms) { std::this_thread::sleep_for(std::chrono::milliseconds(ms)); }
-    bool kbhit() { return false; } // 非 Windows 下暂不实现非阻塞检测
+    bool kbhit() { ensureRaw(); return pollIn(0); }
     void moveCursor(int row, int col) { std::printf("\033[%d;%dH", row + 1, col + 1); }
     void setCursorVisible(bool visible) { std::printf(visible ? "\033[?25h" : "\033[?25l"); }
     void clearToEnd() { std::printf("\033[J"); }

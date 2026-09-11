@@ -6,6 +6,14 @@
 //   - 其他平台：退化为 ANSI 清屏与标准输入
 // ---------------------------------------------------------------------------
 namespace console {
+    // 扩展键码（非 ASCII，方向键等，Linux 下由转义序列解析而来）
+    enum {
+        KEY_UP    = 1000,
+        KEY_DOWN  = 1001,
+        KEY_LEFT  = 1002,
+        KEY_RIGHT = 1003,
+    };
+
     void init();        // 初始化（如设置控制台 UTF-8 编码）
     void clearScreen(); // 清屏
     int  readKey();     // 读取一个按键（无回显）
