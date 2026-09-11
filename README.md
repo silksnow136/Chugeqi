@@ -72,15 +72,35 @@ Chugeqi/
 
 ## 构建与运行
 
-环境要求：CMake ≥ 3.15；Windows（Visual Studio，含 C++ 工具链）或 Linux（g++/clang）均可。
+### Windows
+
+环境要求：Visual Studio（含 C++ 工具链）、CMake ≥ 3.15。
+
+```powershell
+# 1. 配置（Visual Studio 生成器，x64）
+cmake -S . -B build -G "Visual Studio 18 2026" -A x64
+
+# 2. 编译（Release）
+cmake --build build --config Release
+```
+
+### Linux
+
+环境要求：g++（支持 C++17）、CMake ≥ 3.15、Ninja（可选）。
 
 ```bash
-# 1. 配置
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+# Debian/Ubuntu 安装依赖
+sudo apt install build-essential cmake ninja-build
+
+# 1. 配置（Ninja 生成器，Release）
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 
 # 2. 编译
 cmake --build build
 ```
+
+> Linux 下可执行文件无扩展名，产物在 `build/` 目录（如 `build/Chugeqi`）。
+> 在项目根目录运行，程序会加载 `data/` 下的数据（构建后 CMake 也会自动把 `data/` 复制到 `build/`）。
 
 七个可执行目标：
 
@@ -95,6 +115,23 @@ cmake --build build
 | `wujiangMap` | `src/story/wujiangMap.cpp` | 第四幕乌江自刎地图展示 |
 
 CMake 会在构建后自动把 `data/` 复制到各可执行文件同目录。
+
+Windows 运行：
+
+```powershell
+cd build\Release
+.\Chugeqi.exe       # 跑剧情
+.\combatTest.exe    # 跑战斗测试
+```
+
+Linux 运行：
+
+```bash
+./build/Chugeqi     # 跑剧情
+./build/combatTest  # 跑战斗测试
+```
+
+> 地图相关目标：`mapTest`、`gaiXiaMap`、`huaiRiverMap`、`dongchengMap`、`wujiangMap` 可分别运行。
 
 ---
 
