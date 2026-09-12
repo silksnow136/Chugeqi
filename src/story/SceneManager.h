@@ -30,6 +30,15 @@ public:
 
 	void changeAuto();//自动/手动切换
 	bool current_Auto();//当前的自动/手动模式
+
+	// 获取对话管理器（供地图移动交互调用）
+	TalkManager& getTalkManager() { return talkManager; }
+
+	// 进入药店系统（供地图移动交互调用）
+	void enterPharmacy(Game& game1);
+
+	// 进入锻造系统（供地图移动交互调用）
+	void enterForge();
 	//初步剧情存档,获得当前场景id
 	int showScene_id();
 	// 修改场景

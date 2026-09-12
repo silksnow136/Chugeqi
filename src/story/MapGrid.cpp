@@ -189,6 +189,8 @@ void MapGrid::render() const {
                     console::setColor(14); break;
                 case TileType::ITEM:
                     console::setColor(14); break;
+                case TileType::ADVANCE:
+                    console::setColor(13); break;  // 跳转点=紫色高亮
                 default:
                     console::setColor(7);  break;
             }
@@ -200,7 +202,7 @@ void MapGrid::render() const {
     console::setColor(14);
     std::cout << "-------------------------------" << std::endl;
     console::setColor(7);
-    std::cout << "WASD: 移动  |  项羽=玩家  友方(绿)→对话  敌方(红)→战斗  药店(青)→购买  铁匠(紫)→锻造  门(黄)→通行  █=墙" << std::endl;
+    std::cout << "WASD: 移动  |  项羽=玩家  友方(绿)→对话  敌方(红)→战斗  药店(青)→购买  铁匠(紫)→锻造  帅帐(紫)→下一幕  门(黄)→通行  █=墙" << std::endl;
     std::cout << "> ";
 
     console::setCursorVisible(true);
@@ -259,9 +261,20 @@ bool MapGrid::move(char direction) {
         grid[newRow][newCol] = Tile("项羽", TileType::PLAYER, "项羽");
         return true;
     }
+    // 跳转点（帅帐/渡口等）：不移动，触发幕次跳转
+    if (target.type == TileType::ADVANCE) {
+        interactionType = target.type;
+        interactionName = target.name;
+        if (onAdvance) onAdvance(target.name);
+        // 仅在 onAdvance 内部确认跳转时才置 advanceTriggered
+        firstRender = true;  // 交互后清屏（与对话/药店一致）
+        return true;
+    }
+
     interactionType = target.type;
     interactionName = target.name;
     triggerInteraction(target.type, target.name);
+    firstRender = true;  // 交互后清屏
     return true;
 }
 

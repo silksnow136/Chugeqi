@@ -21,6 +21,9 @@ public:
     bool talkScene(Game& game1, int branch_id);
     //播放对话
     void talkCharacter(int scene_id, int character_id, int branch_id);
+
+    // 外部直接播放指定人物对话（不刷新场景地图，供地图移动交互调用）
+    void talkCharacterExternal(int scene_id, int character_id, int branch_id);
     // 第一幕
     void talkScene01(Game& game1, int branch_id);
     // 第二幕

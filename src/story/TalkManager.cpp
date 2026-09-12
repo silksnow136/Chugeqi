@@ -167,6 +167,16 @@ void TalkManager::talkCharacter(int scene_id,int character_id, int branch_id) {
 	waitForReturn();
 }
 
+// 外部直接播放对话（不刷新场景地图）
+void TalkManager::talkCharacterExternal(int scene_id, int character_id, int branch_id) {
+	console::setColor(10);
+	std::cout << "\n===== 对话 =====" << std::endl;
+	console::setColor(7);
+	sceneManager->setCurrentCharacter(character_id);
+	loadDialogue(scene_id, branch_id, character_id);
+	waitForReturn();
+}
+
 //对话系统
 void TalkManager::talkScene_01() {
 	cout << "\n";

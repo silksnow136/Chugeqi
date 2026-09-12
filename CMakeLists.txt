@@ -16,6 +16,8 @@ add_executable(Chugeqi
     src/story/SceneManager.cpp
     src/story/TalkManager.cpp
     src/story/map.cpp
+    src/story/MapGrid.cpp
+    src/story/SceneMap.cpp
     src/story/BackGround.cpp
     src/story/ForgeManager.cpp
     src/story/PharManager.cpp

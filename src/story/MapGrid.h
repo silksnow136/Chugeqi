@@ -26,7 +26,8 @@ enum class TileType {
     PHARMACY,   // 药店 → 触发购买
     FORGE,      // 铁匠铺 → 触发锻造
     DOOR,       // 门 → 可通行，走过后恢复
-    ITEM        // 物品 → 拾取后消失
+    ITEM,       // 物品 → 拾取后消失
+    ADVANCE     // 跳转点 → 触发幕次跳转（帅帐/渡口等）
 };
 
 struct Tile {
@@ -84,6 +85,13 @@ public:
     std::function<void(const std::string&)> onPharmacy;
     std::function<void(const std::string&)> onForge;
     std::function<void(const std::string&)> onItem;
+    std::function<void(const std::string&)> onAdvance;   // 幕次跳转
+
+    // 跳转回调是否已触发（用于通知外部循环退出）
+    bool advanceTriggered = false;
+
+    // 标记下次渲染需清屏（供外部取消跳转后重绘地图）
+    void requestClearRender() { firstRender = true; }
 
 private:
     std::vector<std::vector<Tile>> grid;

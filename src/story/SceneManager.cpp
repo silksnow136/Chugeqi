@@ -6,6 +6,7 @@
 #include "PharManager.h"
 #include "ForgeManager.h"
 #include "BackGround.h"
+#include "SceneMap.h"
 #include "core/console.h"
 #include <cctype>
 #include <limits>
@@ -90,11 +91,12 @@ void SceneManager::changeScene(int scene_id)
 	unique_map_print = false;
 }
 
-//场景功能显示管理
+//场景功能显示管理 —— 使用网格地图 + WASD 移动交互
 void SceneManager::showSceneManager(int scene_id, int branch_id) {
-		map_Manager(scene_id, branch_id);
-		console::setColor(14);
-		sceneManager(game, branch_id);
+	// 运行网格地图交互（走向 NPC 触发对话/药店/锻造/战斗，ESC 退出）
+	SceneMap::runSceneMap(game, *this, scene_id, branch_id);
+	// 退出地图后，恢复到命令层
+	current_state = SceneState::ORIGIN_SCENE;
 }
 
 
@@ -156,6 +158,27 @@ void SceneManager::showCurrentBackground() {
 		break;
 	}
 }
+// 进入药店系统（供地图移动交互调用）
+void SceneManager::enterPharmacy(Game& game1) {
+	if (pharManager == nullptr) {
+		pharManager = std::make_unique<PharManager>(
+			game1.getItemPool(),
+			game1.getGold()
+		);
+	}
+	// 清理可能残留的输入缓冲区
+	cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	pharManager->phar(game1.getPlayer());
+}
+
+// 进入锻造系统（供地图移动交互调用）
+void SceneManager::enterForge() {
+	ForgeManager fm;
+	fm.forge();
+	std::cout << "按任意键返回地图" << std::endl;
+	console::pause();
+}
+
 //场景功能管理,1对话系统+命令系统；2药店系统；3锻造系统
 void SceneManager::sceneManager(Game& game1, int branch_id) {
 	string sceneCommand;
