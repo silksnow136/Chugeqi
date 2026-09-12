@@ -8,6 +8,8 @@
 #include "BackGround.h"
 #include "core/console.h"
 #include <cctype>
+#include <limits>
+#include <memory>
 
 SceneManager::SceneManager(Game& game): game(game)
 {
@@ -23,6 +25,7 @@ SceneManager::SceneManager(Game& game): game(game)
 
 	talkManager.setSceneManager(this);
 }
+SceneManager::~SceneManager() = default;
 
 bool SceneManager::current_Auto() {
 	return autoPlay;
@@ -232,12 +235,21 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 			//药房
 		case SceneState::PHARMACY:
 
-			refreshScene(branch_id);
+			// 进入药店系统
+			if (pharManager == nullptr)
+			{
+				pharManager = std::make_unique<PharManager>(
+					game1.getItemPool(),
+					game1.getGold()
+				);
+			}
 
-			void phar();
-			cout << "输入任意数字返回。\n";
-			cin >> sceneCommand;
-			//别忘记加入if/else输入指令
+			// ORIGIN_SCENE 使用了 cin >>，
+			// 所以这里清掉输入缓冲区中的换行符
+			cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+			pharManager->phar(game1.getPlayer());
+
 			current_state = SceneState::ORIGIN_SCENE;
 
 			break;
