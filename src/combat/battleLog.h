@@ -9,10 +9,7 @@ public:
     static const size_t MAX_LINES = 7;
 
     void add(const std::string& msg); // 追加一条消息，超出上限时丢弃最旧的一条
-    void clear();
     const std::deque<std::string>& lines() const;
-    bool empty() const;
-    std::string render() const; // 返回可直接打印的多行文本
 
 private:
     std::deque<std::string> lines_;

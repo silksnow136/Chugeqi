@@ -290,7 +290,7 @@ void MapGrid::render() const {
     std::cout << "█";
     console::setColor(7);
     std::cout << "=墙" << std::endl;
-    std::cout << "B=背包（装配/卸下/用药）" << std::endl;
+    std::cout << "B=背包与属性（装配/卸下/用药/查看）" << std::endl;
     std::cout << "> ";
 
     console::setCursorVisible(true);
@@ -476,19 +476,25 @@ void showBackpack(Combatant* player, const ItemPool& pool) {
         }
         if (count == 0) std::cout << "\n  背包是空的。\n";
 
-        std::cout << "\n指令：equip+编号 装配 / unequip+编号 卸下 / use+编号 使用药水 / 回车或ESC 返回地图\n> ";
+        std::cout << "\n指令：equip+编号 装配 / unequip+编号 卸下 / use+编号 使用药水 / show 查看属性 / 回车或ESC 返回地图\n> ";
         std::string cmd = console::readLine();
         if (cmd.empty()) return; // 直接回车或 ESC 退出背包
 
-        // 解析指令（equipN / unequipN / useN，兼容带空格的写法）
+        // 解析指令（equipN / unequipN / useN / show，兼容带空格的写法）
         std::string lower;
         for (char ch : cmd) lower += static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
         std::string act;
         if (lower.compare(0, 7, "unequip") == 0) act = "unequip";
         else if (lower.compare(0, 5, "equip") == 0) act = "equip";
         else if (lower.compare(0, 3, "use") == 0) act = "use";
+        else if (lower.compare(0, 4, "show") == 0) act = "show";
         else {
-            std::cout << "未知指令：请使用 equip+编号 / unequip+编号 / use+编号。\n";
+            std::cout << "未知指令：请使用 equip+编号 / unequip+编号 / use+编号 / show。\n";
+            console::pause();
+            continue;
+        }
+        if (act == "show") { // 查看角色属性，无需编号
+            player->showStats();
             console::pause();
             continue;
         }
