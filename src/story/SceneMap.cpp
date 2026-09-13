@@ -456,6 +456,14 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
         console::setColor(14);
         std::cout << "\n[拾取] 获得「" << name << "」！" << std::endl;
         console::setColor(7);
+        // 拾取入包：按名称匹配物品池定义，加入角色背包
+        const Item* it = findItemByName(game.getItemPool(), name);
+        if (it != nullptr) {
+            game.getPlayer().addItem(it->getId(), 1);
+            std::cout << "「" << name << "」已放入背包。（按 B 打开背包查看）" << std::endl;
+        } else {
+            std::cout << "（物品池中未找到「" << name << "」的定义）" << std::endl;
+        }
         console::pause();
     };
 
