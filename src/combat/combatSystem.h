@@ -37,8 +37,11 @@ public:
                  const CombatConfig& config);
     ~CombatSystem();
 
-    // 启动战斗，返回是否胜利
+    // 启动战斗，返回是否胜利（逃跑返回 false，可通过 escaped() 区分）
     bool startBattle();
+
+    // 战斗是否以「成功逃跑」结束
+    bool escaped() const { return playerEscaped; }
 
     // 获取战斗日志
     const std::deque<std::string>& getLog() const;
@@ -53,6 +56,7 @@ private:
     // 战斗状态
     bool battleEnded = false;
     bool playerWon = false;
+    bool playerEscaped = false; // 是否成功逃跑（与 playerWon 互斥）
     bool playerAiAssisted = false; // 玩家是否开启全员 AI 托管
     bool companionAiAssisted = false; // 同伴独立 AI 托管（同伴菜单切换）
     BattleLog log;

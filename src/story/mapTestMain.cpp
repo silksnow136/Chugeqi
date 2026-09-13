@@ -58,6 +58,9 @@ static void triggerBattle(const std::string& enemyName) {
         if (won) {
             console::setColor(10);
             std::cout << "战斗胜利！击败了 " << enemyName << std::endl;
+        } else if (combat.escaped()) {
+            console::setColor(14);
+            std::cout << "成功逃离了战斗。" << std::endl;
         } else {
             console::setColor(12);
             std::cout << "战斗失败...项羽阵亡。" << std::endl;
