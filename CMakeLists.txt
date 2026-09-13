@@ -105,7 +105,17 @@ add_executable(wujiangMap
     src/data/dataLoader.cpp
 )
 
-foreach(TGT Chugeqi combatTest mapTest gaiXiaMap huaiRiverMap dongchengMap wujiangMap)
+# 传送门地图链测试（独立入口）
+add_executable(portalTest
+    src/story/portalTestMain.cpp
+    src/story/MapGrid.cpp
+    src/combat/character.cpp
+    src/combat/skill.cpp
+    src/combat/item.cpp
+    src/core/console.cpp
+)
+
+foreach(TGT Chugeqi combatTest mapTest gaiXiaMap huaiRiverMap dongchengMap wujiangMap portalTest)
     target_include_directories(${TGT} PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/src"
     )
