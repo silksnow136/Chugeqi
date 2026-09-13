@@ -1,10 +1,8 @@
 #include<iostream>
 #include"SceneManager.h"
 #include"Game.h"
-#include"map.h"
 #include "TalkManager.h"
 #include "PharManager.h"
-#include "BackGround.h"
 #include "SceneMap.h"
 #include "core/console.h"
 #include <cctype>
@@ -14,11 +12,8 @@
 SceneManager::SceneManager(Game& game): game(game)
 {
 	current_scene_id = 0;//剧情初步存档,显示当前场景id
-	current_state = SceneState::ORIGIN_SCENE;
-	current_character = 0;
 
 	autoPlay = false;//判断是否自动播放剧情
-	unique_map_print = false;
 
 	// 启动时载入剧情数据（仅一次）
 	scenes = DataLoader::loadStory("data/story.json").scenes;
@@ -88,82 +83,17 @@ void SceneManager::changeScene(int scene_id)
 {
 	// 离开旧场景
 	current_scene_id = scene_id;
-	// 进入新场景时重置状态
-	current_state = SceneState::ORIGIN_SCENE;
-	// 重置对话人物
-	current_character = 0;
 	// 重置分支
 	current_branch_id = 0;
-	// 允许新场景重新打印地图
-	unique_map_print = false;
 }
 
 //场景功能显示管理 —— 使用网格地图 + WASD 移动交互
 void SceneManager::showSceneManager(int scene_id, int branch_id) {
 	// 运行网格地图交互（走向 NPC 触发对话/药店/战斗，ESC 退出）
 	SceneMap::runSceneMap(game, *this, scene_id, branch_id);
-	// 退出地图后，恢复到命令层
-	current_state = SceneState::ORIGIN_SCENE;
 }
 
 
-void choiceList_01() {
-	cout << "1. 对话\n";
-	cout << "2. 药房\n";
-	cout << "\n输入w继续游戏\n";
-}
-
-void SceneManager::refreshScene(int branch_id) {
-	//清屏
-	console::clearScreen();
-	map_Manager(showScene_id(), branch_id);
-}
-
-//判断并执行命令
-bool SceneManager::handleCommand(Game& game1, const string& sceneCommand)
-{	
-	bool ch = true;
-	// 判断是否为需要退出当前场景的指令
-	if (sceneCommand == "south" || sceneCommand == "w" ||  sceneCommand == "W" ||  
-		sceneCommand == "north" || sceneCommand == "n" || sceneCommand == "N" ||
-		sceneCommand == "quit" || sceneCommand == "start")
-	{	
-		// 结束当前 SceneManager
-		ch = false;
-	}
-
-	// 清屏
-	console::clearScreen();
-	game1.gameCommand(sceneCommand);
-	// 执行完普通指令后，等待玩家按键
-	
-	if (sceneCommand != "start") {
-		cout << "输入任意按键返回";
-		console::readKey();
-		deleteWords("输入任意按键返回");
-	}
-	
-	return ch;
-}
-
-
-// 显示当前场景背景
-void SceneManager::showCurrentBackground() {
-	switch (showScene_id()) {
-	case 1:
-		backGround_01();
-		break;
-	case 2:
-		backGround_02();
-		break;
-	case 3:
-		backGround_03();
-		break;
-	case 4:
-		backGround_04();
-		break;
-	}
-}
 // 进入药店系统（供地图移动交互调用）
 void SceneManager::enterPharmacy(Game& game1) {
 	if (pharManager == nullptr) {
@@ -175,122 +105,6 @@ void SceneManager::enterPharmacy(Game& game1) {
 	// 清理可能残留的输入缓冲区
 	cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 	pharManager->phar(game1.getPlayer());
-}
-
-//场景功能管理,1对话系统+命令系统；2药店系统
-void SceneManager::sceneManager(Game& game1, int branch_id) {
-	string sceneCommand;
-	scene = true;
-	while (scene) {
-		switch (current_state) {
-
-		//大世界场景
-		case SceneState::ORIGIN_SCENE:
-
-			refreshScene(branch_id);
-
-			showCurrentBackground();
-			
-			choiceList_01();
-
-			cout << "\n> ";
-			cin >> sceneCommand;
-			if (sceneCommand == "1" || sceneCommand == "2") {
-				int num = stoi(sceneCommand);//将string转化为int
-				switch (num) {
-				case 1:
-					//进入对话
-					current_state = SceneState::TALK;
-					break;
-
-				case 2:
-					//进入药店
-					current_state = SceneState::PHARMACY;
-					//药店未制作！！！！！！！！！！！！！！！！！！！！！
-					//不要在这里添加，这里只负责进入药店系统
-					break;
-				}
-			}
-			else {
-				scene = handleCommand(game1, sceneCommand);
-			}
-			break;
-
-		// 选择对话人物
-		case SceneState::TALK:
-			
-			refreshScene(branch_id);
-
-			switch (showScene_id()) {
-				//第一幕
-			case 1:
-				talkManager.talkScene01(game1, branch_id);
-				break;
-
-				//第二幕
-			case 2:
-				talkManager.talkScene02(game1, branch_id);
-				break;
-
-				//第三幕
-			case 3:
-				talkManager.talkScene03(game1, branch_id);
-				break;
-
-				//第四幕!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-				//第四幕对话暂时没有地方插入，第四幕项羽死了不知道如何合理的进行对话
-			case 4:
-				
-				break;
-			}
-			
-			break;
-
-			//药房
-		case SceneState::PHARMACY:
-
-			// 进入药店系统
-			if (pharManager == nullptr)
-			{
-				pharManager = std::make_unique<PharManager>(
-					game1.getItemPool(),
-					game1.getGold()
-				);
-			}
-
-			// ORIGIN_SCENE 使用了 cin >>，
-			// 所以这里清掉输入缓冲区中的换行符
-			cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-			pharManager->phar(game1.getPlayer());
-
-			current_state = SceneState::ORIGIN_SCENE;
-
-			break;
-		}
-	}
-}
-
-//SceneManager::SceneState函数的返回值类型，后面是类的成员函数
-//读取当前场景状态
-SceneManager::SceneState SceneManager::getSceneState() const
-{
-	return current_state;
-}
-//进入新场景状态，便于从主世界进入对话,便于切换场景
-void SceneManager::setSceneState(SceneState state)
-{
-	current_state = state;
-}
-//读取对话人物
-int SceneManager::getCurrentCharacter() const
-{
-	return current_character;
-}
-//更改对话人物
-void SceneManager::setCurrentCharacter(int character_id)
-{
-	current_character = character_id;
 }
 
 //输出剧情对话,逐字打印，Sleep1控制逐字打印速度
@@ -340,17 +154,6 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 	}
 	if (!scene) return;
 	
-	cout << "\n===== 第三幕 DEBUG =====\n";
-	cout << "scene id: " << scene->id << "\n";
-	cout << "lines size: " << scene->lines.size() << "\n";
-
-	for (size_t i = 0; i < scene->lines.size(); ++i) {
-		cout << "line[" << i << "]: "
-			<< scene->lines[i].text << "\n";
-	}
-
-	cout << "===== DEBUG END =====\n";
-	
 	//清屏
 	console::clearScreen();
 
@@ -366,8 +169,6 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 			return;
 		}
 
-
-		//playChoice(*scene, branch_id);
 		current_branch_id = branch_id; // 记录当前分支，供存档
 
 		console::sleep(2000);
@@ -483,9 +284,6 @@ bool SceneManager::startStoryBattle(const std::string& battleId)
 	}
 
 	std::string battlePath = "data/battle_" + battleId + ".json";
-
-	std::cout << "\n[DEBUG] battleId = " << battleId << std::endl;
-	std::cout << "[DEBUG] battlePath = " << battlePath << std::endl;
 
 	try {
 		Battle battle = DataLoader::loadBattle(

@@ -18,7 +18,6 @@ add_executable(Chugeqi
     src/story/map.cpp
     src/story/MapGrid.cpp
     src/story/SceneMap.cpp
-    src/story/BackGround.cpp
     src/story/PharManager.cpp
     # 战斗系统（combat）
     src/combat/battleLog.cpp
