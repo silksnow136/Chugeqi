@@ -170,19 +170,17 @@ void MapGrid::buildWater(int r, int c, int length) {
 }
 
 void MapGrid::buildPortal(int r, int c, PortalDir dir, const std::string& dest, int length) {
+    if (!isValid(r, c)) return;
+
     const int maxRow = static_cast<int>(grid.size()) - 1;
     const int maxCol = static_cast<int>(grid[0].size()) - 1;
 
-    // 目标地名最多 3 个汉字；文字 = 去 + dest + 箭头
     auto destChars = utf8Chars(dest);
     std::string name;
     for (size_t i = 0; i < destChars.size() && i < 3; i++) name += destChars[i];
     std::string text = "去" + name + portalArrow(dir);
 
-    // 统一横向条：Left/Up 向左延伸，Right/Down 向右延伸（箭头方向仍由 dir 决定）
     int dc = (dir == PortalDir::Left || dir == PortalDir::Up) ? -1 : +1;
-
-    // 文字按 4 列宽切分为片段
     auto segs = splitByWidth(text, CELL_WIDTH);
     int minLen = static_cast<int>(segs.size());
     int len = (length > 0) ? length : minLen;
@@ -190,13 +188,21 @@ void MapGrid::buildPortal(int r, int c, PortalDir dir, const std::string& dest, 
 
     for (int i = 0; i < len; i++) {
         int cc = c + i * dc;
-        // 不覆盖四周边界墙
         if (r <= 0 || r >= maxRow || cc <= 0 || cc >= maxCol) break;
 
-        // 箭头放在沿方向的最远端；Left/Up 时倒序放置片段
         int idx = (dir == PortalDir::Left || dir == PortalDir::Up) ? (minLen - 1 - i) : i;
         std::string disp = (idx >= 0 && idx < minLen) ? segs[idx] : "";
-        grid[r][cc] = Tile(padToWidth(disp, CELL_WIDTH), TileType::PORTAL, name, static_cast<int>(dir));
+        Tile t(padToWidth(disp, CELL_WIDTH), TileType::PORTAL, name, static_cast<int>(dir));
+        t.portalDir = dir;
+        grid[r][cc] = t;
+    }
+
+    if (isValid(r, c - 1) && grid[r][c - 1].type != TileType::PLAYER) {
+        Tile bar("══", TileType::PORTAL, name, static_cast<int>(dir));
+        bar.portalDir = dir;
+        grid[r][c - 1] = bar;
+    }
+}
     }
 }
 
@@ -363,6 +369,16 @@ bool MapGrid::move(char direction) {
         interactionType = target.type;
         interactionName = target.name;
         if (onPortal) onPortal(target.name, target.portalDir);
+        return true;
+    }
+
+    // 传送门：不移动，触发地图切换（回调可置 portalTriggered=false 阻止）
+    if (target.type == TileType::PORTAL) {
+        interactionType = target.type;
+        interactionName = target.name;
+        portalTarget = target.name;
+        portalTriggered = true;
+        if (onPortal) onPortal(target.name);
         return true;
     }
 

@@ -37,7 +37,7 @@ enum class PortalDir { Left, Up, Right, Down };
 struct Tile {
     std::string display;    // 显示字符串
     TileType type = TileType::EMPTY;
-    std::string name;       // 单位名称
+    std::string name;       // 单位名称 / 传送目标地图名
     int portalDir = -1;     // 传送门方向（PortalDir 枚举值），非传送门为 -1
 
     Tile() = default;
@@ -99,6 +99,10 @@ public:
 
     // 跳转回调是否已触发（用于通知外部循环退出）
     bool advanceTriggered = false;
+
+    // 传送是否触发 / 目标地图（回调内可置 false 阻止传送）
+    bool portalTriggered = false;
+    std::string portalTarget;
 
 private:
     std::vector<std::vector<Tile>> grid;
