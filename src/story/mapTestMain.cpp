@@ -30,13 +30,14 @@ static void triggerBattle(const std::string& enemyName) {
 
         // 加载战斗数据
         GameData gameData = DataLoader::loadGameData("data/");
-        SaveManager save("save.db");
+        SaveManager save("saves");
 
         // 我方队伍
-        std::vector<std::unique_ptr<Combatant>> party = save.loadParty(1, gameData.skillPool, gameData.itemPool);
+        auto saveData = save.load(1, gameData.skillPool, gameData.itemPool);
+        std::vector<std::unique_ptr<Combatant>> party = std::move(saveData.party);
         if (party.empty()) {
             party = DataLoader::loadPartyTemplates("data/battle_test.json", gameData.skillPool);
-            save.saveParty(1, party, gameData.skillPool);
+            save.save(1, party, gameData.skillPool);
         }
 
         // 敌方
@@ -52,7 +53,7 @@ static void triggerBattle(const std::string& enemyName) {
         bool won = combat.startBattle();
 
         // 战斗结果写回存档
-        save.saveParty(1, party, gameData.skillPool);
+        save.save(1, party, gameData.skillPool);
 
         console::clearScreen();
         if (won) {

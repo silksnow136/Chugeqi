@@ -32,7 +32,6 @@ add_executable(Chugeqi
     src/core/console.cpp
     src/data/dataLoader.cpp
     # 第三方
-    third_party/sqlite/sqlite3.c
 )
 
 # 战斗测试（独立入口）
@@ -46,7 +45,6 @@ add_executable(combatTest
     src/data/saveManager.cpp
     src/core/console.cpp
     src/data/dataLoader.cpp
-    third_party/sqlite/sqlite3.c
 )
 
 # 地图移动测试（独立入口）
@@ -61,7 +59,6 @@ add_executable(mapTest
     src/data/saveManager.cpp
     src/core/console.cpp
     src/data/dataLoader.cpp
-    third_party/sqlite/sqlite3.c
 )
 
 # 第一幕垓下营地地图展示（独立入口）
@@ -111,7 +108,6 @@ add_executable(wujiangMap
 foreach(TGT Chugeqi combatTest mapTest gaiXiaMap huaiRiverMap dongchengMap wujiangMap)
     target_include_directories(${TGT} PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/src"
-        "${CMAKE_CURRENT_SOURCE_DIR}/third_party/sqlite"
     )
     add_custom_command(TARGET ${TGT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory

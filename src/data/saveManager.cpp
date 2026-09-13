@@ -1,24 +1,29 @@
 #include "saveManager.h"
-#include "sqlite3.h"
-#include <functional>
+#include "core/json.h"
+#include <fstream>
+#include <sstream>
 #include <stdexcept>
+#include <filesystem>
+#include <cstdio>
 
 namespace {
 
-// 绑定参数并执行一条 INSERT/DELETE 语句（不读取结果）
-void runStatement(sqlite3* db, const char* sql, const std::function<void(sqlite3_stmt*)>& bind) {
-    sqlite3_stmt* stmt = nullptr;
-    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-        std::string err = sqlite3_errmsg(db);
-        throw std::runtime_error(err);
+// 转义 JSON 字符串中的特殊字符（引号/反斜杠/换行等）；中文 UTF-8 字节原样保留
+std::string jsonEscape(const std::string& s) {
+    std::string out;
+    for (unsigned char c : s) {
+        switch (c) {
+            case '"':  out += "\\\""; break;
+            case '\\': out += "\\\\"; break;
+            case '\n': out += "\\n"; break;
+            case '\r': out += "\\r"; break;
+            case '\t': out += "\\t"; break;
+            default:
+                if (c < 0x20) { char buf[8]; std::snprintf(buf, sizeof(buf), "\\u%04x", c); out += buf; }
+                else out += static_cast<char>(c);
+        }
     }
-    bind(stmt);
-    if (sqlite3_step(stmt) != SQLITE_DONE) {
-        std::string err = sqlite3_errmsg(db);
-        sqlite3_finalize(stmt);
-        throw std::runtime_error(err);
-    }
-    sqlite3_finalize(stmt);
+    return out;
 }
 
 // 由技能指针反查 skill_id
@@ -29,281 +34,187 @@ std::string findSkillId(const SkillPool& skillPool, const SkillBase* skill) {
     return "";
 }
 
-} // namespace
-
-SaveManager::SaveManager(const std::string& dbPath) {
-    if (sqlite3_open(dbPath.c_str(), &db) != SQLITE_OK) {
-        std::string err = db ? sqlite3_errmsg(db) : "无法打开数据库";
-        if (db) sqlite3_close(db);
-        db = nullptr;
-        throw std::runtime_error(err);
-    }
-
-    const char* schema =
-        "CREATE TABLE IF NOT EXISTS meta ("
-        "  slot_id INTEGER PRIMARY KEY,"
-        "  scene_id INTEGER NOT NULL, branch_id INTEGER NOT NULL, gold INTEGER NOT NULL);"
-        "CREATE TABLE IF NOT EXISTS characters ("
-        "  slot_id INTEGER NOT NULL, id TEXT NOT NULL, name TEXT NOT NULL,"
-        "  level INTEGER NOT NULL, hp INTEGER NOT NULL, sp INTEGER NOT NULL, exp INTEGER NOT NULL,"
-        "  str INTEGER NOT NULL, mag INTEGER NOT NULL, endur INTEGER NOT NULL, agi INTEGER NOT NULL,"
-        "  PRIMARY KEY(slot_id, id));"
-        "CREATE TABLE IF NOT EXISTS learned_skills ("
-        "  slot_id INTEGER NOT NULL, character_id TEXT NOT NULL, slot INTEGER NOT NULL, skill_id TEXT NOT NULL,"
-        "  PRIMARY KEY(slot_id, character_id, slot));"
-        "CREATE TABLE IF NOT EXISTS inventory ("
-        "  slot_id INTEGER NOT NULL, character_id TEXT NOT NULL, item_id TEXT NOT NULL, count INTEGER NOT NULL,"
-        "  PRIMARY KEY(slot_id, character_id, item_id));"
-        "CREATE TABLE IF NOT EXISTS equipment ("
-        "  slot_id INTEGER NOT NULL, character_id TEXT NOT NULL, equip_slot INTEGER NOT NULL, item_id TEXT NOT NULL,"
-        "  PRIMARY KEY(slot_id, character_id, equip_slot));";
-
-    char* errMsg = nullptr;
-    if (sqlite3_exec(db, schema, nullptr, nullptr, &errMsg) != SQLITE_OK) {
-        std::string err = errMsg ? errMsg : "建表失败";
-        sqlite3_free(errMsg);
-        sqlite3_close(db);
-        db = nullptr;
-        throw std::runtime_error(err);
-    }
+// 读取整个文件为字符串；失败返回空串
+std::string readFile(const std::string& path) {
+    std::ifstream in(path, std::ios::binary);
+    if (!in) return "";
+    std::stringstream ss;
+    ss << in.rdbuf();
+    return ss.str();
 }
 
-SaveManager::~SaveManager() {
-    if (db) sqlite3_close(db);
+} // namespace
+
+SaveManager::SaveManager(const std::string& saveDir) : dir_(saveDir) {
+    if (!dir_.empty() && dir_.back() != '/' && dir_.back() != '\\') dir_ += '/';
+}
+
+std::string SaveManager::path(int slot) const {
+    return dir_ + "save_" + std::to_string(slot) + ".json";
 }
 
 bool SaveManager::hasSave(int slot) const {
     if (!validSlot(slot)) return false;
-    sqlite3_stmt* stmt = nullptr;
-    bool result = false;
-    if (sqlite3_prepare_v2(db, "SELECT COUNT(*) FROM characters WHERE slot_id = ?", -1, &stmt, nullptr) == SQLITE_OK) {
-        sqlite3_bind_int(stmt, 1, slot);
-        if (sqlite3_step(stmt) == SQLITE_ROW) result = sqlite3_column_int(stmt, 0) > 0;
-    }
-    sqlite3_finalize(stmt);
-    return result;
+    std::ifstream in(path(slot));
+    return in.good();
 }
 
-std::vector<std::unique_ptr<Combatant>> SaveManager::loadParty(int slot,
-                                                               const SkillPool& skillPool,
-                                                               const ItemPool& itemPool) const {
-    std::vector<std::unique_ptr<Combatant>> party;
-    if (!validSlot(slot)) return party;
-    std::unordered_map<std::string, Combatant*> byId;
-    sqlite3_stmt* stmt = nullptr;
+SaveManager::SlotInfo SaveManager::getSlotInfo(int slot) const {
+    SlotInfo info;
+    if (!validSlot(slot)) return info;
+    std::string text = readFile(path(slot));
+    if (text.empty()) return info;
 
-    // 1. 角色基础状态（str/mag/endur/agi 存的是基础属性，不含装备加成）
-    const char* sqlChar =
-        "SELECT id, name, level, hp, sp, exp, str, mag, endur, agi FROM characters"
-        " WHERE slot_id = ? ORDER BY rowid";
-    if (sqlite3_prepare_v2(db, sqlChar, -1, &stmt, nullptr) == SQLITE_OK) {
-        sqlite3_bind_int(stmt, 1, slot);
-        while (sqlite3_step(stmt) == SQLITE_ROW) {
-            std::string id = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-            std::string name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-            int level = sqlite3_column_int(stmt, 2);
-            int hp = sqlite3_column_int(stmt, 3);
-            int sp = sqlite3_column_int(stmt, 4);
-            int exp = sqlite3_column_int(stmt, 5);
-            int stats[4] = { sqlite3_column_int(stmt, 6), sqlite3_column_int(stmt, 7),
-                             sqlite3_column_int(stmt, 8), sqlite3_column_int(stmt, 9) };
-            auto c = std::make_unique<Combatant>(name, level, hp, sp, exp, stats,
-                                                 std::vector<SkillBase*>{},
-                                                 std::unordered_map<std::string, int>{}, id);
-            byId[id] = c.get();
-            party.push_back(std::move(c));
-        }
-        sqlite3_finalize(stmt);
+    json::Value root = json::Value::parse(text);
+    info.hasSave = true;
+    info.gold = root["gold"].asInt();
+    info.sceneId = root["scene"].asInt();
+    info.branchId = root["branch"].asInt();
+
+    const json::Value& party = root["party"];
+    if (party.size() > 0) {
+        info.name = party[0]["name"].asString();
+        info.level = party[0]["level"].asInt();
     }
-
-    // 2. 持有技能
-    const char* sqlSkill = "SELECT character_id, skill_id FROM learned_skills WHERE slot_id = ? ORDER BY character_id, slot";
-    if (sqlite3_prepare_v2(db, sqlSkill, -1, &stmt, nullptr) == SQLITE_OK) {
-        sqlite3_bind_int(stmt, 1, slot);
-        while (sqlite3_step(stmt) == SQLITE_ROW) {
-            std::string cid = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-            std::string skillId = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-            auto cIt = byId.find(cid);
-            auto sIt = skillPool.find(skillId);
-            if (cIt != byId.end() && sIt != skillPool.end()) cIt->second->addSkill(sIt->second.get());
-        }
-        sqlite3_finalize(stmt);
-    }
-
-    // 3. 持有道具
-    const char* sqlItem = "SELECT character_id, item_id, count FROM inventory WHERE slot_id = ?";
-    if (sqlite3_prepare_v2(db, sqlItem, -1, &stmt, nullptr) == SQLITE_OK) {
-        sqlite3_bind_int(stmt, 1, slot);
-        while (sqlite3_step(stmt) == SQLITE_ROW) {
-            std::string cid = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-            std::string itemId = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-            int count = sqlite3_column_int(stmt, 2);
-            auto cIt = byId.find(cid);
-            if (cIt != byId.end()) cIt->second->addItem(itemId, count);
-        }
-        sqlite3_finalize(stmt);
-    }
-
-    // 4. 装备槽位：按物品池查加成并重新装配
-    const char* sqlEquip = "SELECT character_id, equip_slot, item_id FROM equipment WHERE slot_id = ?";
-    if (sqlite3_prepare_v2(db, sqlEquip, -1, &stmt, nullptr) == SQLITE_OK) {
-        sqlite3_bind_int(stmt, 1, slot);
-        while (sqlite3_step(stmt) == SQLITE_ROW) {
-            std::string cid = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-            int equipSlot = sqlite3_column_int(stmt, 1);
-            std::string itemId = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
-            auto cIt = byId.find(cid);
-            auto it = itemPool.find(itemId);
-            if (cIt != byId.end() && it != itemPool.end()) {
-                const Equipment* eq = dynamic_cast<const Equipment*>(it->second.get());
-                if (eq) {
-                    int bonus[4];
-                    eq->getStatBonus(bonus);
-                    cIt->second->equipItem(equipSlot, itemId, bonus);
-                }
-            }
-        }
-        sqlite3_finalize(stmt);
-    }
-
-    return party;
+    return info;
 }
 
-void SaveManager::saveParty(int slot, const std::vector<Combatant*>& party,
-                            const SkillPool& skillPool) const {
+void SaveManager::save(int slot, const std::vector<Combatant*>& party,
+                       const SkillPool& skillPool, const Meta& meta) const {
     if (!validSlot(slot)) return;
 
-    const char* insertChar =
-        "INSERT INTO characters (slot_id, id, name, level, hp, sp, exp, str, mag, endur, agi)"
-        " VALUES (?,?,?,?,?,?,?,?,?,?,?)";
-    const char* insertSkill = "INSERT INTO learned_skills (slot_id, character_id, slot, skill_id) VALUES (?,?,?,?)";
-    const char* insertItem = "INSERT INTO inventory (slot_id, character_id, item_id, count) VALUES (?,?,?,?)";
-    const char* insertEquip = "INSERT INTO equipment (slot_id, character_id, equip_slot, item_id) VALUES (?,?,?,?)";
+    std::string j;
+    j += "{\n";
+    j += "  \"scene\": " + std::to_string(meta.sceneId) + ",\n";
+    j += "  \"branch\": " + std::to_string(meta.branchId) + ",\n";
+    j += "  \"gold\": " + std::to_string(meta.gold) + ",\n";
+    j += "  \"party\": [\n";
 
-    sqlite3_exec(db, "BEGIN TRANSACTION", nullptr, nullptr, nullptr);
-    // 删除该存档位的旧记录（sqlite3_exec 不支持绑定参数，手动 prepare 绑定）
-    {
-        sqlite3_stmt* d = nullptr;
-        const char* dels[] = {
-            "DELETE FROM characters WHERE slot_id = ?",
-            "DELETE FROM learned_skills WHERE slot_id = ?",
-            "DELETE FROM inventory WHERE slot_id = ?",
-            "DELETE FROM equipment WHERE slot_id = ?",
-        };
-        for (const char* sql : dels) {
-            if (sqlite3_prepare_v2(db, sql, -1, &d, nullptr) == SQLITE_OK) {
-                sqlite3_bind_int(d, 1, slot);
-                sqlite3_step(d);
-                sqlite3_finalize(d);
-            }
-        }
-    }
+    for (size_t i = 0; i < party.size(); i++) {
+        const Combatant* c = party[i];
+        j += "    {\"id\": \"" + jsonEscape(c->getId()) + "\", ";
+        j += "\"name\": \"" + jsonEscape(c->getName()) + "\", ";
+        j += "\"level\": " + std::to_string(c->getLevel()) + ", ";
+        j += "\"hp\": " + std::to_string(c->getHP()) + ", ";
+        j += "\"sp\": " + std::to_string(c->getSP()) + ", ";
+        j += "\"exp\": " + std::to_string(c->getExp()) + ", ";
+        j += "\"str\": " + std::to_string(c->getBaseStat(0)) + ", ";
+        j += "\"mag\": " + std::to_string(c->getBaseStat(1)) + ", ";
+        j += "\"end\": " + std::to_string(c->getBaseStat(2)) + ", ";
+        j += "\"agi\": " + std::to_string(c->getBaseStat(3)) + ", ";
 
-    for (const auto& c : party) {
-        runStatement(db, insertChar, [&](sqlite3_stmt* stmt) {
-            sqlite3_bind_int(stmt, 1, slot);
-            sqlite3_bind_text(stmt, 2, c->getId().c_str(), -1, SQLITE_TRANSIENT);
-            sqlite3_bind_text(stmt, 3, c->getName().c_str(), -1, SQLITE_TRANSIENT);
-            sqlite3_bind_int(stmt, 4, c->getLevel());
-            sqlite3_bind_int(stmt, 5, c->getHP());
-            sqlite3_bind_int(stmt, 6, c->getSP());
-            sqlite3_bind_int(stmt, 7, c->getExp());
-            // 存基础属性（不含装备加成），装备由 equipment 表单独保存
-            for (int i = 0; i < 4; i++) sqlite3_bind_int(stmt, 8 + i, c->getBaseStat(i));
-        });
-
-        int skillSlot = 0;
+        // 技能
+        j += "\"skills\": [";
+        bool first = true;
         for (auto* s : c->getSkills()) {
-            std::string skillId = findSkillId(skillPool, s);
-            if (skillId.empty()) continue;
-            runStatement(db, insertSkill, [&](sqlite3_stmt* stmt) {
-                sqlite3_bind_int(stmt, 1, slot);
-                sqlite3_bind_text(stmt, 2, c->getId().c_str(), -1, SQLITE_TRANSIENT);
-                sqlite3_bind_int(stmt, 3, skillSlot);
-                sqlite3_bind_text(stmt, 4, skillId.c_str(), -1, SQLITE_TRANSIENT);
-            });
-            skillSlot++;
+            std::string sid = findSkillId(skillPool, s);
+            if (sid.empty()) continue;
+            if (!first) j += ", ";
+            j += "\"" + jsonEscape(sid) + "\"";
+            first = false;
         }
+        j += "], ";
 
+        // 背包
+        j += "\"items\": {";
+        first = true;
         for (const auto& kv : c->getInventory()) {
-            runStatement(db, insertItem, [&](sqlite3_stmt* stmt) {
-                sqlite3_bind_int(stmt, 1, slot);
-                sqlite3_bind_text(stmt, 2, c->getId().c_str(), -1, SQLITE_TRANSIENT);
-                sqlite3_bind_text(stmt, 3, kv.first.c_str(), -1, SQLITE_TRANSIENT);
-                sqlite3_bind_int(stmt, 4, kv.second);
-            });
+            if (!first) j += ", ";
+            j += "\"" + jsonEscape(kv.first) + "\": " + std::to_string(kv.second);
+            first = false;
         }
+        j += "}, ";
 
+        // 装备槽位（只存非空槽）
+        j += "\"equip\": {";
+        first = true;
         for (int es = 0; es < 4; es++) {
             const std::string& itemId = c->getEquippedItemId(es);
             if (itemId.empty()) continue;
-            runStatement(db, insertEquip, [&](sqlite3_stmt* stmt) {
-                sqlite3_bind_int(stmt, 1, slot);
-                sqlite3_bind_text(stmt, 2, c->getId().c_str(), -1, SQLITE_TRANSIENT);
-                sqlite3_bind_int(stmt, 3, es);
-                sqlite3_bind_text(stmt, 4, itemId.c_str(), -1, SQLITE_TRANSIENT);
-            });
+            if (!first) j += ", ";
+            j += "\"" + std::to_string(es) + "\": \"" + jsonEscape(itemId) + "\"";
+            first = false;
         }
+        j += "}}";
+        if (i + 1 < party.size()) j += ",";
+        j += "\n";
     }
 
-    sqlite3_exec(db, "COMMIT", nullptr, nullptr, nullptr);
+    j += "  ]\n";
+    j += "}\n";
+
+    std::filesystem::create_directories(dir_);
+    std::ofstream out(path(slot), std::ios::binary);
+    if (!out) throw std::runtime_error("无法写入存档: " + path(slot));
+    out << j;
 }
 
-void SaveManager::saveParty(int slot, const std::vector<std::unique_ptr<Combatant>>& party,
-                            const SkillPool& skillPool) const {
+void SaveManager::save(int slot, const std::vector<std::unique_ptr<Combatant>>& party,
+                       const SkillPool& skillPool, const Meta& meta) const {
     std::vector<Combatant*> ptrs;
     ptrs.reserve(party.size());
     for (const auto& p : party) ptrs.push_back(p.get());
-    saveParty(slot, ptrs, skillPool);
+    save(slot, ptrs, skillPool, meta);
 }
 
-void SaveManager::saveMeta(int slot, const Meta& meta) const {
-    if (!validSlot(slot)) return;
-    runStatement(db,
-        "INSERT INTO meta (slot_id, scene_id, branch_id, gold) VALUES (?,?,?,?)"
-        " ON CONFLICT(slot_id) DO UPDATE SET scene_id=excluded.scene_id,"
-        " branch_id=excluded.branch_id, gold=excluded.gold",
-        [&](sqlite3_stmt* stmt) {
-            sqlite3_bind_int(stmt, 1, slot);
-            sqlite3_bind_int(stmt, 2, meta.sceneId);
-            sqlite3_bind_int(stmt, 3, meta.branchId);
-            sqlite3_bind_int(stmt, 4, meta.gold);
-        });
-}
+SaveManager::SaveData SaveManager::load(int slot, const SkillPool& skillPool,
+                                        const ItemPool& itemPool) const {
+    SaveData data;
+    if (!validSlot(slot)) return data;
 
-SaveManager::Meta SaveManager::loadMeta(int slot) const {
-    Meta meta;
-    if (!validSlot(slot)) return meta;
-    sqlite3_stmt* stmt = nullptr;
-    if (sqlite3_prepare_v2(db, "SELECT scene_id, branch_id, gold FROM meta WHERE slot_id = ?", -1, &stmt, nullptr) == SQLITE_OK) {
-        sqlite3_bind_int(stmt, 1, slot);
-        if (sqlite3_step(stmt) == SQLITE_ROW) {
-            meta.sceneId = sqlite3_column_int(stmt, 0);
-            meta.branchId = sqlite3_column_int(stmt, 1);
-            meta.gold = sqlite3_column_int(stmt, 2);
+    std::string text = readFile(path(slot));
+    if (text.empty()) return data;
+
+    json::Value root = json::Value::parse(text);
+    data.meta.sceneId = root["scene"].asInt();
+    data.meta.branchId = root["branch"].asInt();
+    data.meta.gold = root["gold"].asInt();
+
+    const json::Value& party = root["party"];
+    for (size_t i = 0; i < party.size(); i++) {
+        const json::Value& c = party[i];
+        std::string id = c["id"].asString();
+        std::string name = c["name"].asString();
+        int stats[4] = { c["str"].asInt(), c["mag"].asInt(), c["end"].asInt(), c["agi"].asInt() };
+
+        auto combatant = std::make_unique<Combatant>(
+            name, c["level"].asInt(), c["hp"].asInt(), c["sp"].asInt(), c["exp"].asInt(),
+            stats, std::vector<SkillBase*>{}, std::unordered_map<std::string, int>{}, id);
+
+        if (c.has("skills")) {
+            const json::Value& sk = c["skills"];
+            for (size_t k = 0; k < sk.size(); k++) {
+                auto it = skillPool.find(sk[k].asString());
+                if (it != skillPool.end()) combatant->addSkill(it->second.get());
+            }
         }
+        if (c.has("items")) {
+            const json::Value& items = c["items"];
+            for (const auto& key : items.keys()) combatant->addItem(key, items[key].asInt());
+        }
+        if (c.has("equip")) {
+            const json::Value& equip = c["equip"];
+            for (const auto& key : equip.keys()) {
+                int es = std::stoi(key);
+                std::string itemId = equip[key].asString();
+                auto it = itemPool.find(itemId);
+                if (it != itemPool.end()) {
+                    const Equipment* eq = dynamic_cast<const Equipment*>(it->second.get());
+                    if (eq) {
+                        int bonus[4];
+                        eq->getStatBonus(bonus);
+                        combatant->equipItem(es, itemId, bonus);
+                    }
+                }
+            }
+        }
+        data.party.push_back(std::move(combatant));
     }
-    sqlite3_finalize(stmt);
-    return meta;
+    return data;
 }
 
 void SaveManager::resetSave(int slot) const {
     if (!validSlot(slot)) return;
-    sqlite3_exec(db, "BEGIN TRANSACTION", nullptr, nullptr, nullptr);
-    sqlite3_stmt* d = nullptr;
-    const char* dels[] = {
-        "DELETE FROM meta WHERE slot_id = ?",
-        "DELETE FROM characters WHERE slot_id = ?",
-        "DELETE FROM learned_skills WHERE slot_id = ?",
-        "DELETE FROM inventory WHERE slot_id = ?",
-        "DELETE FROM equipment WHERE slot_id = ?",
-    };
-    for (const char* sql : dels) {
-        if (sqlite3_prepare_v2(db, sql, -1, &d, nullptr) == SQLITE_OK) {
-            sqlite3_bind_int(d, 1, slot);
-            sqlite3_step(d);
-            sqlite3_finalize(d);
-        }
-    }
-    sqlite3_exec(db, "COMMIT", nullptr, nullptr, nullptr);
+    std::error_code ec;
+    std::filesystem::remove(path(slot), ec);
 }

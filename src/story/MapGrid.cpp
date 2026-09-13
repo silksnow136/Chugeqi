@@ -197,8 +197,25 @@ void MapGrid::render() const {
 
     console::setColor(14);
     std::cout << "-------------------------------" << std::endl;
+    // 图例：直接染色，去掉“（绿）/（红）”等颜色文字
+    auto legend = [](int color, const std::string& word, const std::string& meaning, bool last = false) {
+        console::setColor(color);
+        std::cout << word;
+        console::setColor(7);
+        std::cout << "→" << meaning;
+        if (!last) std::cout << "  ";
+    };
+    legend(12, "项羽", "玩家");
+    legend(10, "友方", "对话");
+    legend(12, "敌方", "战斗");
+    legend(11, "药店", "购买");
+    legend(13, "铁匠", "锻造");
+    legend(13, "帅帐", "下一幕");
+    legend(14, "门", "通行");
+    console::setColor(8);
+    std::cout << "█";
     console::setColor(7);
-    std::cout << "WASD: 移动  |  项羽=玩家  友方(绿)→对话  敌方(红)→战斗  药店(青)→购买  铁匠(紫)→锻造  帅帐(紫)→下一幕  门(黄)→通行  █=墙" << std::endl;
+    std::cout << "=墙" << std::endl;
     std::cout << "> ";
 
     console::setCursorVisible(true);

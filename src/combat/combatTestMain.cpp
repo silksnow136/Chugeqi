@@ -11,13 +11,14 @@ int main() {
         GameData gameData = DataLoader::loadGameData("data/");
 
         // 2. 存档（SQLite，玩家运行时状态）
-        SaveManager save("save.db");
+        SaveManager save("saves");
 
-        // 3. 我方队伍：优先从存档加载；首次运行从 JSON 模板建档并落库
-        std::vector<std::unique_ptr<Combatant>> party = save.loadParty(1, gameData.skillPool, gameData.itemPool);
+        // 3. 我方队伍：优先从存档加载；首次运行从 JSON 模板建档并落盘
+        auto saveData = save.load(1, gameData.skillPool, gameData.itemPool);
+        std::vector<std::unique_ptr<Combatant>> party = std::move(saveData.party);
         if (party.empty()) {
             party = DataLoader::loadPartyTemplates("data/battle_test.json", gameData.skillPool);
-            save.saveParty(1, party, gameData.skillPool);
+            save.save(1, party, gameData.skillPool);
         }
 
         // 4. 敌方与配置（JSON 模板，每场战斗单独加载）
@@ -33,7 +34,7 @@ int main() {
         combat.startBattle();
 
         // 5. 战斗结束，把队伍最新状态写回存档
-        save.saveParty(1, party, gameData.skillPool);
+        save.save(1, party, gameData.skillPool);
 
         // 6. 询问是否重置存档（避免反复测试导致等级不断上升）
         console::init();

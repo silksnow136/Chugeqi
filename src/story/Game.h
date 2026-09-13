@@ -20,6 +20,13 @@ public:
     ItemPool& getItemPool();
     int& getGold();
 
+    // 存档 / 读档（slot 1~2，供命令层与地图场景调用）
+    void doSave(int slot);
+    void doLoad(int slot);
+
+    // 存读档界面（清屏显示槽位与信息，单键操作；返回 true 表示发生了读档）
+    bool saveMenu();
+
 private:
     bool running = true;
 
@@ -29,9 +36,7 @@ private:
     void showWelcome();
     void showHelp();
 
-    // 存档 / 读档（slot 1~2）
-    void doSave(int slot);
-    void doLoad(int slot);
+    bool slotMenu(int slot);
 
     int scene_id = 0;
 
