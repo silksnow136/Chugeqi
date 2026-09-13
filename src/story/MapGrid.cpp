@@ -9,9 +9,10 @@ static const int CELL_WIDTH = 4;
 
 static const std::string EMPTY_DISP = "    ";     // 4 空格
 static const std::string WALL_DISP  = "████";     // 4 个全块
-static const std::string ROOM_WALL  = "====";     // 帐墙
-static const std::string FENCE_DISP = "║║";       // 栅栏（2 列 + 2 空格对齐）
-static const std::string CHEVAL_DISP = "╳╳ ";      // 拒马
+static const std::string ROOM_WALL  = "====";     // 帐墙（横边）
+static const std::string ROOM_WALL_V = "| | ";    // 帐墙（竖边）
+static const std::string FENCE_DISP = "####";       // 栅栏
+static const std::string CHEVAL_DISP = "╳╳╳╳ ";      // 拒马
 static const std::string WATER_DISP = "~~~~";      // 水域
 
 // 计算 UTF-8 字符串的控制台显示宽度
@@ -78,12 +79,12 @@ void MapGrid::buildRoom(int r1, int c1, int r2, int c2, int doorCol) {
         if (c != doorCol && isValid(r2, c))
             grid[r2][c] = Tile(ROOM_WALL, TileType::WALL);
     }
-    // 左右墙
-    for (int r = r1; r <= r2; r++) {
+    // 左右墙（竖边，跳过四个角，角由上下墙的横边材质覆盖）
+    for (int r = r1 + 1; r <= r2 - 1; r++) {
         if (isValid(r, c1))
-            grid[r][c1] = Tile(ROOM_WALL, TileType::WALL);
+            grid[r][c1] = Tile(ROOM_WALL_V, TileType::WALL);
         if (isValid(r, c2))
-            grid[r][c2] = Tile(ROOM_WALL, TileType::WALL);
+            grid[r][c2] = Tile(ROOM_WALL_V, TileType::WALL);
     }
     // 门：放在上下墙的 doorCol 位置，设为 DOOR 类型
     if (isValid(r1, doorCol))
@@ -94,7 +95,8 @@ void MapGrid::buildRoom(int r1, int c1, int r2, int c2, int doorCol) {
     // 内部清空
     for (int r = r1 + 1; r < r2; r++)
         for (int c = c1 + 1; c < c2; c++)
-            if (isValid(r, c) && grid[r][c].type == TileType::WALL && grid[r][c].display == ROOM_WALL)
+            if (isValid(r, c) && grid[r][c].type == TileType::WALL &&
+                (grid[r][c].display == ROOM_WALL || grid[r][c].display == ROOM_WALL_V))
                 grid[r][c] = Tile(EMPTY_DISP, TileType::EMPTY);
 }
 
