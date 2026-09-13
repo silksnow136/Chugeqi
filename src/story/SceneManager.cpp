@@ -4,7 +4,6 @@
 #include"map.h"
 #include "TalkManager.h"
 #include "PharManager.h"
-#include "ForgeManager.h"
 #include "BackGround.h"
 #include "SceneMap.h"
 #include "core/console.h"
@@ -101,7 +100,7 @@ void SceneManager::changeScene(int scene_id)
 
 //场景功能显示管理 —— 使用网格地图 + WASD 移动交互
 void SceneManager::showSceneManager(int scene_id, int branch_id) {
-	// 运行网格地图交互（走向 NPC 触发对话/药店/锻造/战斗，ESC 退出）
+	// 运行网格地图交互（走向 NPC 触发对话/药店/战斗，ESC 退出）
 	SceneMap::runSceneMap(game, *this, scene_id, branch_id);
 	// 退出地图后，恢复到命令层
 	current_state = SceneState::ORIGIN_SCENE;
@@ -111,7 +110,6 @@ void SceneManager::showSceneManager(int scene_id, int branch_id) {
 void choiceList_01() {
 	cout << "1. 对话\n";
 	cout << "2. 药房\n";
-	cout << "3. 锻造\n";
 	cout << "\n输入w继续游戏\n";
 }
 
@@ -179,15 +177,7 @@ void SceneManager::enterPharmacy(Game& game1) {
 	pharManager->phar(game1.getPlayer());
 }
 
-// 进入锻造系统（供地图移动交互调用）
-void SceneManager::enterForge() {
-	ForgeManager fm;
-	fm.forge();
-	std::cout << "按任意键返回地图" << std::endl;
-	console::pause();
-}
-
-//场景功能管理,1对话系统+命令系统；2药店系统；3锻造系统
+//场景功能管理,1对话系统+命令系统；2药店系统
 void SceneManager::sceneManager(Game& game1, int branch_id) {
 	string sceneCommand;
 	scene = true;
@@ -205,7 +195,7 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 
 			cout << "\n> ";
 			cin >> sceneCommand;
-			if (sceneCommand == "1" || sceneCommand == "2" || sceneCommand == "3") {
+			if (sceneCommand == "1" || sceneCommand == "2") {
 				int num = stoi(sceneCommand);//将string转化为int
 				switch (num) {
 				case 1:
@@ -218,13 +208,6 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 					current_state = SceneState::PHARMACY;
 					//药店未制作！！！！！！！！！！！！！！！！！！！！！
 					//不要在这里添加，这里只负责进入药店系统
-					break;
-
-				case 3:
-					// 进入锻造
-					current_state = SceneState::FORGE;
-					//锻造未制作！！！！！！！！！！！！！！！！
-					//不要在这里添加，这里只负责进入锻造系统
 					break;
 				}
 			}
@@ -281,19 +264,6 @@ void SceneManager::sceneManager(Game& game1, int branch_id) {
 
 			pharManager->phar(game1.getPlayer());
 
-			current_state = SceneState::ORIGIN_SCENE;
-
-			break;
-
-			//锻造
-		case SceneState::FORGE:
-
-			refreshScene(branch_id);
-
-			void forge();
-			cout << "输入任意数字返回。\n";
-			cin >> sceneCommand;
-			//别忘记加入if/else输入指令
 			current_state = SceneState::ORIGIN_SCENE;
 
 			break;

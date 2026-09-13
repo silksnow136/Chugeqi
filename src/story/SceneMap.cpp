@@ -4,7 +4,6 @@
 #include "SceneManager.h"
 #include "TalkManager.h"
 #include "PharManager.h"
-#include "ForgeManager.h"
 #include "core/console.h"
 #include "data/dataLoader.h"
 #include "combat/combatSystem.h"
@@ -78,7 +77,6 @@ static void buildGaiXia(MapGrid& grid) {
 
     // 功能建筑
     grid.setTile(26, 5, "军医", TileType::PHARMACY, "军医");
-    grid.setTile(26, 19, "铁匠", TileType::FORGE, "铁匠");
 
     // 物品
     grid.setTile(20, 12, "木炭", TileType::ITEM, "木炭");
@@ -187,7 +185,6 @@ static void buildHuaiRiver(MapGrid& grid) {
     grid.setTile(34, 8, "灌婴", TileType::ENEMY, "灌婴");
 
     grid.setTile(6, 22, "农舍", TileType::PHARMACY, "农舍（草药）");
-    grid.setTile(30, 5, "残帐", TileType::FORGE, "残帐（修补）");
 
     // 跳转点：北渡淮河后前往东城
     grid.setTile(15, 12, "北渡", TileType::ADVANCE, "北渡");
@@ -307,7 +304,6 @@ static void buildDongcheng(MapGrid& grid) {
     grid.setTile(10, 13, "楚酒", TileType::ITEM, "楚酒（残）");
 
     grid.setTile(3, 3, "野帐", TileType::PHARMACY, "野战医帐");
-    grid.setTile(3, 23, "残炉", TileType::FORGE, "野战铁炉");
 
     grid.setTile(26, 13, "突围", TileType::ADVANCE, "突围");
 }
@@ -355,7 +351,6 @@ static void buildWujiang(MapGrid& grid) {
     grid.setTile(24, 18, "王翳", TileType::ENEMY, "王翳");
 
     grid.setTile(22, 5, "篝火", TileType::PHARMACY, "残火（疗伤）");
-    grid.setTile(22, 21, "石砧", TileType::FORGE, "石砧（磨剑）");
 }
 
 MapGrid buildSceneMap(int scene_id, int) {
@@ -738,15 +733,6 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
             std::cout << "===== " << name << " =====" << std::endl;
             console::setColor(7);
             sm.enterPharmacy(game);
-        };
-
-        // 锻造
-        grid.onForge = [&](const std::string& name) {
-            console::clearScreen();
-            console::setColor(13);
-            std::cout << "===== " << name << " =====" << std::endl;
-            console::setColor(7);
-            sm.enterForge();
         };
 
         // 战斗

@@ -7,7 +7,7 @@
 //   - 每格固定占 4 个控制台列宽（= 2 个中文字符），不足补空格
 //   - 玩家（项羽）用 WASD 移动，每次移动一格
 //   - 不能越过边界墙，不能覆盖其他文字单位
-//   - 试图覆盖单位时触发交互：友方→对话，敌方→战斗，药店→购买，铁匠铺→锻造，物品→拾取
+//   - 试图覆盖单位时触发交互：友方→对话，敌方→战斗，药店→购买，物品→拾取
 //   - 门(DOOR)可通行，玩家走过后恢复原样
 // ---------------------------------------------------------------------------
 
@@ -24,7 +24,6 @@ enum class TileType {
     FRIEND,     // 友方单位 → 触发对话
     ENEMY,      // 敌方单位 → 触发战斗
     PHARMACY,   // 药店 → 触发购买
-    FORGE,      // 铁匠铺 → 触发锻造
     DOOR,       // 门 → 可通行，走过后恢复
     ITEM,       // 物品 → 拾取后消失
     ADVANCE,    // 跳转点 → 触发幕次跳转（帅帐/渡口等）
@@ -92,7 +91,6 @@ public:
     std::function<void(const std::string&)> onTalk;
     std::function<void(const std::string&)> onBattle;
     std::function<void(const std::string&)> onPharmacy;
-    std::function<void(const std::string&)> onForge;
     std::function<void(const std::string&)> onItem;
     std::function<void(const std::string&)> onAdvance;   // 幕次跳转
     std::function<void(const std::string&, int)> onPortal;    // 传送门（目标地名, 传送门方向）

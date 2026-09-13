@@ -33,7 +33,6 @@ int main(int argc, char* argv[]) {
     grid.buildRoom( 19, 3, 23, 10, 6);   // 伤兵营
     grid.buildRoom( 19, 17, 22, 23, 19); // 伙房
     grid.buildRoom( 25, 3, 28, 8, 5);    // 医帐
-    grid.buildRoom( 25, 17, 28, 23, 19); // 铁匠铺
 
     // ===== 南北壁垒（栅栏）=====
     grid.buildFence( 2, 3, 24, 13, 14);
@@ -75,9 +74,8 @@ int main(int argc, char* argv[]) {
     grid.setTile(21, 16, "士兵", TileType::FRIEND, "士兵");
     grid.setTile(13, 19, "旗杆", TileType::FRIEND, "旗杆");
 
-    // ===== 功能建筑（PHARMACY / FORGE）=====
+    // ===== 功能建筑（PHARMACY）=====
     grid.setTile(26, 5, "军医", TileType::PHARMACY, "军医");
-    grid.setTile(26, 19, "铁匠", TileType::FORGE, "铁匠");
 
     // ===== 物品（拾取后消失）=====
     grid.setTile(20, 12, "木炭", TileType::ITEM, "木炭");
@@ -149,15 +147,6 @@ int main(int argc, char* argv[]) {
         console::setColor(7);
         std::cout << "军医：“将军负伤了？让在下看看。”" << std::endl;
         std::cout << "（治疗功能占位 —— 后续接 HP 恢复）" << std::endl;
-        console::pause();
-    };
-
-    grid.onForge = [](const std::string& name) {
-        console::setColor(13);
-        std::cout << "\n===== " << name << " =====" << std::endl;
-        console::setColor(7);
-        std::cout << "铁匠：“霸王枪卷刃了？让小的打磨一番。”" << std::endl;
-        std::cout << "（锻造功能占位 —— 后续接装备强化）" << std::endl;
         console::pause();
     };
 

@@ -257,8 +257,6 @@ void MapGrid::render() const {
                     console::setColor(12); break;
                 case TileType::PHARMACY:
                     console::setColor(11); break;
-                case TileType::FORGE:
-                    console::setColor(13); break;
                 case TileType::DOOR:
                     console::setColor(14); break;
                 case TileType::ITEM:
@@ -289,7 +287,6 @@ void MapGrid::render() const {
     legend(10, "友方", "对话");
     legend(12, "敌方", "战斗");
     legend(11, "药店", "购买");
-    legend(13, "铁匠", "锻造");
     legend(13, "帅帐", "下一幕");
     legend(14, "门", "通行");
     legend(11, "传送门", "切换地图");
@@ -398,7 +395,6 @@ void MapGrid::triggerInteraction(TileType type, const std::string& name) {
         case TileType::FRIEND:  if (onTalk) onTalk(name); break;
         case TileType::ENEMY:   if (onBattle) onBattle(name); break;
         case TileType::PHARMACY: if (onPharmacy) onPharmacy(name); break;
-        case TileType::FORGE:   if (onForge) onForge(name); break;
         case TileType::ITEM:    if (onItem) onItem(name); break;
         default: break;
     }

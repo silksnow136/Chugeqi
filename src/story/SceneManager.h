@@ -10,7 +10,6 @@ using namespace std;
 
 class Game;
 class PharManager;
-class ForgeManager;
 
 class SceneManager {
 public:
@@ -23,8 +22,7 @@ public:
 	{
 		ORIGIN_SCENE,	//当前场景
 		TALK,			//进入对话系统,选择角色对话
-		PHARMACY,		//进入药店
-		FORGE			//进入锻造
+		PHARMACY		//进入药店
 	};
 
 	void ShowBackground(int scene_id);
@@ -41,8 +39,6 @@ public:
 	// 进入药店系统（供地图移动交互调用）
 	void enterPharmacy(Game& game1);
 
-	// 进入锻造系统（供地图移动交互调用）
-	void enterForge();
 	//初步剧情存档,获得当前场景id
 	int showScene_id();
 	// 获得当前分支id（第二幕 A/B）
@@ -51,7 +47,7 @@ public:
 	void changeScene(int scene_id);
 	//场景功能显示管理
 	void showSceneManager(int scene_id = 0, int branch_id = 0);
-	//场景功能管理,1对话系统以及对话分支+指令系统；2.药店系统；3.锻造系统
+	//场景功能管理,1对话系统以及对话分支+指令系统；2.药店系统
 	void sceneManager(Game& game1, int branch_id);
 
 	void nextLine();
@@ -79,7 +75,6 @@ private:
 	TalkManager talkManager;
 	QuestState questState;   // 支线任务状态
 	unique_ptr<PharManager> pharManager;
-	ForgeManager* forgeManager = nullptr;
 
 	// 当前场景ID
 	int current_scene_id = 0;

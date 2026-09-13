@@ -76,7 +76,6 @@ int main(int argc, char* argv[]) {
 
     // ===== 功能 =====
     grid.setTile(22, 5, "篝火", TileType::PHARMACY, "残火（疗伤）");
-    grid.setTile(22, 21, "石砧", TileType::FORGE, "石砧（磨剑）");
 
     // ===== 交互回调 =====
     grid.onTalk = [](const std::string& name) {
@@ -132,15 +131,6 @@ int main(int argc, char* argv[]) {
         std::cout << "\n===== " << name << " =====" << std::endl;
         console::setColor(7);
         std::cout << "残火尚暖，最后疗伤的机会。" << std::endl;
-        console::pause();
-    };
-
-    grid.onForge = [](const std::string& name) {
-        console::setColor(13);
-        std::cout << "\n===== " << name << " =====" << std::endl;
-        console::setColor(7);
-        std::cout << "石砧上磨剑，锋刃映着乌江波光。" << std::endl;
-        std::cout << "项羽：“今日当以此剑，全霸王之名。”" << std::endl;
         console::pause();
     };
 

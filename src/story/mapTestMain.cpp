@@ -7,8 +7,7 @@
 //   3. 碰到友方单位 → 触发对话
 //   4. 碰到敌方单位 → 触发战斗（接入真实 CombatSystem）
 //   5. 碰到药店 → 触发购买（占位）
-//   6. 碰到铁匠铺 → 触发锻造（占位）
-//   7. 按 ESC 退出测试
+//   6. 按 ESC 退出测试
 // ---------------------------------------------------------------------------
 
 #include "story/MapGrid.h"
@@ -97,9 +96,6 @@ int main() {
         // 放置药店
         grid.setTile(10, 8, "药店", TileType::PHARMACY, "军营药店");
 
-        // 放置铁匠铺
-        grid.setTile(2, 8, "铁匠", TileType::FORGE, "军营铁匠");
-
         // 设置交互回调
         grid.onTalk = [](const std::string& name) {
             console::setColor(10);
@@ -121,15 +117,6 @@ int main() {
             console::setColor(7);
             std::cout << "药铺老板：将军要买些金创药吗？" << std::endl;
             std::cout << "（药店系统占位 —— 后续接入 PharManager）" << std::endl;
-            console::pause();
-        };
-
-        grid.onForge = [](const std::string& name) {
-            console::setColor(13);
-            std::cout << "\n===== 进入 " << name << " =====" << std::endl;
-            console::setColor(7);
-            std::cout << "铁匠：将军的兵器可要打磨一番？" << std::endl;
-            std::cout << "（锻造系统占位 —— 后续接入 ForgeManager）" << std::endl;
             console::pause();
         };
 

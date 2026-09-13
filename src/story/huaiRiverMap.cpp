@@ -84,7 +84,6 @@ int main(int argc, char* argv[]) {
 
     // ===== 功能建筑 =====
     grid.setTile(6, 22, "农舍", TileType::PHARMACY, "农舍（草药）");
-    grid.setTile(30, 5, "残帐", TileType::FORGE, "残帐（修补）");
 
     // ===== 交互回调 =====
     grid.onTalk = [](const std::string& name) {
@@ -133,14 +132,6 @@ int main(int argc, char* argv[]) {
         std::cout << "\n===== " << name << " =====" << std::endl;
         console::setColor(7);
         std::cout << "农人：“采了些止血草，将军拿去。”" << std::endl;
-        console::pause();
-    };
-
-    grid.onForge = [](const std::string& name) {
-        console::setColor(13);
-        std::cout << "\n===== " << name << " =====" << std::endl;
-        console::setColor(7);
-        std::cout << "军士在残帐中修补甲胄。" << std::endl;
         console::pause();
     };
 

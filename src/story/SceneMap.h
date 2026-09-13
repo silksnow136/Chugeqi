@@ -5,7 +5,6 @@
 // 用 MapGrid 网格地图 + WASD 移动替换 map.cpp 中的简易 ASCII 地图。
 // 走向友方 NPC → 触发对话（TalkManager）
 // 走向药店    → 触发购买（PharManager）
-// 走向铁匠铺  → 触发锻造（ForgeManager）
 // 走向敌方    → 触发战斗（CombatSystem）
 // 走向物品    → 拾取
 // 按 ESC      → 退出场景地图，返回命令层
