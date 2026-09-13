@@ -27,13 +27,18 @@ enum class TileType {
     FORGE,      // 铁匠铺 → 触发锻造
     DOOR,       // 门 → 可通行，走过后恢复
     ITEM,       // 物品 → 拾取后消失
-    ADVANCE     // 跳转点 → 触发幕次跳转（帅帐/渡口等）
+    ADVANCE,    // 跳转点 → 触发幕次跳转（帅帐/渡口等）
+    PORTAL      // 传送门 → 切换地图（营外荒郊/阴陵地牢）
 };
+
+// 传送门朝向（箭头方向 = 传送去向）
+enum class PortalDir { Up, Down, Left, Right };
 
 struct Tile {
     std::string display;    // 显示字符串
     TileType type = TileType::EMPTY;
-    std::string name;       // 单位名称
+    std::string name;       // 单位名称 / 传送目标地图名
+    PortalDir portalDir = PortalDir::Up;  // 仅 PORTAL 使用
 
     Tile() = default;
     Tile(const std::string& d, TileType t, const std::string& n = "")
@@ -79,6 +84,9 @@ public:
     // 放置水域（横向 length 格）
     void buildWater(int r, int c, int length);
 
+    // 建造传送门：(r,c) 为箭头格，左侧 (r,c-1) 为门框条；target=目标地图名
+    void buildPortal(int r, int c, PortalDir dir, const std::string& target, int unused = 0);
+
     // 交互回调
     std::function<void(const std::string&)> onTalk;
     std::function<void(const std::string&)> onBattle;
@@ -86,9 +94,14 @@ public:
     std::function<void(const std::string&)> onForge;
     std::function<void(const std::string&)> onItem;
     std::function<void(const std::string&)> onAdvance;   // 幕次跳转
+    std::function<void(const std::string&)> onPortal;    // 地图传送（参数=目标地图名）
 
     // 跳转回调是否已触发（用于通知外部循环退出）
     bool advanceTriggered = false;
+
+    // 传送是否触发 / 目标地图（回调内可置 false 阻止传送）
+    bool portalTriggered = false;
+    std::string portalTarget;
 
 private:
     std::vector<std::vector<Tile>> grid;

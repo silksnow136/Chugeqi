@@ -4,6 +4,7 @@
 //负责显示场景以及场景交互
 #include "data/dataLoader.h"
 #include "TalkManager.h"
+#include "QuestState.h"
 #include <memory>
 using namespace std;
 
@@ -33,6 +34,9 @@ public:
 
 	// 获取对话管理器（供地图移动交互调用）
 	TalkManager& getTalkManager() { return talkManager; }
+
+	// 支线任务进度（军心/委托/阴陵地牢 flag，跨场景共享）
+	QuestState& getQuestState() { return questState; }
 
 	// 进入药店系统（供地图移动交互调用）
 	void enterPharmacy(Game& game1);
@@ -73,6 +77,7 @@ private:
 	Game& game;
 
 	TalkManager talkManager;
+	QuestState questState;   // 支线任务状态
 	unique_ptr<PharManager> pharManager;
 	ForgeManager* forgeManager = nullptr;
 

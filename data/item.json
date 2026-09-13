@@ -129,5 +129,18 @@
     "category": "equipment",
     "slot": "armor",
     "bonus": [0, 0, 1, 0]
+  },
+  "herb": {
+    "name": "草药",
+    "description": "荒郊采来的草药，可疗伤解毒。",
+    "price": 10,
+    "category": "potion",
+    "healHP": 15
+  },
+  "fodder": {
+    "name": "草料",
+    "description": "优质草料，喂饱战马可壮脚力。",
+    "price": 10,
+    "category": "material"
   }
 }

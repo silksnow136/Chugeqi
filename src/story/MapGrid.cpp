@@ -136,6 +136,26 @@ void MapGrid::buildWater(int r, int c, int length) {
     }
 }
 
+void MapGrid::buildPortal(int r, int c, PortalDir dir, const std::string& target, int) {
+    if (!isValid(r, c)) return;
+    const char* arrow = "↑";
+    switch (dir) {
+        case PortalDir::Up:    arrow = "↑"; break;
+        case PortalDir::Down:  arrow = "↓"; break;
+        case PortalDir::Left:  arrow = "←"; break;
+        case PortalDir::Right: arrow = "→"; break;
+    }
+    Tile t(arrow, TileType::PORTAL, target);
+    t.portalDir = dir;
+    grid[r][c] = t;
+    // 门框条在箭头左侧
+    if (isValid(r, c - 1) && grid[r][c-1].type != TileType::PLAYER) {
+        Tile bar("══", TileType::PORTAL, target);
+        bar.portalDir = dir;
+        grid[r][c-1] = bar;
+    }
+}
+
 // =========================================================================
 // 设置
 // =========================================================================
@@ -195,6 +215,8 @@ void MapGrid::render() const {
                     console::setColor(14); break;
                 case TileType::ADVANCE:
                     console::setColor(13); break;  // 跳转点=紫色高亮
+                case TileType::PORTAL:
+                    console::setColor(15); break;  // 传送门=亮白
                 default:
                     console::setColor(7);  break;
             }
@@ -288,6 +310,16 @@ bool MapGrid::move(char direction) {
         interactionName = target.name;
         if (onAdvance) onAdvance(target.name);
         // 仅在 onAdvance 内部确认跳转时才置 advanceTriggered
+        return true;
+    }
+
+    // 传送门：不移动，触发地图切换（回调可置 portalTriggered=false 阻止）
+    if (target.type == TileType::PORTAL) {
+        interactionType = target.type;
+        interactionName = target.name;
+        portalTarget = target.name;
+        portalTriggered = true;
+        if (onPortal) onPortal(target.name);
         return true;
     }
 
