@@ -28,7 +28,8 @@ static int displayWidth(const std::string& s) {
             unsigned cp = ((c & 0x0F) << 12) |
                           ((static_cast<unsigned char>(s[i-2]) & 0x3F) << 6) |
                           (static_cast<unsigned char>(s[i-1]) & 0x3F);
-            width += (cp >= 0x2500 && cp <= 0x257F) ? 1 : 2;
+            width += (cp >= 0x2190 && cp <= 0x2193) ? 1 :
+                     (cp >= 0x2500 && cp <= 0x259F) ? 1 : 2;
         }
         else                 { width += 2; i += 4; }
     }
@@ -39,6 +40,38 @@ static std::string padToWidth(const std::string& s, int targetWidth) {
     int dw = displayWidth(s);
     if (dw >= targetWidth) return s;
     return s + std::string(targetWidth - dw, ' ');
+}
+
+// 箭头字符（顺序与 PortalDir 枚举一致：Left/Up/Right/Down）
+static const char* portalArrow(PortalDir dir) {
+    static const char* arrows[] = { "←", "↑", "→", "↓" };
+    return arrows[static_cast<int>(dir)];
+}
+
+// 按 UTF-8 字符切分（首字节高位个数决定字符字节数）
+static std::vector<std::string> utf8Chars(const std::string& s) {
+    std::vector<std::string> out;
+    for (size_t i = 0; i < s.size(); ) {
+        unsigned char c = static_cast<unsigned char>(s[i]);
+        int len = 1 + (c >= 0x80) + (c >= 0xE0) + (c >= 0xF0);
+        out.push_back(s.substr(i, len));
+        i += len;
+    }
+    return out;
+}
+
+// 按显示宽度切分，每段 <= chunkWidth 列（不拆分多字节字符）
+static std::vector<std::string> splitByWidth(const std::string& s, int chunkWidth) {
+    std::vector<std::string> out;
+    std::string cur;
+    int w = 0;
+    for (const auto& ch : utf8Chars(s)) {
+        int cw = displayWidth(ch);
+        if (w + cw > chunkWidth) { out.push_back(cur); cur = ch; w = cw; }
+        else { cur += ch; w += cw; }
+    }
+    if (!cur.empty()) out.push_back(cur);
+    return out;
 }
 
 // =========================================================================
@@ -136,6 +169,37 @@ void MapGrid::buildWater(int r, int c, int length) {
     }
 }
 
+void MapGrid::buildPortal(int r, int c, PortalDir dir, const std::string& dest, int length) {
+    const int maxRow = static_cast<int>(grid.size()) - 1;
+    const int maxCol = static_cast<int>(grid[0].size()) - 1;
+
+    // 目标地名最多 3 个汉字；文字 = 去 + dest + 箭头
+    auto destChars = utf8Chars(dest);
+    std::string name;
+    for (size_t i = 0; i < destChars.size() && i < 3; i++) name += destChars[i];
+    std::string text = "去" + name + portalArrow(dir);
+
+    // 统一横向条：Left/Up 向左延伸，Right/Down 向右延伸（箭头方向仍由 dir 决定）
+    int dc = (dir == PortalDir::Left || dir == PortalDir::Up) ? -1 : +1;
+
+    // 文字按 4 列宽切分为片段
+    auto segs = splitByWidth(text, CELL_WIDTH);
+    int minLen = static_cast<int>(segs.size());
+    int len = (length > 0) ? length : minLen;
+    if (len < minLen) len = minLen;
+
+    for (int i = 0; i < len; i++) {
+        int cc = c + i * dc;
+        // 不覆盖四周边界墙
+        if (r <= 0 || r >= maxRow || cc <= 0 || cc >= maxCol) break;
+
+        // 箭头放在沿方向的最远端；Left/Up 时倒序放置片段
+        int idx = (dir == PortalDir::Left || dir == PortalDir::Up) ? (minLen - 1 - i) : i;
+        std::string disp = (idx >= 0 && idx < minLen) ? segs[idx] : "";
+        grid[r][cc] = Tile(padToWidth(disp, CELL_WIDTH), TileType::PORTAL, name, static_cast<int>(dir));
+    }
+}
+
 // =========================================================================
 // 设置
 // =========================================================================
@@ -195,6 +259,8 @@ void MapGrid::render() const {
                     console::setColor(14); break;
                 case TileType::ADVANCE:
                     console::setColor(13); break;  // 跳转点=紫色高亮
+                case TileType::PORTAL:
+                    console::setColor(11); break;  // 传送门=青色高亮
                 default:
                     console::setColor(7);  break;
             }
@@ -220,6 +286,7 @@ void MapGrid::render() const {
     legend(13, "铁匠", "锻造");
     legend(13, "帅帐", "下一幕");
     legend(14, "门", "通行");
+    legend(11, "传送门", "切换地图");
     console::setColor(8);
     std::cout << "█";
     console::setColor(7);
@@ -288,6 +355,13 @@ bool MapGrid::move(char direction) {
         interactionName = target.name;
         if (onAdvance) onAdvance(target.name);
         // 仅在 onAdvance 内部确认跳转时才置 advanceTriggered
+        return true;
+    }
+    // 传送门：不移动，触发地图切换
+    if (target.type == TileType::PORTAL) {
+        interactionType = target.type;
+        interactionName = target.name;
+        if (onPortal) onPortal(target.name, target.portalDir);
         return true;
     }
 
