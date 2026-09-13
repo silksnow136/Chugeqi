@@ -13,9 +13,9 @@
 
 #include "story/MapGrid.h"
 #include "core/console.h"
-#include "core/dataLoader.h"
+#include "data/dataLoader.h"
 #include "combat/combatSystem.h"
-#include "combat/saveManager.h"
+#include "data/saveManager.h"
 #include <iostream>
 #include <exception>
 
@@ -30,13 +30,14 @@ static void triggerBattle(const std::string& enemyName) {
 
         // 加载战斗数据
         GameData gameData = DataLoader::loadGameData("data/");
-        SaveManager save("save.db");
+        SaveManager save("saves");
 
         // 我方队伍
-        std::vector<std::unique_ptr<Combatant>> party = save.loadParty(gameData.skillPool);
+        auto saveData = save.load(1, gameData.skillPool, gameData.itemPool);
+        std::vector<std::unique_ptr<Combatant>> party = std::move(saveData.party);
         if (party.empty()) {
             party = DataLoader::loadPartyTemplates("data/battle_test.json", gameData.skillPool);
-            save.saveParty(party, gameData.skillPool);
+            save.save(1, party, gameData.skillPool);
         }
 
         // 敌方
@@ -52,12 +53,15 @@ static void triggerBattle(const std::string& enemyName) {
         bool won = combat.startBattle();
 
         // 战斗结果写回存档
-        save.saveParty(party, gameData.skillPool);
+        save.save(1, party, gameData.skillPool);
 
         console::clearScreen();
         if (won) {
             console::setColor(10);
             std::cout << "战斗胜利！击败了 " << enemyName << std::endl;
+        } else if (combat.escaped()) {
+            console::setColor(14);
+            std::cout << "成功逃离了战斗。" << std::endl;
         } else {
             console::setColor(12);
             std::cout << "战斗失败...项羽阵亡。" << std::endl;

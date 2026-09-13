@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 // ---------------------------------------------------------------------------
 // 平台抽象层：把控制台相关的平台差异（清屏、读取按键、编码初始化）集中到此处，
 // 业务代码只依赖本头文件，避免在 combatSystem 中直接使用 conio/windows API。
@@ -25,4 +26,14 @@ namespace console {
     void moveCursor(int row, int col); // 移动光标到 (row, col)，0 起始（用于覆盖重绘防闪烁）
     void setCursorVisible(bool visible); // 显示/隐藏光标（渲染时隐藏，防光标乱闪）
     void clearToEnd(); // 清光标到屏幕底（覆盖重绘后清掉尾部残留）
+
+    // 终端模式切换（Linux 有效，Windows 空实现）
+    // 语义：readKey/kbhit 会进入 raw 模式；若调用前已是 raw（如 printWords 主动
+    // 持有 raw），则读完后不恢复，交由外层统一恢复，从而在整个输出期间吞掉按键。
+    void enterRaw();         // 进入原始模式：单键即时读取、关闭回显
+    void restoreCanonical(); // 恢复行缓冲模式：让 getline / cin >> 等行输入正常工作
+    void drainInput();       // 丢弃所有待读按键并恢复 canonical（用于播放结束后清残留）
+
+    // 读取一行命令：回显 + 退格 + 回车结束 + ESC 取消（返回空串）
+    std::string readLine();
 }

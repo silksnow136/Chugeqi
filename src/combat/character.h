@@ -80,6 +80,7 @@ public:
 
     // 属性获取（含装备加成）
     int getEffectiveStat(int index) const; // index 0~3
+    int getBaseStat(int index) const;      // 基础属性（不含装备加成，供存档）
     int getHP() const;
     int getSP() const;
     int getLevel() const;

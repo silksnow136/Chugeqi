@@ -112,6 +112,11 @@ int Combatant::getSP() const { return sp; }
 int Combatant::getLevel() const { return level; }
 int Combatant::getExp() const { return exp; }
 
+int Combatant::getBaseStat(int index) const {
+    if (index < 0 || index >= 4) return 0;
+    return baseStats[index];
+}
+
 void Combatant::setEquipmentBonus(const int bonus[4]) {
     std::copy(bonus, bonus + 4, equipmentBonus);
 }

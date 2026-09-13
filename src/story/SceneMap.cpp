@@ -5,9 +5,9 @@
 #include "PharManager.h"
 #include "ForgeManager.h"
 #include "core/console.h"
-#include "core/dataLoader.h"
+#include "data/dataLoader.h"
 #include "combat/combatSystem.h"
-#include "combat/saveManager.h"
+#include "data/saveManager.h"
 #include <iostream>
 #include <memory>
 
@@ -415,11 +415,12 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
 
         try {
             GameData gameData = DataLoader::loadGameData("data/");
-            SaveManager save("save.db");
-            std::vector<std::unique_ptr<Combatant>> party = save.loadParty(gameData.skillPool);
+            SaveManager save("saves");
+            auto saveData = save.load(1, gameData.skillPool, gameData.itemPool);
+            std::vector<std::unique_ptr<Combatant>> party = std::move(saveData.party);
             if (party.empty()) {
                 party = DataLoader::loadPartyTemplates("data/battle_test.json", gameData.skillPool);
-                save.saveParty(party, gameData.skillPool);
+                save.save(1, party, gameData.skillPool);
             }
             Battle battle = DataLoader::loadBattle("data/battle_test.json", gameData);
 
@@ -431,7 +432,7 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
 
             CombatSystem combat(player, companions, enemies, battle.config);
             bool won = combat.startBattle();
-            save.saveParty(party, gameData.skillPool);
+            save.save(1, party, gameData.skillPool);
 
             console::clearScreen();
             if (won) {
@@ -502,7 +503,6 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
                 sm.ShowBackground(scene_id + 1);
             } else {
                 // 选择留下，重绘地图继续游戏
-                grid.requestClearRender();
                 grid.render();
             }
         } else {
@@ -516,7 +516,6 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
                 grid.advanceTriggered = true;
                 sm.ShowBackground(4);
             } else {
-                grid.requestClearRender();
                 grid.render();
             }
         }
@@ -524,7 +523,7 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
 
     // ----- WASD 主循环 -----
     grid.render();
-    std::cout << "第" << scene_id << "幕 —— WASD 移动项羽，ESC 退出场景" << std::endl;
+    std::cout << "第" << scene_id << "幕 —— WASD移动  B背包  F存读档  ESC退出" << std::endl;
 
     while (true) {
         int key = console::readKey();
@@ -534,6 +533,16 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
             grid.move(dir);
             // 只有 Y 确认跳转后 advanceTriggered 才为 true → 退出循环
             if (grid.advanceTriggered) break;
+            grid.render();
+        }
+        else if (dir == 'b') {
+            // 背包：装配/卸下/使用，返回后重绘地图
+            showBackpack(&game.getPlayer(), game.getItemPool());
+            grid.render();
+        }
+        else if (dir == 'f') {
+            // 打开存读档界面（存档/读档/覆盖）；读档会重入场景，退出当前地图
+            if (game.saveMenu()) break;
             grid.render();
         }
     }

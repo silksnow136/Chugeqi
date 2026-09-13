@@ -156,13 +156,9 @@ void MapGrid::setPlayer(int row, int col) {
 // =========================================================================
 
 void MapGrid::render() const {
-    // 首屏用 cls 彻底清屏，后续用光标定位覆盖避免闪烁/重复
-    if (firstRender) {
-        console::clearScreen();
-        firstRender = false;
-    }
+    // 每次整体清屏重绘：修复地图高于终端窗口时滚动导致的残影/重叠
+    console::clearScreen();
     console::setCursorVisible(false);
-    console::moveCursor(0, 0);
 
     // 标题
     console::setColor(14);
@@ -201,8 +197,25 @@ void MapGrid::render() const {
 
     console::setColor(14);
     std::cout << "-------------------------------" << std::endl;
+    // 图例：直接染色，去掉“（绿）/（红）”等颜色文字
+    auto legend = [](int color, const std::string& word, const std::string& meaning, bool last = false) {
+        console::setColor(color);
+        std::cout << word;
+        console::setColor(7);
+        std::cout << "→" << meaning;
+        if (!last) std::cout << "  ";
+    };
+    legend(12, "项羽", "玩家");
+    legend(10, "友方", "对话");
+    legend(12, "敌方", "战斗");
+    legend(11, "药店", "购买");
+    legend(13, "铁匠", "锻造");
+    legend(13, "帅帐", "下一幕");
+    legend(14, "门", "通行");
+    console::setColor(8);
+    std::cout << "█";
     console::setColor(7);
-    std::cout << "WASD: 移动  |  项羽=玩家  友方(绿)→对话  敌方(红)→战斗  药店(青)→购买  铁匠(紫)→锻造  帅帐(紫)→下一幕  门(黄)→通行  █=墙" << std::endl;
+    std::cout << "=墙" << std::endl;
     std::cout << "> ";
 
     console::setCursorVisible(true);
@@ -267,14 +280,12 @@ bool MapGrid::move(char direction) {
         interactionName = target.name;
         if (onAdvance) onAdvance(target.name);
         // 仅在 onAdvance 内部确认跳转时才置 advanceTriggered
-        firstRender = true;  // 交互后清屏（与对话/药店一致）
         return true;
     }
 
     interactionType = target.type;
     interactionName = target.name;
     triggerInteraction(target.type, target.name);
-    firstRender = true;  // 交互后清屏
     return true;
 }
 
@@ -313,18 +324,6 @@ const Item* findItemByName(const ItemPool& pool, const std::string& name) {
         if (kv.second->getName() == name) return kv.second.get();
     }
     return nullptr;
-}
-
-std::string readCommandLine() {
-    std::string cmd;
-    while (true) {
-        int k = console::readKey();
-        if (k == 13 || k == 10) { std::cout << std::endl; break; }   // 回车
-        if (k == 27) { std::cout << std::endl; return ""; }          // ESC 取消
-        if (k == 8) { if (!cmd.empty()) { cmd.pop_back(); std::cout << "\b \b"; } } // 退格
-        else if (k >= 32 && k < 127) { cmd += static_cast<char>(k); std::cout << static_cast<char>(k); }
-    }
-    return cmd;
 }
 
 void collectBagEntries(Combatant* player, const ItemPool& pool, std::vector<BagEntry>& out) {
@@ -393,7 +392,7 @@ void showBackpack(Combatant* player, const ItemPool& pool) {
         if (count == 0) std::cout << "\n  背包是空的。\n";
 
         std::cout << "\n指令：equip+编号 装配 / unequip+编号 卸下 / use+编号 使用药水 / 回车或ESC 返回地图\n> ";
-        std::string cmd = readCommandLine();
+        std::string cmd = console::readLine();
         if (cmd.empty()) return; // 直接回车或 ESC 退出背包
 
         // 解析指令（equipN / unequipN / useN，兼容带空格的写法）

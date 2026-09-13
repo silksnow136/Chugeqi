@@ -7,7 +7,8 @@ Release/
 *.pdb
 *.exe
 
-# 运行时生成的存档数据库
+# 运行时生成的存档文件
+saves/
 save.db
 *.db
 

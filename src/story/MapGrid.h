@@ -90,9 +90,6 @@ public:
     // 跳转回调是否已触发（用于通知外部循环退出）
     bool advanceTriggered = false;
 
-    // 标记下次渲染需清屏（供外部取消跳转后重绘地图）
-    void requestClearRender() { firstRender = true; }
-
 private:
     std::vector<std::vector<Tile>> grid;
     int playerRow = 1;
@@ -102,8 +99,6 @@ private:
 
     // 玩家脚下被覆盖的原始格子（门/空地等），离开时恢复
     Tile underPlayer{ "    ", TileType::EMPTY };
-
-    mutable bool firstRender = true;  // 首屏用 cls 清屏，后续用光标定位覆盖
 
     bool isValid(int row, int col) const;
     void triggerInteraction(TileType type, const std::string& name);
@@ -124,9 +119,6 @@ struct BagEntry {
 
 // 按名称在物品池中查找物品（地图物品格常用中文名标注）
 const Item* findItemByName(const ItemPool& pool, const std::string& name);
-
-// 读取一行命令（逐字符读取并回显；回车结束，ESC 返回空串）
-std::string readCommandLine();
 
 // 收集背包条目并按 装备->药水->材料 排序
 void collectBagEntries(Combatant* player, const ItemPool& pool, std::vector<BagEntry>& out);

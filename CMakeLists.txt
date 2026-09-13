@@ -27,12 +27,11 @@ add_executable(Chugeqi
     src/combat/combatSystem.cpp
     src/combat/item.cpp
     src/combat/skill.cpp
-    src/combat/saveManager.cpp
+    src/data/saveManager.cpp
     # 平台抽象层 / 数据加载（core）
     src/core/console.cpp
-    src/core/dataLoader.cpp
+    src/data/dataLoader.cpp
     # 第三方
-    third_party/sqlite/sqlite3.c
 )
 
 # 战斗测试（独立入口）
@@ -43,10 +42,9 @@ add_executable(combatTest
     src/combat/combatSystem.cpp
     src/combat/item.cpp
     src/combat/skill.cpp
-    src/combat/saveManager.cpp
+    src/data/saveManager.cpp
     src/core/console.cpp
-    src/core/dataLoader.cpp
-    third_party/sqlite/sqlite3.c
+    src/data/dataLoader.cpp
 )
 
 # 地图移动测试（独立入口）
@@ -58,10 +56,9 @@ add_executable(mapTest
     src/combat/combatSystem.cpp
     src/combat/item.cpp
     src/combat/skill.cpp
-    src/combat/saveManager.cpp
+    src/data/saveManager.cpp
     src/core/console.cpp
-    src/core/dataLoader.cpp
-    third_party/sqlite/sqlite3.c
+    src/data/dataLoader.cpp
 )
 
 # 第一幕垓下营地地图展示（独立入口）
@@ -72,7 +69,7 @@ add_executable(gaiXiaMap
     src/combat/skill.cpp
     src/combat/item.cpp
     src/core/console.cpp
-    src/core/dataLoader.cpp
+    src/data/dataLoader.cpp
 )
 
 # 第二幕淮河突围地图展示（独立入口）
@@ -83,7 +80,7 @@ add_executable(huaiRiverMap
     src/combat/skill.cpp
     src/combat/item.cpp
     src/core/console.cpp
-    src/core/dataLoader.cpp
+    src/data/dataLoader.cpp
 )
 
 # 第三幕东城快战地图展示（独立入口）
@@ -94,7 +91,7 @@ add_executable(dongchengMap
     src/combat/skill.cpp
     src/combat/item.cpp
     src/core/console.cpp
-    src/core/dataLoader.cpp
+    src/data/dataLoader.cpp
 )
 
 # 第四幕乌江自刎地图展示（独立入口）
@@ -105,13 +102,12 @@ add_executable(wujiangMap
     src/combat/skill.cpp
     src/combat/item.cpp
     src/core/console.cpp
-    src/core/dataLoader.cpp
+    src/data/dataLoader.cpp
 )
 
 foreach(TGT Chugeqi combatTest mapTest gaiXiaMap huaiRiverMap dongchengMap wujiangMap)
     target_include_directories(${TGT} PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/src"
-        "${CMAKE_CURRENT_SOURCE_DIR}/third_party/sqlite"
     )
     add_custom_command(TARGET ${TGT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory

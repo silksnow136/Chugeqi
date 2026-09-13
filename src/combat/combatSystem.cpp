@@ -112,6 +112,7 @@ bool CombatSystem::startBattle() {
     console::init();
     battleEnded = false;
     playerWon = false;
+    playerEscaped = false;
 
     // 主循环：我方（玩家 + 同伴）→ 敌方。每轮统一在轮首结算、轮末递减状态。
     while (!battleEnded) {
@@ -125,6 +126,8 @@ bool CombatSystem::startBattle() {
         if (player->isAlive()) {
             processPlayerTurn();
         }
+        // 逃跑成功会在行动内部把 battleEnded 置真，需立即结束，避免同伴/敌方再行动一轮
+        if (battleEnded) break;
         if (getAliveEnemies().empty()) { battleEnded = true; playerWon = true; break; }
 
         // 同伴回合
@@ -162,9 +165,17 @@ bool CombatSystem::startBattle() {
     }
 
     // 战斗结束提示
-    addLog(playerWon ? "战斗胜利！" : "战斗失败...");
+    if (playerEscaped) {
+        addLog("成功逃跑，战斗结束。");
+    } else {
+        addLog(playerWon ? "战斗胜利！" : "战斗失败...");
+    }
     displayBattle();
-    std::cout << (playerWon ? "战斗胜利！" : "战斗失败...") << std::endl;
+    if (playerEscaped) {
+        std::cout << "成功逃跑，战斗结束。" << std::endl;
+    } else {
+        std::cout << (playerWon ? "战斗胜利！" : "战斗失败...") << std::endl;
+    }
     console::pause();
     return playerWon;
 }
@@ -566,6 +577,7 @@ bool CombatSystem::attemptRun(Combatant* runner) {
         console::pause();
         battleEnded = true;
         playerWon = false;
+        playerEscaped = true;
         return true;
     }
 

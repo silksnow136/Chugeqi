@@ -11,7 +11,7 @@
 #include "core/console.h"
 #include "combat/character.h"
 #include "combat/item.h"
-#include "core/dataLoader.h"
+#include "data/dataLoader.h"
 #include <iostream>
 #include <cctype>
 
