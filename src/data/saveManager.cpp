@@ -97,6 +97,8 @@ void SaveManager::save(int slot, const std::vector<Combatant*>& party,
         j += "\"level\": " + std::to_string(c->getLevel()) + ", ";
         j += "\"hp\": " + std::to_string(c->getHP()) + ", ";
         j += "\"sp\": " + std::to_string(c->getSP()) + ", ";
+        j += "\"maxHp\": " + std::to_string(c->getMaxHP()) + ", ";
+        j += "\"maxSp\": " + std::to_string(c->getMaxSP()) + ", ";
         j += "\"exp\": " + std::to_string(c->getExp()) + ", ";
         j += "\"str\": " + std::to_string(c->getBaseStat(0)) + ", ";
         j += "\"mag\": " + std::to_string(c->getBaseStat(1)) + ", ";
@@ -176,10 +178,12 @@ SaveManager::SaveData SaveManager::load(int slot, const SkillPool& skillPool,
         std::string id = c["id"].asString();
         std::string name = c["name"].asString();
         int stats[4] = { c["str"].asInt(), c["mag"].asInt(), c["end"].asInt(), c["agi"].asInt() };
+        int maxHp = c.has("maxHp") ? c["maxHp"].asInt() : -1;
+        int maxSp = c.has("maxSp") ? c["maxSp"].asInt() : -1;
 
         auto combatant = std::make_unique<Combatant>(
             name, c["level"].asInt(), c["hp"].asInt(), c["sp"].asInt(), c["exp"].asInt(),
-            stats, std::vector<SkillBase*>{}, std::unordered_map<std::string, int>{}, id);
+            stats, std::vector<SkillBase*>{}, std::unordered_map<std::string, int>{}, id, maxHp, maxSp);
 
         if (c.has("skills")) {
             const json::Value& sk = c["skills"];

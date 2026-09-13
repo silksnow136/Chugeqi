@@ -140,6 +140,8 @@ std::unique_ptr<Combatant> DataLoader::loadCombatant(const std::string& path,
     int hp = c["hp"].asInt();
     int sp = c["sp"].asInt();
     int exp = c.has("exp") ? c["exp"].asInt() : 0;
+    int maxHp = c.has("maxHp") ? c["maxHp"].asInt() : -1;
+    int maxSp = c.has("maxSp") ? c["maxSp"].asInt() : -1;
 
     int baseStats[4] = {0, 0, 0, 0};
     if (c.has("baseStats")) {
@@ -162,7 +164,7 @@ std::unique_ptr<Combatant> DataLoader::loadCombatant(const std::string& path,
         for (const auto& id : inv.keys()) inventory[id] = inv[id].asInt();
     }
 
-    return std::make_unique<Combatant>(name, level, hp, sp, exp, baseStats, skills, inventory, id);
+    return std::make_unique<Combatant>(name, level, hp, sp, exp, baseStats, skills, inventory, id, maxHp, maxSp);
 }
 
 GameData DataLoader::loadGameData(const std::string& dataDir) {
@@ -203,7 +205,6 @@ Battle DataLoader::loadBattle(const std::string& battlePath, const GameData& gam
     for (size_t i = 0; i < enemyRefs.size(); i++)
         battle.enemies.push_back(loadCombatant(dir + enemyRefs[i].asString(), gameData.skillPool));
 
-    battle.config.playerFirst = !root.has("first_side") || root["first_side"].asString() == "player";
     battle.config.disableRun = root.has("disable_run") && root["disable_run"].asBool();
     battle.config.disableItems = root.has("disable_items") && root["disable_items"].asBool();
     return battle;
