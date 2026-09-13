@@ -4,21 +4,18 @@
 #include <cmath>
 #include <iostream>
 
-// ---- Civil ----
-Civil::Civil(const std::string& name, const std::string& role, const std::vector<std::string>& dialogue)
-    : Character(name), role(role), dialogue(dialogue) {}
-
-const std::string& Civil::getRole() const { return role; }
-const std::string& Civil::getDialogue(int index) const { return dialogue.at(index); }
-
 // ---- Combatant ----
 Combatant::Combatant(const std::string& name, int level, int hp, int sp, int exp,
                      const int baseStats[4], const std::vector<SkillBase*>& skills,
-                     const std::unordered_map<std::string, int>& inventory, const std::string& id)
+                     const std::unordered_map<std::string, int>& inventory, const std::string& id,
+                     int maxHp, int maxSp)
     : Character(name), id(id), hp(hp), sp(sp), level(level), exp(exp), statusFlags(0), skills(skills), inventory(inventory) {
     std::copy(baseStats, baseStats + 4, this->baseStats);
     std::fill(equipmentBonus, equipmentBonus + 4, 0);
     std::fill(&slotBonuses[0][0], &slotBonuses[0][0] + 16, 0);
+    // 最大HP/SP未显式给出时，按当前值回退（模板加载时当前值即满值）
+    this->maxHp = (maxHp >= 0) ? maxHp : hp;
+    this->maxSp = (maxSp >= 0) ? maxSp : sp;
 }
 
 const std::string& Combatant::getId() const { return id; }
@@ -40,11 +37,13 @@ void Combatant::takeDamage(int damage) {
 
 void Combatant::heal(int amount) {
     hp += amount;
-    // 可考虑设上限，但暂不设
+    if (hp > maxHp) hp = maxHp;
 }
 
 void Combatant::restoreSP(int amount) {
     sp += amount;
+    if (sp > maxSp) sp = maxSp;
+    if (sp < 0) sp = 0;
 }
 
 void Combatant::addStatusEffect(StatusEffect type, int duration, int targetStat, float mult) {
@@ -76,14 +75,6 @@ void Combatant::updateStatusEffects() {
     recalcStatusFlags();
 }
 
-void Combatant::clearStatusEffect(StatusEffect type) {
-    activeStatusEffects.erase(
-        std::remove_if(activeStatusEffects.begin(), activeStatusEffects.end(),
-            [type](const StatusEffectInstance& effect) { return effect.type == type; }),
-        activeStatusEffects.end());
-    recalcStatusFlags();
-}
-
 void Combatant::recalcStatusFlags() {
     statusFlags = 0;
     for (const auto& effect : activeStatusEffects) {
@@ -109,6 +100,8 @@ int Combatant::getEffectiveStat(int index) const {
 
 int Combatant::getHP() const { return hp; }
 int Combatant::getSP() const { return sp; }
+int Combatant::getMaxHP() const { return maxHp; }
+int Combatant::getMaxSP() const { return maxSp; }
 int Combatant::getLevel() const { return level; }
 int Combatant::getExp() const { return exp; }
 
@@ -199,41 +192,22 @@ void Combatant::levelUp() {
     level++;
     // 全属性+1
     for (int i = 0; i < 4; ++i) baseStats[i] += 1;
-    // 恢复满HP和SP
-    hp = 100 + level * 10;
-    sp = 50 + level * 5;
-}
-
-// ---- 拾取与查看（探索态交互） ----
-
-void Combatant::pickUp(const std::string& itemId, int count) {
-    addItem(itemId, count);
-    std::cout << getName() << " 拾取了 " << count
-              << " 个 [" << itemId << "]。" << std::endl;
+    // 提升上限并恢复满HP/SP
+    maxHp += 10;
+    maxSp += 5;
+    hp = maxHp;
+    sp = maxSp;
 }
 
 void Combatant::showStats() const {
     std::cout << "\n========== 角色属性 ==========\n";
     std::cout << "姓名: " << getName() << "\n";
     std::cout << "等级: " << level << "\n";
-    std::cout << "生命: " << hp << "  技能值: " << sp << "\n";
+    std::cout << "生命: " << hp << "/" << maxHp << "  技能值: " << sp << "/" << maxSp << "\n";
     std::cout << "经验: " << exp << "/" << (10 * level * level) << "\n";
     std::cout << "力量: " << getEffectiveStat(0)
               << "  魔力: " << getEffectiveStat(1)
               << "  耐力: " << getEffectiveStat(2)
               << "  敏捷: " << getEffectiveStat(3) << "\n";
     std::cout << "==============================\n";
-}
-
-void Combatant::showInventory() const {
-    std::cout << "\n========== 背包 ==========\n";
-    if (inventory.empty()) {
-        std::cout << "背包是空的。\n";
-    } else {
-        int idx = 1;
-        for (const auto& p : inventory) {
-            std::cout << idx++ << ". " << p.first << " ×" << p.second << "\n";
-        }
-    }
-    std::cout << "==========================\n";
 }

@@ -15,17 +15,6 @@ public:
     const std::string& getName() const { return name; }
 };
 
-// 非战斗角色（仅剧情对话，不参与战斗）
-class Civil : public Character {
-private:
-    std::string role;
-    std::vector<std::string> dialogue;
-public:
-    Civil(const std::string& name, const std::string& role, const std::vector<std::string>& dialogue);
-    const std::string& getRole() const;
-    const std::string& getDialogue(int index) const;
-};
-
 // 状态效果枚举（位标志）
 enum class StatusEffect : uint16_t {
     None   = 0,
@@ -49,6 +38,8 @@ private:
     std::string id;        // 稳定标识，用于存档/数据库主键（敌人可为空）
     int hp;
     int sp;
+    int maxHp;             // 最大生命值
+    int maxSp;             // 最大技能值
     int level;
     int exp;
     int baseStats[4];      // strength, magic, endurance, agility 
@@ -60,7 +51,8 @@ public:
     Combatant(const std::string& name, int level, int hp, int sp, int exp,
               const int baseStats[4], const std::vector<SkillBase*>& skills,
               const std::unordered_map<std::string, int>& inventory = {},
-              const std::string& id = "");
+              const std::string& id = "",
+              int maxHp = -1, int maxSp = -1);
     ~Combatant();
 
     // 稳定标识
@@ -76,13 +68,14 @@ public:
     // 状态管理
     void addStatusEffect(StatusEffect type, int duration, int targetStat = -1, float mult = 0.0f);
     void updateStatusEffects(); // 每回合结束调用，减少持续回合，移除到期状态
-    void clearStatusEffect(StatusEffect type);
 
     // 属性获取（含装备加成）
     int getEffectiveStat(int index) const; // index 0~3
     int getBaseStat(int index) const;      // 基础属性（不含装备加成，供存档）
     int getHP() const;
     int getSP() const;
+    int getMaxHP() const;
+    int getMaxSP() const;
     int getLevel() const;
     int getExp() const;
 
@@ -106,14 +99,12 @@ public:
     void addItem(const std::string& itemId, int count = 1);
     bool consumeItem(const std::string& itemId, int count = 1);
 
-    // 拾取与查看（探索态交互）
-    void pickUp(const std::string& itemId, int count = 1); // 拾取物品并输出反馈
-    void showStats() const;                                // 查看基础属性
-    void showInventory() const;                            // 查看背包（itemId×数量）
-
     // 经验与升级
     void addExp(int amount);
     void levelUp(); // 升级时全属性+1，并恢复满HP/SP
+
+    // 查看基础属性
+    void showStats() const;
 
 private:
     int equipmentBonus[4];         // 四项属性加成（各槽位加成之和）
