@@ -28,21 +28,21 @@ enum class TileType {
     DOOR,       // 门 → 可通行，走过后恢复
     ITEM,       // 物品 → 拾取后消失
     ADVANCE,    // 跳转点 → 触发幕次跳转（帅帐/渡口等）
-    PORTAL      // 传送门 → 切换地图（营外荒郊/阴陵地牢）
+    PORTAL      // 传送门 → 连接地图，触发地图切换
 };
 
-// 传送门朝向（箭头方向 = 传送去向）
-enum class PortalDir { Up, Down, Left, Right };
+// 传送门方向：决定箭头指向（←/↑/→/↓）与条延伸方向（条统一横向）
+enum class PortalDir { Left, Up, Right, Down };
 
 struct Tile {
     std::string display;    // 显示字符串
     TileType type = TileType::EMPTY;
     std::string name;       // 单位名称 / 传送目标地图名
-    PortalDir portalDir = PortalDir::Up;  // 仅 PORTAL 使用
+    int portalDir = -1;     // 传送门方向（PortalDir 枚举值），非传送门为 -1
 
     Tile() = default;
-    Tile(const std::string& d, TileType t, const std::string& n = "")
-        : display(d), type(t), name(n) {}
+    Tile(const std::string& d, TileType t, const std::string& n = "", int dir = -1)
+        : display(d), type(t), name(n), portalDir(dir) {}
 };
 
 class MapGrid {
@@ -84,8 +84,9 @@ public:
     // 放置水域（横向 length 格）
     void buildWater(int r, int c, int length);
 
-    // 建造传送门：(r,c) 为箭头格，左侧 (r,c-1) 为门框条；target=目标地图名
-    void buildPortal(int r, int c, PortalDir dir, const std::string& target, int unused = 0);
+    // 建造传送门（条状，连接地图）：文字提示「去<dest><箭头>」，dest 最多 3 个汉字。
+    // dir 决定箭头指向与条延伸方向；length<=0 时取最小长度（刚好完整显示文字）。
+    void buildPortal(int r, int c, PortalDir dir, const std::string& dest, int length = 0);
 
     // 交互回调
     std::function<void(const std::string&)> onTalk;
@@ -94,7 +95,7 @@ public:
     std::function<void(const std::string&)> onForge;
     std::function<void(const std::string&)> onItem;
     std::function<void(const std::string&)> onAdvance;   // 幕次跳转
-    std::function<void(const std::string&)> onPortal;    // 地图传送（参数=目标地图名）
+    std::function<void(const std::string&, int)> onPortal;    // 传送门（目标地名, 传送门方向）
 
     // 跳转回调是否已触发（用于通知外部循环退出）
     bool advanceTriggered = false;

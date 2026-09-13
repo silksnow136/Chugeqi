@@ -94,8 +94,9 @@ static int defaultStatusDuration(StatusEffect e) {
 
 CombatSystem::CombatSystem(Combatant* player, std::vector<Combatant*> companions,
                            std::vector<Combatant*> enemies,
-                           const CombatConfig& config)
-    : player(player), companions(companions), enemies(enemies), config(config) {
+                           const CombatConfig& config,
+                           const ItemPool* itemPool)
+    : player(player), companions(companions), enemies(enemies), config(config), itemPool(itemPool) {
     std::random_device rd;
     rng.seed(rd());
 }
@@ -294,7 +295,7 @@ bool CombatSystem::manualTurn(Combatant* actor, int maxChoice) {
     while (true) {
         displayBattle(); // 行动前刷新一次界面
         if (maxChoice >= 5)
-            std::cout << "[1]攻击  [2]技能  [3]道具(未实现)  [4]逃跑  [5]"
+            std::cout << "[1]攻击  [2]技能  [3]道具  [4]逃跑  [5]"
                       << (playerAiAssisted ? "关闭全员AI托管" : "开启全员AI托管") << std::endl;
         else
             std::cout << actor->getName() << " 的行动：[1]攻击  [2]技能  [3]"
@@ -322,10 +323,19 @@ bool CombatSystem::manualTurn(Combatant* actor, int maxChoice) {
                 break;
             }
             case 3:
-                if (maxChoice >= 5) { // 玩家：道具（未实现）
-                    std::cout << "道具系统：(未实现)" << std::endl;
-                    console::pause();
-                    continue;
+                if (maxChoice >= 5) { // 玩家：道具（使用药品，指令 use+编号）
+                    if (config.disableItems) {
+                        addLog("此战斗禁止使用道具！");
+                        std::cout << "此战斗禁止使用道具！" << std::endl;
+                        console::pause();
+                        continue;
+                    }
+                    if (useItemInBattle(actor)) {
+                        displayBattle(); // 属性变动后立即刷新
+                        console::pause();
+                        return false;    // 使用道具算一次行动，结束本回合
+                    }
+                    continue; // 未使用（取消/无效输入），返回主菜单
                 }
                 // 同伴：切换同伴 AI 托管，开启后立即由 AI 接管本回合
                 companionAiAssisted = !companionAiAssisted;
@@ -552,10 +562,107 @@ bool CombatSystem::performSkill(Combatant* user, SkillBase* skill, std::vector<C
 }
 
 bool CombatSystem::performItem(Combatant* user, const std::string& itemId, std::vector<Combatant*>& targets) {
-    // 道具系统：(未实现)
-    std::cout << "道具系统：(未实现)" << std::endl;
-    console::pause();
+    if (config.disableItems) {
+        addLog("此战斗禁止使用道具！");
+        std::cout << "此战斗禁止使用道具！" << std::endl;
+        console::pause();
+        return false;
+    }
+    if (itemPool == nullptr) {
+        addLog(user->getName() + " 的道具数据未加载，无法使用道具。");
+        return false;
+    }
+    if (!user->hasItem(itemId)) {
+        addLog(user->getName() + " 没有这个道具！");
+        return false;
+    }
+    auto it = itemPool->find(itemId);
+    if (it == itemPool->end()) {
+        addLog("找不到道具数据：" + itemId);
+        return false;
+    }
+    const Consumable* c = dynamic_cast<const Consumable*>(it->second.get());
+    if (c == nullptr || (c->getHealHP() <= 0 && c->getHealSP() <= 0)) {
+        addLog("该道具无法在战斗中使用。");
+        return false;
+    }
+    bool used = false;
+    if (c->getHealHP() > 0) {
+        user->heal(c->getHealHP());
+        addLog(user->getName() + " 使用「" + c->getName() + "」，恢复 "
+               + std::to_string(c->getHealHP()) + " 点 HP！");
+        used = true;
+    }
+    if (c->getHealSP() > 0) {
+        user->restoreSP(c->getHealSP());
+        addLog(user->getName() + " 使用「" + c->getName() + "」，恢复 "
+               + std::to_string(c->getHealSP()) + " 点 SP！");
+        used = true;
+    }
+    if (used) {
+        user->consumeItem(itemId, 1);
+        return true;
+    }
     return false;
+}
+
+// 战斗中道具菜单：列出背包中可用的药品，输入 use+编号 使用（作用于使用者自身）
+// 返回 true 表示成功使用了一个道具（本回合行动结束）
+bool CombatSystem::useItemInBattle(Combatant* actor) {
+    if (itemPool == nullptr) {
+        std::cout << "道具数据未加载，无法使用。" << std::endl;
+        console::pause();
+        return false;
+    }
+    // 收集背包中可用药品（potion 且数量 > 0）
+    std::vector<std::pair<std::string, const Consumable*>> potions;
+    const auto& inv = actor->getInventory();
+    for (const auto& pair : inv) {
+        if (pair.second <= 0) continue;
+        auto it = itemPool->find(pair.first);
+        if (it == itemPool->end()) continue;
+        const Consumable* c = dynamic_cast<const Consumable*>(it->second.get());
+        if (c == nullptr || c->getCategory() != "potion") continue;
+        if (c->getHealHP() <= 0 && c->getHealSP() <= 0) continue;
+        potions.push_back(std::make_pair(pair.first, c));
+    }
+    if (potions.empty()) {
+        std::cout << "背包中没有可用的药品。" << std::endl;
+        console::pause();
+        return false;
+    }
+    std::cout << "选择要使用的药品（输入 use+编号，直接回车返回）：" << std::endl;
+    for (size_t i = 0; i < potions.size(); i++) {
+        const Consumable* c = potions[i].second;
+        std::cout << i + 1 << ". " << c->getName()
+                  << "（数量 " << inv.at(potions[i].first) << "）";
+        if (c->getHealHP() > 0) std::cout << "  HP+" << c->getHealHP();
+        if (c->getHealSP() > 0) std::cout << "  SP+" << c->getHealSP();
+        std::cout << std::endl;
+    }
+    std::cout << "> ";
+    std::string cmd = console::readLine();
+    if (cmd.empty()) return false; // 直接回车返回主菜单
+    // 解析 use+编号（支持 use3 / use 3 / 直接数字）
+    if (cmd[0] == 'u' || cmd[0] == 'U') {
+        cmd = cmd.substr(3);
+        while (!cmd.empty() && (cmd[0] == ' ' || cmd[0] == '\t')) cmd.erase(cmd.begin());
+    }
+    int idx = 0;
+    try {
+        idx = std::stoi(cmd);
+    } catch (...) {
+        std::cout << "无效输入，请输入 use+编号。" << std::endl;
+        console::pause();
+        return false;
+    }
+    if (idx < 1 || idx > static_cast<int>(potions.size())) {
+        std::cout << "无效编号。" << std::endl;
+        console::pause();
+        return false;
+    }
+    std::vector<Combatant*> targets; // 目标列表预留（药品作用于使用者自身）
+    return performItem(actor, potions[idx - 1].first, targets);
 }
 
 bool CombatSystem::attemptRun(Combatant* runner) {

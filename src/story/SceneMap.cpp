@@ -525,12 +525,43 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
             std::vector<Combatant*> enemies;
             for (const auto& e : battle.enemies) enemies.push_back(e.get());
 
-            CombatSystem combat(p, companions, enemies, battle.config);
-            won = combat.startBattle();
+            CombatSystem combat(player, companions, enemies, battle.config, &gameData.itemPool);
+            bool won = combat.startBattle();
+            save.save(1, party, gameData.skillPool);
+
+            console::clearScreen();
+            if (won) {
+                console::setColor(10);
+                std::cout << "战斗胜利！击败了 " << name << std::endl;
+            } else {
+                console::setColor(12);
+                std::cout << "战斗失败..." << std::endl;
+            }
+            console::setColor(7);
+            std::cout << "按任意键返回地图" << std::endl;
+            console::pause();
         } catch (const std::exception& e) {
             std::cerr << "战斗系统错误: " << e.what() << std::endl;
         }
 
+    // ----- 物品拾取回调 -----
+    grid.onItem = [&](const std::string& name) {
+        console::setColor(14);
+        std::cout << "\n[拾取] 获得「" << name << "」！" << std::endl;
+        console::setColor(7);
+        // 拾取入包：按名称匹配物品池定义，加入角色背包
+        const Item* it = findItemByName(game.getItemPool(), name);
+        if (it != nullptr) {
+            game.getPlayer().addItem(it->getId(), 1);
+            std::cout << "「" << name << "」已放入背包。（按 B 打开背包查看）" << std::endl;
+        } else {
+            std::cout << "（物品池中未找到「" << name << "」的定义）" << std::endl;
+        }
+        console::pause();
+    };
+
+    // ----- 幕次跳转回调 -----
+    grid.onAdvance = [&, scene_id](const std::string& name) {
         console::clearScreen();
         if (won) {
             console::setColor(10);
