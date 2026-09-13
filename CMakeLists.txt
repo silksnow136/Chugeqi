@@ -45,64 +45,6 @@ add_executable(combatTest
     src/data/dataLoader.cpp
 )
 
-# 地图移动测试（独立入口）
-add_executable(mapTest
-    src/story/mapTestMain.cpp
-    src/story/MapGrid.cpp
-    src/combat/battleLog.cpp
-    src/combat/character.cpp
-    src/combat/combatSystem.cpp
-    src/combat/item.cpp
-    src/combat/skill.cpp
-    src/data/saveManager.cpp
-    src/core/console.cpp
-    src/data/dataLoader.cpp
-)
-
-# 第一幕垓下营地地图展示（独立入口）
-add_executable(gaiXiaMap
-    src/story/gaiXiaMap.cpp
-    src/story/MapGrid.cpp
-    src/combat/character.cpp
-    src/combat/skill.cpp
-    src/combat/item.cpp
-    src/core/console.cpp
-    src/data/dataLoader.cpp
-)
-
-# 第二幕淮河突围地图展示（独立入口）
-add_executable(huaiRiverMap
-    src/story/huaiRiverMap.cpp
-    src/story/MapGrid.cpp
-    src/combat/character.cpp
-    src/combat/skill.cpp
-    src/combat/item.cpp
-    src/core/console.cpp
-    src/data/dataLoader.cpp
-)
-
-# 第三幕东城快战地图展示（独立入口）
-add_executable(dongchengMap
-    src/story/dongchengMap.cpp
-    src/story/MapGrid.cpp
-    src/combat/character.cpp
-    src/combat/skill.cpp
-    src/combat/item.cpp
-    src/core/console.cpp
-    src/data/dataLoader.cpp
-)
-
-# 第四幕乌江自刎地图展示（独立入口）
-add_executable(wujiangMap
-    src/story/wujiangMap.cpp
-    src/story/MapGrid.cpp
-    src/combat/character.cpp
-    src/combat/skill.cpp
-    src/combat/item.cpp
-    src/core/console.cpp
-    src/data/dataLoader.cpp
-)
-
 # 传送门地图链测试（独立入口）
 add_executable(portalTest
     src/story/portalTestMain.cpp
@@ -113,7 +55,7 @@ add_executable(portalTest
     src/core/console.cpp
 )
 
-foreach(TGT Chugeqi combatTest mapTest gaiXiaMap huaiRiverMap dongchengMap wujiangMap portalTest)
+foreach(TGT Chugeqi combatTest portalTest)
     target_include_directories(${TGT} PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/src"
     )
