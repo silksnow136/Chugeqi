@@ -502,7 +502,6 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
                 sm.ShowBackground(scene_id + 1);
             } else {
                 // 选择留下，重绘地图继续游戏
-                grid.requestClearRender();
                 grid.render();
             }
         } else {
@@ -516,7 +515,6 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
                 grid.advanceTriggered = true;
                 sm.ShowBackground(4);
             } else {
-                grid.requestClearRender();
                 grid.render();
             }
         }

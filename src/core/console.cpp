@@ -12,7 +12,18 @@ namespace console {
         SetConsoleOutputCP(CP_UTF8);
         SetConsoleCP(CP_UTF8);
     }
-    void clearScreen() { std::system("cls"); }
+    void clearScreen() {
+        HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+        CONSOLE_SCREEN_BUFFER_INFO csbi;
+        if (!GetConsoleScreenBufferInfo(h, &csbi)) return;
+        // 清空整个屏幕缓冲区（含滚动历史），并复位光标到左上角
+        DWORD cells = static_cast<DWORD>(csbi.dwSize.X) * csbi.dwSize.Y;
+        COORD origin = { 0, 0 };
+        DWORD written = 0;
+        FillConsoleOutputCharacter(h, ' ', cells, origin, &written);
+        FillConsoleOutputAttribute(h, csbi.wAttributes, cells, origin, &written);
+        SetConsoleCursorPosition(h, origin);
+    }
     int readKey() { return _getch(); }
     void pause() { _getch(); }
     bool pauseEsc() { return _getch() == 27; } // ESC 的键码为 27
@@ -109,7 +120,9 @@ namespace {
 namespace console {
     void init() { saveOriginal(); } // 仅保存原始属性，不再常驻 raw 模式
 
-    void clearScreen() { std::system("clear"); }
+    // 快速清屏（直接 ANSI，避免 system() 子进程导致的闪烁）：
+    // \033[H 光标复位，\033[2J 清屏，\033[3J 清滚动历史（防止旧地图残留）
+    void clearScreen() { std::printf("\033[H\033[2J\033[3J"); }
 
     // 进入原始模式：关闭行缓冲(ICANON)与回显(ECHO)，逐字节即时读取
     void enterRaw() {

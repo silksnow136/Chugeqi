@@ -90,9 +90,6 @@ public:
     // 跳转回调是否已触发（用于通知外部循环退出）
     bool advanceTriggered = false;
 
-    // 标记下次渲染需清屏（供外部取消跳转后重绘地图）
-    void requestClearRender() { firstRender = true; }
-
 private:
     std::vector<std::vector<Tile>> grid;
     int playerRow = 1;
@@ -102,8 +99,6 @@ private:
 
     // 玩家脚下被覆盖的原始格子（门/空地等），离开时恢复
     Tile underPlayer{ "    ", TileType::EMPTY };
-
-    mutable bool firstRender = true;  // 首屏用 cls 清屏，后续用光标定位覆盖
 
     bool isValid(int row, int col) const;
     void triggerInteraction(TileType type, const std::string& name);

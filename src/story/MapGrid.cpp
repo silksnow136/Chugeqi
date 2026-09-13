@@ -156,13 +156,9 @@ void MapGrid::setPlayer(int row, int col) {
 // =========================================================================
 
 void MapGrid::render() const {
-    // 首屏用 cls 彻底清屏，后续用光标定位覆盖避免闪烁/重复
-    if (firstRender) {
-        console::clearScreen();
-        firstRender = false;
-    }
+    // 每次整体清屏重绘：修复地图高于终端窗口时滚动导致的残影/重叠
+    console::clearScreen();
     console::setCursorVisible(false);
-    console::moveCursor(0, 0);
 
     // 标题
     console::setColor(14);
@@ -267,14 +263,12 @@ bool MapGrid::move(char direction) {
         interactionName = target.name;
         if (onAdvance) onAdvance(target.name);
         // 仅在 onAdvance 内部确认跳转时才置 advanceTriggered
-        firstRender = true;  // 交互后清屏（与对话/药店一致）
         return true;
     }
 
     interactionType = target.type;
     interactionName = target.name;
     triggerInteraction(target.type, target.name);
-    firstRender = true;  // 交互后清屏
     return true;
 }
 
