@@ -20,6 +20,8 @@ public:
     ItemPool& getItemPool();
     int& getGold();
 
+    GameData& getGameData();
+
 private:
     bool running = true;
 

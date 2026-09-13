@@ -1,0 +1,12 @@
+{
+	"name": "乌江最终决战",
+	"first_side": "player",
+	"disable_run": true,
+	"disable_items": false,
+	"enemies_ref": [
+		"wangjian.json",
+		"yangxi.json",
+		"lvsheng.json",
+		"yangwu.json"
+	]
+}

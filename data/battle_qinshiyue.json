@@ -1,0 +1,7 @@
+{
+	"name": "¶«³ÇÔâÓöÕ½",
+	"first_side": "player",
+	"disable_run": true,
+	"disable_items": false,
+	"enemies_ref": [ "qinshiyue.json" ]
+}

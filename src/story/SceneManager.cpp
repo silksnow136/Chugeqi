@@ -364,11 +364,16 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 	console::clearScreen();
 
 	// 播放叙事
-	playLines(scene->lines);
+	if (!playLines(scene->lines)) {
+		return;
+	}
 
 	// 分支选择（第二幕）
 	if (!scene->choice.options.empty()) {
-		playChoice(*scene, branch_id);
+		if (!playChoice(*scene, branch_id)) {
+			return;
+		}
+
 		console::sleep(2000);
 	}
 
@@ -400,33 +405,120 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 	}
 }
 
-void SceneManager::playLines(const std::vector<StoryLine>& lines) {
+bool SceneManager::playLines(const std::vector<StoryLine>& lines)
+{
 	for (const auto& line : lines) {
+
+		// 播放剧情
 		printWords(line.text, line.color, line.sleep);
-		if (line.wait) nextLine();
+
+		// 等待玩家继续
+		if (line.wait) {
+			nextLine();
+		}
+
+		// 当前剧情要求进入战斗
+		if (line.battle) {
+
+			bool victory = startStoryBattle(line.battleId);
+
+			// 战斗失败，不继续播放后面的剧情
+			if (!victory) {
+				return false;
+			}
+		}
 	}
+
+	return true;
 }
 
-void SceneManager::playChoice(const Scene& scene, int& branch_id) {
-	if (scene.choice.options.empty()) return;
+bool SceneManager::playChoice(const Scene& scene, int& branch_id)
+{
+	if (scene.choice.options.empty())
+		return true;
+
 	char choice;
 	bool choice_test = true;
+
 	do {
 		printWords(scene.choice.prompt, 11, 0);
-		cout << "\n" << ">";
+
+		cout << "\n>";
 		cin >> choice;
+
 		bool matched = false;
+
 		for (const auto& opt : scene.choice.options) {
+
 			if (std::tolower(choice) == std::tolower(opt.key)) {
-				playLines(opt.lines);
+
+				bool success = playLines(opt.lines);
+
+				if (!success) {
+					return false;
+				}
+
 				branch_id = opt.branch;
 				choice_test = false;
 				matched = true;
+
 				break;
 			}
 		}
+
 		if (!matched) {
-			printWords("未知分支，请重新选择！！！\n", 11, 0);
+			printWords(
+				"未知分支，请重新选择！！！\n",
+				11,
+				0
+			);
 		}
+
 	} while (choice_test);
+
+	return true;
+}
+
+
+bool SceneManager::startStoryBattle(const std::string& battleId)
+{
+	if (battleId.empty()) {
+		return true;
+	}
+
+	std::string battlePath = "data/battle_" + battleId + ".json";
+
+	std::cout << "\n[DEBUG] battleId = " << battleId << std::endl;
+	std::cout << "[DEBUG] battlePath = " << battlePath << std::endl;
+
+	try {
+		Battle battle = DataLoader::loadBattle(
+			battlePath,
+			game.getGameData()
+		);
+
+		Combatant* player = &game.getPlayer();
+
+		std::vector<Combatant*> companions;
+		std::vector<Combatant*> enemies;
+
+		for (auto& enemy : battle.enemies) {
+			enemies.push_back(enemy.get());
+		}
+
+		CombatSystem combat(
+			player,
+			companions,
+			enemies,
+			battle.config
+		);
+
+		return combat.startBattle();
+	}
+	catch (const std::exception& e) {
+		std::cerr << "\n战斗加载失败：" << e.what() << "\n";
+		std::cout << "按任意键返回。\n";
+		console::readKey();
+		return false;
+	}
 }

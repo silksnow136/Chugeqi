@@ -90,8 +90,12 @@ private:
 	std::vector<Scene> scenes;
 
 	// 播放叙事行 / 分支选择
-	void playLines(const std::vector<StoryLine>& lines);
-	void playChoice(const Scene& scene, int& branch_id);
+	bool playLines(const std::vector<StoryLine>& lines);
+	bool playChoice(const Scene& scene, int& branch_id);
+
+
+	bool startStoryBattle(const std::string& battleId);
+
 
 	// =====================================
 	// 通用辅助函数

@@ -137,3 +137,8 @@ int& Game::getGold()
 {
 	return gold;
 }
+
+GameData& Game::getGameData()
+{
+	return gameData;
+}

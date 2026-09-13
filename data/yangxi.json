@@ -1,0 +1,9 @@
+{
+	"name": "ÑîÏ²",
+	"id": "yangxi",
+	"level": 1,
+	"hp": 100,
+	"sp": 20,
+	"exp": 0,
+	"baseStats": [ 4, 7, 5, 5 ]
+}

@@ -39,6 +39,12 @@ struct StoryLine {
     int color = 14;        // 文字颜色（Windows 控制台色码）
     int sleep = 0;         // 播完后停顿毫秒
     bool wait = false;     // 是否等待按键后继续（对应 nextLine）
+
+    // 是否在这句剧情之后进入战斗
+    bool battle = false;
+
+    // 战斗文件，例如 "wangjian"
+    std::string battleId;
 };
 
 // 分支选项

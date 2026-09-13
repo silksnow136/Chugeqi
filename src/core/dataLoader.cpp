@@ -33,6 +33,11 @@ StoryLine parseLine(const json::Value& v) {
     line.color = v.has("color") ? v["color"].asInt() : 14;
     line.sleep = v.has("sleep") ? v["sleep"].asInt() : 0;
     line.wait = v.has("wait") ? v["wait"].asBool() : false;
+
+    // 战斗信息
+    line.battle = v.has("battle") ? v["battle"].asBool() : false;
+    line.battleId = v.has("battleId") ? v["battleId"].asString() : "";
+
     return line;
 }
 
