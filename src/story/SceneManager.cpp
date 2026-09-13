@@ -536,7 +536,8 @@ bool SceneManager::startStoryBattle(const std::string& battleId)
 			player,
 			companions,
 			enemies,
-			battle.config
+			battle.config,
+				&game.getGameData().itemPool
 		);
 
 		return combat.startBattle();

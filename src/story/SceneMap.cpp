@@ -430,7 +430,7 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
             std::vector<Combatant*> enemies;
             for (const auto& e : battle.enemies) enemies.push_back(e.get());
 
-            CombatSystem combat(player, companions, enemies, battle.config);
+            CombatSystem combat(player, companions, enemies, battle.config, &gameData.itemPool);
             bool won = combat.startBattle();
             save.save(1, party, gameData.skillPool);
 

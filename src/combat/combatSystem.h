@@ -34,7 +34,8 @@ public:
 
     CombatSystem(Combatant* player, std::vector<Combatant*> companions,
                  std::vector<Combatant*> enemies,
-                 const CombatConfig& config);
+                 const CombatConfig& config,
+                 const ItemPool* itemPool = nullptr);
     ~CombatSystem();
 
     // 启动战斗，返回是否胜利（逃跑返回 false，可通过 escaped() 区分）
@@ -52,6 +53,7 @@ private:
     std::vector<Combatant*> companions;
     std::vector<Combatant*> enemies;
     CombatConfig config;
+    const ItemPool* itemPool = nullptr; // 物品池（战斗中解析药品效果），可为空
 
     // 战斗状态
     bool battleEnded = false;
@@ -81,7 +83,8 @@ private:
     // 行动执行
     bool performAttack(Combatant* attacker, Combatant* target, bool isNormalAttack = true);
     bool performSkill(Combatant* user, SkillBase* skill, std::vector<Combatant*>& targets);
-    bool performItem(Combatant* user, const std::string& itemId, std::vector<Combatant*>& targets); // 未实现
+    bool performItem(Combatant* user, const std::string& itemId, std::vector<Combatant*>& targets);
+    bool useItemInBattle(Combatant* actor); // 战斗中道具菜单：use+编号 使用药品
     bool attemptRun(Combatant* runner);
 
     // 辅助计算
