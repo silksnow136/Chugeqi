@@ -81,6 +81,10 @@ int SceneManager::showScene_id() {
 	return current_scene_id;
 }
 
+int SceneManager::showBranch_id() {
+	return current_branch_id;
+}
+
 void SceneManager::changeScene(int scene_id)
 {
 	// 离开旧场景
@@ -89,6 +93,8 @@ void SceneManager::changeScene(int scene_id)
 	current_state = SceneState::ORIGIN_SCENE;
 	// 重置对话人物
 	current_character = 0;
+	// 重置分支
+	current_branch_id = 0;
 	// 允许新场景重新打印地图
 	unique_map_print = false;
 }
@@ -373,6 +379,7 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 	// 分支选择（第二幕）
 	if (!scene->choice.options.empty()) {
 		playChoice(*scene, branch_id);
+		current_branch_id = branch_id; // 记录当前分支，供存档
 		console::sleep(2000);
 	}
 

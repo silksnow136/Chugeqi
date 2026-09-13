@@ -3,7 +3,7 @@
 #include <string>
 #include <memory>
 #include "SceneManager.h"
-#include "core/dataLoader.h"
+#include "data/dataLoader.h"
 
 // 负责控制游戏初始化以及指令处理
 class Game {
@@ -28,6 +28,10 @@ private:
 
     void showWelcome();
     void showHelp();
+
+    // 存档 / 读档（slot 1~2）
+    void doSave(int slot);
+    void doLoad(int slot);
 
     int scene_id = 0;
 

@@ -5,9 +5,9 @@
 #include "PharManager.h"
 #include "ForgeManager.h"
 #include "core/console.h"
-#include "core/dataLoader.h"
+#include "data/dataLoader.h"
 #include "combat/combatSystem.h"
-#include "combat/saveManager.h"
+#include "data/saveManager.h"
 #include <iostream>
 #include <memory>
 
@@ -416,10 +416,10 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
         try {
             GameData gameData = DataLoader::loadGameData("data/");
             SaveManager save("save.db");
-            std::vector<std::unique_ptr<Combatant>> party = save.loadParty(gameData.skillPool);
+            std::vector<std::unique_ptr<Combatant>> party = save.loadParty(1, gameData.skillPool, gameData.itemPool);
             if (party.empty()) {
                 party = DataLoader::loadPartyTemplates("data/battle_test.json", gameData.skillPool);
-                save.saveParty(party, gameData.skillPool);
+                save.saveParty(1, party, gameData.skillPool);
             }
             Battle battle = DataLoader::loadBattle("data/battle_test.json", gameData);
 
@@ -431,7 +431,7 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
 
             CombatSystem combat(player, companions, enemies, battle.config);
             bool won = combat.startBattle();
-            save.saveParty(party, gameData.skillPool);
+            save.saveParty(1, party, gameData.skillPool);
 
             console::clearScreen();
             if (won) {

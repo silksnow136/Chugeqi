@@ -2,7 +2,7 @@
 //负责故事背景显示
 //负责显示剧情
 //负责显示场景以及场景交互
-#include "core/dataLoader.h"
+#include "data/dataLoader.h"
 #include "TalkManager.h"
 #include <memory>
 using namespace std;
@@ -41,6 +41,8 @@ public:
 	void enterForge();
 	//初步剧情存档,获得当前场景id
 	int showScene_id();
+	// 获得当前分支id（第二幕 A/B）
+	int showBranch_id();
 	// 修改场景
 	void changeScene(int scene_id);
 	//场景功能显示管理
@@ -76,6 +78,9 @@ private:
 
 	// 当前场景ID
 	int current_scene_id = 0;
+
+	// 当前分支ID（第二幕 A/B，默认 0）
+	int current_branch_id = 0;
 
 	// 当前场景状态
 	SceneState current_state = SceneState::ORIGIN_SCENE;

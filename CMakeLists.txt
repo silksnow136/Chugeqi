@@ -27,10 +27,10 @@ add_executable(Chugeqi
     src/combat/combatSystem.cpp
     src/combat/item.cpp
     src/combat/skill.cpp
-    src/combat/saveManager.cpp
+    src/data/saveManager.cpp
     # 平台抽象层 / 数据加载（core）
     src/core/console.cpp
-    src/core/dataLoader.cpp
+    src/data/dataLoader.cpp
     # 第三方
     third_party/sqlite/sqlite3.c
 )
@@ -43,9 +43,9 @@ add_executable(combatTest
     src/combat/combatSystem.cpp
     src/combat/item.cpp
     src/combat/skill.cpp
-    src/combat/saveManager.cpp
+    src/data/saveManager.cpp
     src/core/console.cpp
-    src/core/dataLoader.cpp
+    src/data/dataLoader.cpp
     third_party/sqlite/sqlite3.c
 )
 
@@ -58,9 +58,9 @@ add_executable(mapTest
     src/combat/combatSystem.cpp
     src/combat/item.cpp
     src/combat/skill.cpp
-    src/combat/saveManager.cpp
+    src/data/saveManager.cpp
     src/core/console.cpp
-    src/core/dataLoader.cpp
+    src/data/dataLoader.cpp
     third_party/sqlite/sqlite3.c
 )
 
@@ -72,7 +72,7 @@ add_executable(gaiXiaMap
     src/combat/skill.cpp
     src/combat/item.cpp
     src/core/console.cpp
-    src/core/dataLoader.cpp
+    src/data/dataLoader.cpp
 )
 
 # 第二幕淮河突围地图展示（独立入口）
@@ -83,7 +83,7 @@ add_executable(huaiRiverMap
     src/combat/skill.cpp
     src/combat/item.cpp
     src/core/console.cpp
-    src/core/dataLoader.cpp
+    src/data/dataLoader.cpp
 )
 
 # 第三幕东城快战地图展示（独立入口）
@@ -94,7 +94,7 @@ add_executable(dongchengMap
     src/combat/skill.cpp
     src/combat/item.cpp
     src/core/console.cpp
-    src/core/dataLoader.cpp
+    src/data/dataLoader.cpp
 )
 
 # 第四幕乌江自刎地图展示（独立入口）
@@ -105,7 +105,7 @@ add_executable(wujiangMap
     src/combat/skill.cpp
     src/combat/item.cpp
     src/core/console.cpp
-    src/core/dataLoader.cpp
+    src/data/dataLoader.cpp
 )
 
 foreach(TGT Chugeqi combatTest mapTest gaiXiaMap huaiRiverMap dongchengMap wujiangMap)

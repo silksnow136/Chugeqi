@@ -13,9 +13,9 @@
 
 #include "story/MapGrid.h"
 #include "core/console.h"
-#include "core/dataLoader.h"
+#include "data/dataLoader.h"
 #include "combat/combatSystem.h"
-#include "combat/saveManager.h"
+#include "data/saveManager.h"
 #include <iostream>
 #include <exception>
 
@@ -33,10 +33,10 @@ static void triggerBattle(const std::string& enemyName) {
         SaveManager save("save.db");
 
         // 我方队伍
-        std::vector<std::unique_ptr<Combatant>> party = save.loadParty(gameData.skillPool);
+        std::vector<std::unique_ptr<Combatant>> party = save.loadParty(1, gameData.skillPool, gameData.itemPool);
         if (party.empty()) {
             party = DataLoader::loadPartyTemplates("data/battle_test.json", gameData.skillPool);
-            save.saveParty(party, gameData.skillPool);
+            save.saveParty(1, party, gameData.skillPool);
         }
 
         // 敌方
@@ -52,7 +52,7 @@ static void triggerBattle(const std::string& enemyName) {
         bool won = combat.startBattle();
 
         // 战斗结果写回存档
-        save.saveParty(party, gameData.skillPool);
+        save.saveParty(1, party, gameData.skillPool);
 
         console::clearScreen();
         if (won) {
