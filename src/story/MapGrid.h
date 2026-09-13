@@ -125,9 +125,6 @@ struct BagEntry {
 // 按名称在物品池中查找物品（地图物品格常用中文名标注）
 const Item* findItemByName(const ItemPool& pool, const std::string& name);
 
-// 读取一行命令（逐字符读取并回显；回车结束，ESC 返回空串）
-std::string readCommandLine();
-
 // 收集背包条目并按 装备->药水->材料 排序
 void collectBagEntries(Combatant* player, const ItemPool& pool, std::vector<BagEntry>& out);
 

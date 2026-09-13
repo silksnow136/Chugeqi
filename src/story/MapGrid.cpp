@@ -315,18 +315,6 @@ const Item* findItemByName(const ItemPool& pool, const std::string& name) {
     return nullptr;
 }
 
-std::string readCommandLine() {
-    std::string cmd;
-    while (true) {
-        int k = console::readKey();
-        if (k == 13 || k == 10) { std::cout << std::endl; break; }   // 回车
-        if (k == 27) { std::cout << std::endl; return ""; }          // ESC 取消
-        if (k == 8) { if (!cmd.empty()) { cmd.pop_back(); std::cout << "\b \b"; } } // 退格
-        else if (k >= 32 && k < 127) { cmd += static_cast<char>(k); std::cout << static_cast<char>(k); }
-    }
-    return cmd;
-}
-
 void collectBagEntries(Combatant* player, const ItemPool& pool, std::vector<BagEntry>& out) {
     const auto& inv = player->getInventory();
     for (const auto& kv : inv) {
@@ -393,7 +381,7 @@ void showBackpack(Combatant* player, const ItemPool& pool) {
         if (count == 0) std::cout << "\n  背包是空的。\n";
 
         std::cout << "\n指令：equip+编号 装配 / unequip+编号 卸下 / use+编号 使用药水 / 回车或ESC 返回地图\n> ";
-        std::string cmd = readCommandLine();
+        std::string cmd = console::readLine();
         if (cmd.empty()) return; // 直接回车或 ESC 退出背包
 
         // 解析指令（equipN / unequipN / useN，兼容带空格的写法）
