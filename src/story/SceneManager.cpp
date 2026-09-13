@@ -359,7 +359,18 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 		if (s.id == scene_id) { scene = &s; break; }
 	}
 	if (!scene) return;
+	
+	cout << "\n===== 第三幕 DEBUG =====\n";
+	cout << "scene id: " << scene->id << "\n";
+	cout << "lines size: " << scene->lines.size() << "\n";
 
+	for (size_t i = 0; i < scene->lines.size(); ++i) {
+		cout << "line[" << i << "]: "
+			<< scene->lines[i].text << "\n";
+	}
+
+	cout << "===== DEBUG END =====\n";
+	
 	//清屏
 	console::clearScreen();
 

@@ -1,9 +1,9 @@
 {
-	"name": "ÇØÊ±ÔÂ",
+	"name": "ç§¦æ—¶æœˆ",
 	"id": "qinshiyue",
 	"level": 1,
 	"hp": 110,
 	"sp": 20,
 	"exp": 0,
-	"baseStats": [ 6, 9, 6, 7 ]
+	"baseStats": [ 1, 9, 6, 7 ]
 }

@@ -5,5 +5,5 @@
 	"hp": 130,
 	"sp": 40,
 	"exp": 0,
-	"baseStats": [ 8, 7, 6, 6 ]
+	"baseStats": [ 1, 7, 6, 6 ]
 }
