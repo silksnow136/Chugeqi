@@ -110,10 +110,10 @@ CombatSystem::~CombatSystem() {
 // ---------------------------------------------------------------------------
 
 bool CombatSystem::startBattle() {
-    console::init();
     battleEnded = false;
     playerWon = false;
     playerEscaped = false;
+    firstRender = true;
 
     // 主循环：我方（玩家 + 同伴）→ 敌方。每轮统一在轮首结算、轮末递减状态。
     while (!battleEnded) {
@@ -189,9 +189,8 @@ void CombatSystem::addLog(const std::string& msg) {
     log.add(msg);
 }
 
-void CombatSystem::displayBattle() const {
+void CombatSystem::displayBattle() {
     // 首次清屏，之后光标回顶覆盖重绘（防闪烁）
-    static bool firstRender = true;
     if (firstRender) {
         console::clearScreen();
         firstRender = false;
@@ -250,8 +249,8 @@ void CombatSystem::displayBattle() const {
 
 std::string CombatSystem::displayStatus(const Combatant* c) const {
     std::string s = c->getName() + "  Lv." + std::to_string(c->getLevel())
-                  + "  HP:" + std::to_string(c->getHP())
-                  + "  SP:" + std::to_string(c->getSP())
+                  + "  HP:" + std::to_string(c->getHP()) + "/" + std::to_string(c->getMaxHP())
+                  + "  SP:" + std::to_string(c->getSP()) + "/" + std::to_string(c->getMaxSP())
                   + "  状态：";
     std::vector<std::string> statuses;
     if (c->hasStatusEffect(StatusEffect::Burn))   statuses.push_back(statusName(StatusEffect::Burn));
@@ -273,24 +272,24 @@ std::string CombatSystem::displayStatus(const Combatant* c) const {
 // 回合处理
 // ---------------------------------------------------------------------------
 
-bool CombatSystem::processPlayerTurn() {
-    if (playerAiAssisted) return processAllyAITurn(player); // AI 托管
-    return manualTurn(player, 5);                           // 手动：含切换托管项
+void CombatSystem::processPlayerTurn() {
+    if (playerAiAssisted) { processAllyAITurn(player); return; } // AI 托管
+    manualTurn(player, 5);                                       // 手动：含切换托管项
 }
 
-bool CombatSystem::processCompanionTurn(Combatant* companion) {
-    if (playerAiAssisted || companionAiAssisted) return processAllyAITurn(companion); // 全员托管 或 同伴独立托管
-    return manualTurn(companion, 3); // 手动（含托管选项）
+void CombatSystem::processCompanionTurn(Combatant* companion) {
+    if (playerAiAssisted || companionAiAssisted) { processAllyAITurn(companion); return; } // 全员托管 或 同伴独立托管
+    manualTurn(companion, 3); // 手动（含托管选项）
 }
 
 // 手动回合：玩家(maxChoice=5，含全员托管切换)与同伴(maxChoice=3，含同伴托管切换)共用
-bool CombatSystem::manualTurn(Combatant* actor, int maxChoice) {
+void CombatSystem::manualTurn(Combatant* actor, int maxChoice) {
     // 眩晕：跳过本回合行动（状态持续回合在轮末统一递减）
     if (actor->hasStatusEffect(StatusEffect::Stun)) {
         addLog(actor->getName() + " 处于眩晕，无法行动！");
         displayBattle();
         console::pause();
-        return false;
+        return;
     }
     while (true) {
         displayBattle(); // 行动前刷新一次界面
@@ -333,7 +332,7 @@ bool CombatSystem::manualTurn(Combatant* actor, int maxChoice) {
                     if (useItemInBattle(actor)) {
                         displayBattle(); // 属性变动后立即刷新
                         console::pause();
-                        return false;    // 使用道具算一次行动，结束本回合
+                        return;          // 使用道具算一次行动，结束本回合
                     }
                     continue; // 未使用（取消/无效输入），返回主菜单
                 }
@@ -341,19 +340,22 @@ bool CombatSystem::manualTurn(Combatant* actor, int maxChoice) {
                 companionAiAssisted = !companionAiAssisted;
                 if (companionAiAssisted) {
                     addLog(std::string(actor->getName()) + " 进入了 AI 托管。");
-                    return processAllyAITurn(actor);
+                    processAllyAITurn(actor);
+                    return;
                 }
                 addLog(std::string(actor->getName()) + " 退出了 AI 托管。");
                 std::cout << "已关闭 " << actor->getName() << " 的 AI 托管。" << std::endl;
                 console::pause();
                 continue;
             case 4: // 逃跑（仅玩家）
-                return attemptRun(actor);
+                attemptRun(actor);
+                return;
             case 5: // 切换全员 AI 托管：开启后立即由 AI 接管本回合
                 playerAiAssisted = !playerAiAssisted;
                 if (playerAiAssisted) {
                     addLog("全体我方角色进入了 AI 托管。");
-                    return processAllyAITurn(actor); // actor 必为 player（仅玩家菜单含此项）
+                    processAllyAITurn(actor); // actor 必为 player（仅玩家菜单含此项）
+                    return;
                 }
                 companionAiAssisted = false; // 全员关闭时一并清除同伴托管
                 addLog("全体我方角色退出了 AI 托管。");
@@ -363,7 +365,7 @@ bool CombatSystem::manualTurn(Combatant* actor, int maxChoice) {
         }
         displayBattle(); // HP/SP 变动后立即刷新显示
         console::pause();
-        return false;
+        return;
     }
 }
 
@@ -381,20 +383,20 @@ void CombatSystem::aiPause() {
     }
 }
 
-bool CombatSystem::processEnemyTurn(Combatant* enemy) {
+void CombatSystem::processEnemyTurn(Combatant* enemy) {
     // 敌人 AI：眩晕跳过；否则按策略选择普攻或技能，集火我方残血
     if (enemy->hasStatusEffect(StatusEffect::Stun)) {
         addLog(enemy->getName() + " 处于眩晕，无法行动！");
         displayBattle();
         aiPause();
-        return false;
+        return;
     }
 
     auto targets = getAliveAllies();
-    if (targets.empty()) return false; // 无可攻击目标
+    if (targets.empty()) return; // 无可攻击目标
 
     // 决策：有可用伤害技能且 SP 足够时，约 60% 概率用技能，否则普攻
-    SkillBase* skill = chooseAISkill(enemy, targets, getAliveEnemies());
+    SkillBase* skill = chooseAISkill(enemy);
     if (skill) {
         // 全体技能自动选中全部我方，单体技能选 HP 最低者
         std::vector<Combatant*> skillTargets;
@@ -409,37 +411,36 @@ bool CombatSystem::processEnemyTurn(Combatant* enemy) {
             performSkill(enemy, skill, skillTargets);
             displayBattle();
             aiPause();
-            return false;
+            return;
         }
     }
 
     // 普通攻击：集火 HP 最低的我方
     Combatant* target = chooseAITarget(enemy, targets);
-    if (!target) return false;
+    if (!target) return;
     displayBattle();
     performAttack(enemy, target, true);
     displayBattle();
     aiPause();
-    return false;
 }
 
 // 我方 AI 托管回合：低血优先治疗，否则优先伤害技能，最后退回普攻
-bool CombatSystem::processAllyAITurn(Combatant* actor) {
+void CombatSystem::processAllyAITurn(Combatant* actor) {
     // 眩晕跳过
     if (actor->hasStatusEffect(StatusEffect::Stun)) {
         addLog(actor->getName() + " 处于眩晕，无法行动！");
         displayBattle();
         aiPause();
-        return false;
+        return;
     }
 
     auto allies = getAliveAllies();   // 含 actor 自身，治疗可选
     auto enemies = getAliveEnemies();
-    if (enemies.empty()) return false;
+    if (enemies.empty()) return;
 
-    // 满血估算 = 100 + 等级×10；HP 低于 30% 视为残血
-    int maxHpEst = 100 + actor->getLevel() * 10;
-    bool lowHp = actor->getHP() < (maxHpEst * 3 / 10);
+    // 满血按最大生命估算；HP 低于 30% 视为残血
+    int maxHp = actor->getMaxHP();
+    bool lowHp = actor->getHP() < (maxHp * 3 / 10);
 
     // 1) 低血优先：找可用治疗技能
     if (lowHp) {
@@ -459,7 +460,7 @@ bool CombatSystem::processAllyAITurn(Combatant* actor) {
                 performSkill(actor, s, tgts);
                 displayBattle();
                 aiPause();
-                return false;
+                return;
             }
         }
     }
@@ -480,47 +481,45 @@ bool CombatSystem::processAllyAITurn(Combatant* actor) {
             performSkill(actor, s, tgts);
             displayBattle();
             aiPause();
-            return false;
+            return;
         }
     }
 
     // 3) 退回普攻：集火 HP 最低的敌方
     Combatant* t = chooseAITarget(actor, enemies);
-    if (!t) return false;
+    if (!t) return;
     displayBattle();
     performAttack(actor, t, true);
     displayBattle();
     aiPause();
-    return false;
 }
 
 // ---------------------------------------------------------------------------
 // 行动执行
 // ---------------------------------------------------------------------------
 
-bool CombatSystem::performAttack(Combatant* attacker, Combatant* target, bool isNormalAttack) {
+void CombatSystem::performAttack(Combatant* attacker, Combatant* target, bool isNormalAttack) {
     // 命中判定（基于敏捷）
     float baseHit = isNormalAttack ? 0.95f : 0.90f;
     float hitRate = calculateHitRate(baseHit, attacker->getEffectiveStat(3), target->getEffectiveStat(3));
     if (roll(100) >= static_cast<int>(hitRate * 100)) {
         addLog(attacker->getName() + " 攻击 " + target->getName() + "，但未命中！");
-        return true; // 未命中
+        return; // 未命中
     }
 
     // 伤害 = 力量 * 威力 - 防御（普通攻击威力固定为 10）
     int damage = calculateDamage(attacker->getEffectiveStat(0), 10, target->getEffectiveStat(2));
     target->takeDamage(damage);
     addLog(attacker->getName() + " 攻击 " + target->getName() + "，造成 " + std::to_string(damage) + " 点伤害。");
-    return true;
 }
 
-bool CombatSystem::performSkill(Combatant* user, SkillBase* skill, std::vector<Combatant*>& targets) {
+void CombatSystem::performSkill(Combatant* user, SkillBase* skill, std::vector<Combatant*>& targets) {
     // 检查并扣除 SP
     if (user->getSP() < skill->getCost()) {
         addLog(user->getName() + " 的 SP 不足，无法使用「" + skill->getName() + "」。");
         std::cout << user->getName() << " SP不足！" << std::endl;
         console::pause();
-        return false;
+        return;
     }
     user->restoreSP(-skill->getCost());
 
@@ -558,33 +557,32 @@ bool CombatSystem::performSkill(Combatant* user, SkillBase* skill, std::vector<C
         std::cout << "该技能类型：(未实现)" << std::endl;
         console::pause();
     }
-    return true;
 }
 
-bool CombatSystem::performItem(Combatant* user, const std::string& itemId, std::vector<Combatant*>& targets) {
+void CombatSystem::performItem(Combatant* user, const std::string& itemId) {
     if (config.disableItems) {
         addLog("此战斗禁止使用道具！");
         std::cout << "此战斗禁止使用道具！" << std::endl;
         console::pause();
-        return false;
+        return;
     }
     if (itemPool == nullptr) {
         addLog(user->getName() + " 的道具数据未加载，无法使用道具。");
-        return false;
+        return;
     }
     if (!user->hasItem(itemId)) {
         addLog(user->getName() + " 没有这个道具！");
-        return false;
+        return;
     }
     auto it = itemPool->find(itemId);
     if (it == itemPool->end()) {
         addLog("找不到道具数据：" + itemId);
-        return false;
+        return;
     }
     const Consumable* c = dynamic_cast<const Consumable*>(it->second.get());
     if (c == nullptr || (c->getHealHP() <= 0 && c->getHealSP() <= 0)) {
         addLog("该道具无法在战斗中使用。");
-        return false;
+        return;
     }
     bool used = false;
     if (c->getHealHP() > 0) {
@@ -601,9 +599,7 @@ bool CombatSystem::performItem(Combatant* user, const std::string& itemId, std::
     }
     if (used) {
         user->consumeItem(itemId, 1);
-        return true;
     }
-    return false;
 }
 
 // 战斗中道具菜单：列出背包中可用的药品，输入 use+编号 使用（作用于使用者自身）
@@ -661,16 +657,16 @@ bool CombatSystem::useItemInBattle(Combatant* actor) {
         console::pause();
         return false;
     }
-    std::vector<Combatant*> targets; // 目标列表预留（药品作用于使用者自身）
-    return performItem(actor, potions[idx - 1].first, targets);
+    performItem(actor, potions[idx - 1].first);
+    return true;
 }
 
-bool CombatSystem::attemptRun(Combatant* runner) {
+void CombatSystem::attemptRun(Combatant* runner) {
     if (config.disableRun) {
         addLog("此战斗禁止逃跑！");
         std::cout << "此战斗禁止逃跑！" << std::endl;
         console::pause();
-        return false;
+        return;
     }
 
     // 逃跑成功率：基于自身敏捷与敌方敏捷之和
@@ -685,13 +681,12 @@ bool CombatSystem::attemptRun(Combatant* runner) {
         battleEnded = true;
         playerWon = false;
         playerEscaped = true;
-        return true;
+        return;
     }
 
     addLog(runner->getName() + " 逃跑失败！");
     std::cout << runner->getName() << " 逃跑失败！" << std::endl;
     console::pause();
-    return false;
 }
 
 // ---------------------------------------------------------------------------
@@ -763,7 +758,7 @@ void CombatSystem::applyRoundEndStatus() {
     for (auto* e : getAliveEnemies()) e->updateStatusEffects();
 }
 
-SkillBase* CombatSystem::chooseAISkill(Combatant* ai, const std::vector<Combatant*>& enemies, const std::vector<Combatant*>& allies) {
+SkillBase* CombatSystem::chooseAISkill(Combatant* ai) {
     // 敌人进攻型 AI：只考虑伤害技能，且 SP 需足够
     std::vector<SkillBase*> usable;
     for (auto* s : ai->getSkills()) {

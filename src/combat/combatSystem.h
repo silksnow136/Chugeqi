@@ -1,9 +1,5 @@
 #pragma once
 // 战斗系统：负责回合流程、行动执行与界面显示。
-// 以下功能仅保留接口与定义，未实现
-//   - 道具使用
-//   - 状态效果（灼烧 / 迟缓 / 眩晕 / 充能）
-//   - 充能技能的实际执行
 #include <vector>
 #include <memory>
 #include <deque>
@@ -20,16 +16,7 @@ public:
     // 战斗配置
     struct CombatConfig {
         bool disableRun = false;   // 是否禁止逃跑
-        bool disableItems = false; // 是否禁止使用物品（道具系统未实现）
-        bool playerFirst = true;   // 是否我方先手（当前未使用）
-    };
-
-    // 行动结果（预留，当前未使用）
-    struct ActionResult {
-        std::string description;
-        int damage = 0;
-        bool hit = false;
-        bool critical = false;
+        bool disableItems = false; // 是否禁止使用物品
     };
 
     CombatSystem(Combatant* player, std::vector<Combatant*> companions,
@@ -61,6 +48,7 @@ private:
     bool playerEscaped = false; // 是否成功逃跑（与 playerWon 互斥）
     bool playerAiAssisted = false; // 玩家是否开启全员 AI 托管
     bool companionAiAssisted = false; // 同伴独立 AI 托管（同伴菜单切换）
+    bool firstRender = true; // 首次渲染清屏，之后光标回顶覆盖重绘
     BattleLog log;
     mutable std::mt19937 rng; // 随机数引擎，构造时用 random_device 播种
 
@@ -69,27 +57,27 @@ private:
 
     // 界面
     void addLog(const std::string& msg);
-    void displayBattle() const;
+    void displayBattle();
     std::string displayStatus(const Combatant* c) const; // 返回单行状态文本
 
     // 回合处理
-    bool processPlayerTurn();
-    bool processCompanionTurn(Combatant* companion);
-    bool processEnemyTurn(Combatant* enemy);
-    bool processAllyAITurn(Combatant* actor); // 我方 AI 托管回合（玩家可切换开启）
-    bool manualTurn(Combatant* actor, int maxChoice); // 玩家/同伴共用的手动回合
+    void processPlayerTurn();
+    void processCompanionTurn(Combatant* companion);
+    void processEnemyTurn(Combatant* enemy);
+    void processAllyAITurn(Combatant* actor); // 我方 AI 托管回合（玩家可切换开启）
+    void manualTurn(Combatant* actor, int maxChoice); // 玩家/同伴共用的手动回合
     void aiPause(); // AI 行动后的等待：任意键继续，ESC 退出玩家 AI 托管
 
     // 行动执行
-    bool performAttack(Combatant* attacker, Combatant* target, bool isNormalAttack = true);
-    bool performSkill(Combatant* user, SkillBase* skill, std::vector<Combatant*>& targets);
-    bool performItem(Combatant* user, const std::string& itemId, std::vector<Combatant*>& targets);
+    void performAttack(Combatant* attacker, Combatant* target, bool isNormalAttack = true);
+    void performSkill(Combatant* user, SkillBase* skill, std::vector<Combatant*>& targets);
+    void performItem(Combatant* user, const std::string& itemId);
     bool useItemInBattle(Combatant* actor); // 战斗中道具菜单：use+编号 使用药品
-    bool attemptRun(Combatant* runner);
+    void attemptRun(Combatant* runner);
 
     // 辅助计算
-    float calculateHitRate(float baseHitRate, int attackerAgility, int defenderAgility);
-    int calculateDamage(int strength, int power, int defense);
+    static float calculateHitRate(float baseHitRate, int attackerAgility, int defenderAgility);
+    static int calculateDamage(int strength, int power, int defense);
     std::vector<Combatant*> getAliveEnemies() const;
     std::vector<Combatant*> getAliveAllies() const;
 
@@ -99,6 +87,6 @@ private:
     void applyRoundEndStatus();            // 回合结束：对全体存活战斗者递减状态持续回合
 
     // AI 决策
-    SkillBase* chooseAISkill(Combatant* ai, const std::vector<Combatant*>& enemies, const std::vector<Combatant*>& allies);
+    SkillBase* chooseAISkill(Combatant* ai);
     Combatant* chooseAITarget(Combatant* ai, const std::vector<Combatant*>& potentialTargets);
 };
