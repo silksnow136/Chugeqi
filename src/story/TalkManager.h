@@ -14,34 +14,9 @@ public:
 
     void setSceneManager(SceneManager* manager);
 
-    // 进入对话系统
-    void talkManager(int scene_id = 0, int branch_id = 0);
-
-    // 对话系统
-    bool talkScene(Game& game1, int branch_id);
-    //播放对话
-    void talkCharacter(int scene_id, int character_id, int branch_id);
-
     // 外部直接播放指定人物对话（不刷新场景地图，供地图移动交互调用）
     void talkCharacterExternal(int scene_id, int character_id, int branch_id);
-    // 第一幕
-    void talkScene01(Game& game1, int branch_id);
-    // 第二幕
-    void talkScene02(Game& game1, int branch_id);
-    // 第三幕
-    void talkScene03(Game& game1, int branch_id);
-    //第四幕
-    void talkScene04(Game& game1, int branch_id);
-    // 对话人物打印
 
-    void talkScene_01();   // 虞姬、小卒a
-    void talkScene_020();  // 农夫
-    void talkScene_021();  // 王翦、楚军
-    void talkScene_022();  // 副将、楚军
-    void talkScene_03();   // 钟离昧
-    void talkScene_04();   // 钟离昧、乌江亭长、众将士、韩信
-
-    
     // 从 JSON 读取对话
     void loadDialogue(
         int scene_id,

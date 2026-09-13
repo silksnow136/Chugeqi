@@ -1,5 +1,4 @@
 #include<iostream>
-#include"Game.h"
 #include "TalkManager.h"
 #include "SceneManager.h"
 #include "core/console.h"
@@ -15,136 +14,6 @@ void TalkManager::setSceneManager(SceneManager* manager)
 	sceneManager = manager;
 }
 
-//第一幕
-void TalkManager::talkScene01(Game& game1, int branch_id) {
-	talkScene_01();
-	string sceneCommand1;
-	cout << "\n> ";
-	cin >> sceneCommand1;
-	if (sceneCommand1 == "1" || sceneCommand1 == "2" || sceneCommand1 == "3") {
-		int num = stoi(sceneCommand1);//将string转化为int
-		if (num == 3) {
-			//返回
-			sceneManager->setSceneState(SceneManager::SceneState::ORIGIN_SCENE);
-		}
-		else {
-			//与小兵/虞姬对话
-			talkCharacter(1,num, branch_id);
-		}
-	}
-	else {
-		sceneManager->scene = sceneManager->handleCommand(game1, sceneCommand1);
-		
-	}
-}
-
-//第二章
-void TalkManager::talkScene02(Game& game1, int branch_id) {
-	if (branch_id == 1) {
-		talkScene_021();
-		string sceneCommand1;
-		cout << "\n> ";
-		cin >> sceneCommand1;
-		if (sceneCommand1 == "1" || sceneCommand1 == "2" || sceneCommand1 == "3") {
-			int num = stoi(sceneCommand1);//将string转化为int
-			if (num == 3) {
-				//返回
-				sceneManager->setSceneState(SceneManager::SceneState::ORIGIN_SCENE);
-			}
-			else {
-				//王翦/汉军
-				talkCharacter(2,num, branch_id);
-			}
-		}
-		else {
-			sceneManager->scene = sceneManager->handleCommand(game1, sceneCommand1);
-			
-		}
-	}
-	else {
-		talkScene_022();
-		string sceneCommand1;
-		cout << "\n> ";
-		cin >> sceneCommand1;
-		if (sceneCommand1 == "1" || sceneCommand1 == "2") {
-			int num = stoi(sceneCommand1);//将string转化为int
-			if (num == 2) {
-				//返回
-				sceneManager->setSceneState(SceneManager::SceneState::ORIGIN_SCENE);
-			}
-			else {
-				//副将
-				talkCharacter(2,num, branch_id);
-			}
-		}
-		else {
-			sceneManager->scene = sceneManager->handleCommand(game1, sceneCommand1);
-			
-		}
-	}
-}
-
-//第三章
-void TalkManager::talkScene03(Game& game1, int branch_id) {
-	talkScene_03();
-	string sceneCommand1;
-	cout << "\n> ";
-	cin >> sceneCommand1;
-	if (sceneCommand1 == "1" || sceneCommand1 == "2" || sceneCommand1 == "3" || sceneCommand1 == "4" || sceneCommand1 == "5") {
-		int num = stoi(sceneCommand1);//将string转化为int
-		if (num == 5) {
-			//返回
-			sceneManager->setSceneState(SceneManager::SceneState::ORIGIN_SCENE);
-		}
-		else {
-			//与赤泉侯/秦时月/钟离昧/二十八骑对话
-			talkCharacter(3,num, branch_id);
-		}
-	}
-	else {
-		sceneManager->scene = sceneManager->handleCommand(game1, sceneCommand1);
-	}
-}
-
-// 第四幕
-void TalkManager::talkScene04(Game& game1, int branch_id)
-{
-	talkScene_04();
-
-	string sceneCommand1;
-
-	cout << "\n> ";
-	cin >> sceneCommand1;
-
-	if (sceneCommand1 == "1" ||
-		sceneCommand1 == "2" ||
-		sceneCommand1 == "3" ||
-		sceneCommand1 == "4" ||
-		sceneCommand1 == "5" ||
-		sceneCommand1 == "6")
-	{
-		int num = stoi(sceneCommand1);
-
-		if (num == 6)
-		{
-			// 返回大世界
-			sceneManager->setSceneState(
-				SceneManager::SceneState::ORIGIN_SCENE
-			);
-		}
-		else
-		{
-			// 播放第四幕对应人物对话
-			talkCharacter(4,num, branch_id);
-		}
-	}
-	else
-	{
-		sceneManager->scene =
-			sceneManager->handleCommand(game1, sceneCommand1);
-	}
-}
-
 void TalkManager::waitForReturn() {
 	string tip1 = "输入任意按键返回";
 	cout << tip1;
@@ -153,106 +22,13 @@ void TalkManager::waitForReturn() {
 
 }
 
-//对话播放
-void TalkManager::talkCharacter(int scene_id,int character_id, int branch_id) {
-
-	// 刷新场景
-	sceneManager->refreshScene(branch_id);
-	// 设置当前人物
-	sceneManager->setCurrentCharacter(character_id);
-	// 播放人物对话
-	// 从 talk.json 读取
-	loadDialogue(scene_id,branch_id,character_id);
-
-	waitForReturn();
-}
-
 // 外部直接播放对话（不刷新场景地图）
 void TalkManager::talkCharacterExternal(int scene_id, int character_id, int branch_id) {
 	console::setColor(10);
 	std::cout << "\n===== 对话 =====" << std::endl;
 	console::setColor(7);
-	sceneManager->setCurrentCharacter(character_id);
 	loadDialogue(scene_id, branch_id, character_id);
 	waitForReturn();
-}
-
-//对话系统
-void TalkManager::talkScene_01() {
-	cout << "\n";
-	cout << "================================\n";
-	cout << "              对话\n";
-	cout << "================================\n";
-
-	cout << "1. 小卒a\n";
-	cout << "2. 虞姬\n";
-	cout << "3. 返回\n";
-	cout << "\n输入w继续游戏\n";
-
-}
-void TalkManager::talkScene_020() {
-	cout << "\n";
-	cout << "================================\n";
-	cout << "              对话\n";
-	cout << "================================\n";
-
-	cout << "1. \n";
-	cout << "2. \n";
-	cout << "3. 返回\n";
-	cout << "\n输入w继续游戏\n";
-
-}
-void TalkManager::talkScene_021() {
-	cout << "\n";
-	cout << "================================\n";
-	cout << "              对话\n";
-	cout << "================================\n";
-
-	cout << "1. 王翦\n";
-	cout << "2. 汉军\n";
-	cout << "3. 返回\n";
-	cout << "\n输入w继续游戏\n";
-
-}
-void TalkManager::talkScene_022() {
-	cout << "\n";
-	cout << "================================\n";
-	cout << "              对话\n";
-	cout << "================================\n";
-
-	cout << "1. 副将\n";
-	cout << "2. 返回\n";
-	cout << "\n输入w继续游戏\n";
-
-}
-void TalkManager::talkScene_03() {
-	cout << "\n";
-	cout << "================================\n";
-	cout << "              对话\n";
-	cout << "================================\n";
-
-	cout << "1. 赤泉侯\n";
-	cout << "2. 秦时月\n";
-	cout << "3. 钟离昧\n";
-	cout << "4. 二十八骑\n";
-	cout << "5. 返回\n";
-	cout << "\n输入w继续游戏\n";
-
-}
-void TalkManager::talkScene_04() {
-	cout << "\n";
-	cout << "================================\n";
-	cout << "              对话\n";
-	cout << "================================\n";
-
-	cout << "1. 韩信\n";
-	cout << "2. 汉军\n";
-	cout << "3. 钟离昧\n";
-	cout << "4. 二十八骑\n";
-	cout << "5. 乌江亭长\n";
-	cout << "6. 返回\n";
-	cout << "\n输入w继续游戏\n";
-
 }
 
 //播放一句话
