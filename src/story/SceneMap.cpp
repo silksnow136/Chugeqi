@@ -25,7 +25,7 @@ static void buildGaiXia(MapGrid& grid) {
     grid.buildRoom( 4, 17, 9, 24, 20);
     grid.buildRoom(13, 3, 16, 8, 5);
     grid.buildRoom(10, 11, 17, 18, 14);
-    grid.buildRoom(10, 20, 14, 25, 22);
+    grid.buildRoom(11, 20, 15, 25, 22);
     grid.buildRoom(19, 3, 23, 10, 6);
     grid.buildRoom(19, 17, 22, 23, 19);
     grid.buildRoom(25, 3, 28, 8, 5);
@@ -57,7 +57,7 @@ static void buildGaiXia(MapGrid& grid) {
     grid.setTile(6, 21, "马夫", TileType::FRIEND, "马夫");
     grid.setTile(14, 5, "军械", TileType::FRIEND, "军械库");
     grid.setTile(12, 14, "帅帐", TileType::ADVANCE, "帅帐");
-    grid.setTile(12, 22, "虞姬", TileType::FRIEND, "虞姬");
+    grid.setTile(13, 22, "虞姬", TileType::FRIEND, "虞姬");
     grid.setTile(20, 5, "伤兵", TileType::FRIEND, "伤兵");
     grid.setTile(20, 6, "伤兵", TileType::FRIEND, "伤兵");
     grid.setTile(20, 7, "伤兵", TileType::FRIEND, "伤兵");
@@ -79,7 +79,7 @@ static void buildGaiXia(MapGrid& grid) {
     // 物品
     grid.setTile(20, 12, "木炭", TileType::ITEM, "木炭");
     grid.setTile(14, 7, "楚酒", TileType::ITEM, "楚酒");
-    grid.setTile(12, 24, "铜镜", TileType::ITEM, "铜镜");
+    grid.setTile(13, 24, "铜镜", TileType::ITEM, "铜镜");
 
     // 汉军
     grid.setTile(1, 5, "汉军", TileType::ENEMY, "汉军哨骑");

@@ -12,7 +12,7 @@ static const std::string WALL_DISP  = "████";     // 4 个全块
 static const std::string ROOM_WALL  = "====";     // 帐墙（横边）
 static const std::string ROOM_WALL_V = "| | ";    // 帐墙（竖边）
 static const std::string FENCE_DISP = "####";       // 栅栏
-static const std::string CHEVAL_DISP = "╳╳╳╳ ";      // 拒马
+static const std::string CHEVAL_DISP = "╳╳╳╳";      // 拒马
 static const std::string WATER_DISP = "~~~~";      // 水域
 
 // 计算 UTF-8 字符串的控制台显示宽度
@@ -101,10 +101,13 @@ void MapGrid::buildRoom(int r1, int c1, int r2, int c2, int doorCol) {
 }
 
 void MapGrid::buildFence(int r, int c, int length, int doorCol, int doorCol2) {
+    const int maxRow = static_cast<int>(grid.size()) - 1;
+    const int maxCol = static_cast<int>(grid[0].size()) - 1;
     // 横向栅栏：在 row=r 行，从 col=c 开始向右延伸 length 格
     for (int i = 0; i < length; i++) {
         int cc = c + i;
-        if (!isValid(r, cc)) break;
+        // 不覆盖四周边界墙
+        if (r <= 0 || r >= maxRow || cc <= 0 || cc >= maxCol) break;
         if (grid[r][cc].type == TileType::PLAYER) continue;
         // 门位置设为 DOOR
         if (cc == doorCol || cc == doorCol2) {
@@ -122,9 +125,12 @@ void MapGrid::buildCheval(int r, int c) {
 }
 
 void MapGrid::buildWater(int r, int c, int length) {
+    const int maxRow = static_cast<int>(grid.size()) - 1;
+    const int maxCol = static_cast<int>(grid[0].size()) - 1;
     for (int i = 0; i < length; i++) {
         int cc = c + i;
-        if (!isValid(r, cc)) break;
+        // 不覆盖四周边界墙
+        if (r <= 0 || r >= maxRow || cc <= 0 || cc >= maxCol) break;
         if (grid[r][cc].type == TileType::PLAYER) continue;
         grid[r][cc] = Tile(WATER_DISP, TileType::WALL);
     }
