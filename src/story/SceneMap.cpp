@@ -418,7 +418,9 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
             SaveManager save("saves");
             auto saveData = save.load(1, gameData.skillPool, gameData.itemPool);
             std::vector<std::unique_ptr<Combatant>> party = std::move(saveData.party);
-            if (party.empty()) {
+            // 存档无效（空档，或主角已死亡——上次战斗失败会把死亡队伍存进档里）时，
+            // 回退到初始队伍模板并覆盖存档，避免"一进战斗就失败"的死档
+            if (party.empty() || !party[0]->isAlive()) {
                 party = DataLoader::loadPartyTemplates("data/battle_test.json", gameData.skillPool);
                 save.save(1, party, gameData.skillPool);
             }
@@ -432,7 +434,8 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
 
             CombatSystem combat(player, companions, enemies, battle.config, &gameData.itemPool);
             bool won = combat.startBattle();
-            save.save(1, party, gameData.skillPool);
+            // 仅胜利时保存战斗后状态；失败不覆盖存档，保留战前状态以便重试
+            if (won) save.save(1, party, gameData.skillPool);
 
             console::clearScreen();
             if (won) {
