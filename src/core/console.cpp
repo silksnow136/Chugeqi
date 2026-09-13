@@ -49,6 +49,7 @@ namespace console {
     // Windows 控制台天然支持 _getch 单键读取，无需切换终端模式
     void enterRaw() {}
     void restoreCanonical() {}
+    void drainInput() {}
 
     std::string readLine() {
         std::string cmd;
@@ -130,17 +131,18 @@ namespace console {
     }
 
     int readKey() {
+        bool wasRaw = g_raw;   // 记录是否已处于 raw：若是，读完不恢复，交由外层统一恢复
         enterRaw();
         int c = std::getchar();
-        if (c == EOF) { restoreCanonical(); return c; }
-        if (c != 27) { restoreCanonical(); return c; } // 普通按键
+        if (c == EOF) { if (!wasRaw) restoreCanonical(); return c; }
+        if (c != 27) { if (!wasRaw) restoreCanonical(); return c; } // 普通按键
         // ESC：可能是裸 ESC，也可能是方向键转义序列 \033[A/B/C/D
-        if (!pollIn(20)) { restoreCanonical(); return 27; }
+        if (!pollIn(20)) { if (!wasRaw) restoreCanonical(); return 27; }
         int c2 = std::getchar();
-        if (c2 == EOF || c2 != '[') { restoreCanonical(); return 27; }
-        if (!pollIn(20)) { restoreCanonical(); return 27; }
+        if (c2 == EOF || c2 != '[') { if (!wasRaw) restoreCanonical(); return 27; }
+        if (!pollIn(20)) { if (!wasRaw) restoreCanonical(); return 27; }
         int c3 = std::getchar();
-        restoreCanonical();
+        if (!wasRaw) restoreCanonical();
         switch (c3) {
             case 'A': return KEY_UP;
             case 'B': return KEY_DOWN;
@@ -164,10 +166,21 @@ namespace console {
     void sleep(int ms) { std::this_thread::sleep_for(std::chrono::milliseconds(ms)); }
 
     bool kbhit() {
+        bool wasRaw = g_raw;   // 若已持有 raw，查完不恢复
         enterRaw();
         bool has = pollIn(0);
-        restoreCanonical();
+        if (!wasRaw) restoreCanonical();
         return has;
+    }
+
+    // 丢弃所有待读按键并恢复 canonical：用于剧情播放等「输出期间吞键」的场景，
+    // 确保返回命令输入前终端干净（无残留字符、回显恢复）。
+    void drainInput() {
+        enterRaw();
+        while (pollIn(0)) {
+            if (std::getchar() == EOF) break;
+        }
+        restoreCanonical();
     }
 
     void moveCursor(int row, int col) { std::printf("\033[%d;%dH", row + 1, col + 1); }
