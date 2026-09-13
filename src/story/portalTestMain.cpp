@@ -84,13 +84,14 @@ int main() {
             console::setColor(7);
             console::pause();
         };
-        grid.onPortal = [&](const std::string& name, int dir) {
+        grid.onPortal = [&](const std::string& name, int dir) -> bool {
             int target = mapIndexByName(name);
-            if (target < 0) return;
+            if (target < 0) return false;
             cur = target;
             grid = buildMap(cur, oppositeDir(dir));
             bind();
             grid.render();
+            return true;
         };
     };
     bind();

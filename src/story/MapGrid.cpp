@@ -193,16 +193,12 @@ void MapGrid::buildPortal(int r, int c, PortalDir dir, const std::string& dest, 
         int idx = (dir == PortalDir::Left || dir == PortalDir::Up) ? (minLen - 1 - i) : i;
         std::string disp = (idx >= 0 && idx < minLen) ? segs[idx] : "";
         Tile t(padToWidth(disp, CELL_WIDTH), TileType::PORTAL, name, static_cast<int>(dir));
-        t.portalDir = dir;
         grid[r][cc] = t;
     }
 
     if (isValid(r, c - 1) && grid[r][c - 1].type != TileType::PLAYER) {
         Tile bar("══", TileType::PORTAL, name, static_cast<int>(dir));
-        bar.portalDir = dir;
         grid[r][c - 1] = bar;
-    }
-}
     }
 }
 
@@ -361,21 +357,15 @@ bool MapGrid::move(char direction) {
         // 仅在 onAdvance 内部确认跳转时才置 advanceTriggered
         return true;
     }
-    // 传送门：不移动，触发地图切换
-    if (target.type == TileType::PORTAL) {
-        interactionType = target.type;
-        interactionName = target.name;
-        if (onPortal) onPortal(target.name, target.portalDir);
-        return true;
-    }
-
-    // 传送门：不移动，触发地图切换（回调可置 portalTriggered=false 阻止）
+    // 传送门：不移动，触发地图切换（回调返回 false 可阻止）
     if (target.type == TileType::PORTAL) {
         interactionType = target.type;
         interactionName = target.name;
         portalTarget = target.name;
         portalTriggered = true;
-        if (onPortal) onPortal(target.name);
+        if (onPortal && !onPortal(target.name, target.portalDir)) {
+            portalTriggered = false;
+        }
         return true;
     }
 

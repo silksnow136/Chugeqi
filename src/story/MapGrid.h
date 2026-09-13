@@ -93,7 +93,8 @@ public:
     std::function<void(const std::string&)> onPharmacy;
     std::function<void(const std::string&)> onItem;
     std::function<void(const std::string&)> onAdvance;   // 幕次跳转
-    std::function<void(const std::string&, int)> onPortal;    // 传送门（目标地名, 传送门方向）
+    // 传送门（目标地名, 传送门方向），返回 false 可阻止传送
+    std::function<bool(const std::string&, int)> onPortal;
 
     // 跳转回调是否已触发（用于通知外部循环退出）
     bool advanceTriggered = false;

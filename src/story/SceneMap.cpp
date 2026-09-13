@@ -484,6 +484,173 @@ static void simpleTalk(const std::string& name) {
     console::pause();
 }
 
+// 地图遭遇战：复用 battle_test.json，返回是否胜利
+static bool runBattle(Game& game, Combatant& player, const std::string& enemyName) {
+    console::clearScreen();
+    console::setColor(12);
+    std::cout << "===== 遭遇 " << enemyName << "！战斗开始！ =====" << std::endl;
+    console::setColor(7);
+    console::pause();
+
+    bool won = false;
+    try {
+        Battle battle = DataLoader::loadBattle("data/battle_test.json", game.getGameData());
+
+        Combatant* p = &player;
+        std::vector<Combatant*> companions;  // 地图遭遇战不带同伴
+        std::vector<Combatant*> enemies;
+        for (const auto& e : battle.enemies) enemies.push_back(e.get());
+
+        CombatSystem combat(p, companions, enemies, battle.config, &game.getGameData().itemPool);
+        won = combat.startBattle();
+
+        console::clearScreen();
+        if (won) {
+            console::setColor(10);
+            std::cout << "战斗胜利！击败了 " << enemyName << std::endl;
+        } else {
+            console::setColor(12);
+            std::cout << "战斗失败..." << std::endl;
+        }
+        console::setColor(7);
+        std::cout << "按任意键返回地图" << std::endl;
+        console::pause();
+    } catch (const std::exception& e) {
+        std::cerr << "战斗系统错误: " << e.what() << std::endl;
+    }
+    return won;
+}
+
+// 支线一：营地委托对话（老兵 / 粮官 / 粮仓）
+static void talkQuest(Game& game, Combatant& player, QuestState& qs, const std::string& name) {
+    console::clearScreen();
+    console::setColor(10);
+    std::cout << "\n===== " << name << " =====" << std::endl;
+    console::setColor(7);
+
+    if (name == "老兵") {
+        if (qs.q1 == 0) {
+            std::cout << "老兵：“大王！昨夜又有几名弟兄趁夜逃了……\n"
+                         "        他们就在营外荒郊，求大王把他们劝回来！”\n";
+            std::cout << "\n【接受委托】寻回逃兵（0/3）—— 从北门白色传送门进入荒郊\n";
+            qs.q1 = 1;
+        } else if (qs.q1 == 1) {
+            std::cout << "老兵：“逃兵们就在营外荒郊，已劝回 " << qs.deserters << "/3。”\n";
+        } else if (qs.q1 == 2) {
+            std::cout << "老兵：“三名弟兄都回来了！多谢大王！\n";
+            game.getGold() += 30;
+            player.addItem("herb_potion", 1);
+            qs.morale += 15;
+            std::cout << "【奖励】金币 +30、伤药 ×1，军心 +15（当前军心 " << qs.morale << "）\n";
+            qs.q1 = 3;
+        } else {
+            std::cout << "老兵：“军心已定，愿随大王死战！”\n";
+        }
+        console::pause();
+        return;
+    }
+
+    if (name == "粮官") {
+        if (qs.q2 == 0) {
+            std::cout << "粮官：“南门最近有汉军哨骑出没，请大王巡视南门、将其击退！”\n";
+            std::cout << "\n【接受委托】巡南门 —— 出南门击败汉军哨骑\n";
+            qs.q2 = 1;
+        } else if (qs.q2 == 1) {
+            std::cout << "粮官：“南门外的汉军哨骑仍在游荡，请大王出手！”\n";
+        } else if (qs.q2 == 2) {
+            std::cout << "粮官：“哨骑已退！这是赏格，请大王收下。\n";
+            game.getGold() += 20;
+            player.addItem("iron_sword", 1);
+            qs.morale += 10;
+            std::cout << "【奖励】金币 +20、铁剑 ×1，军心 +10（当前军心 " << qs.morale << "）\n";
+            qs.q2 = 3;
+        } else {
+            std::cout << "粮官：“南门安宁，全赖大王。”\n";
+        }
+        console::pause();
+        return;
+    }
+
+    if (name == "粮仓") {
+        if (qs.q3 == 0) {
+            std::cout << "粮仓官：“仓中余粮无多，请大王示下如何分配？”\n\n"
+                         "  1. 优先士兵 —— 伤药×2，军心 +5\n"
+                         "  2. 优先战马 —— 草料×2，军心不变\n"
+                         "  3. 留存突围 —— 木炭×2，军心 -5\n"
+                         "\n请输入 1 / 2 / 3：";
+            int key = console::readKey();
+            if (key == '1') {
+                player.addItem("herb_potion", 2);
+                qs.morale += 5; qs.q3choice = 1;
+                std::cout << "\n【分配】粮草优先士兵，营中士气大振。\n";
+            } else if (key == '2') {
+                player.addItem("fodder", 2);
+                qs.q3choice = 2;
+                std::cout << "\n【分配】粮草优先战马，马匹膘壮。\n";
+            } else if (key == '3') {
+                player.addItem("charcoal", 2);
+                qs.morale -= 5; qs.q3choice = 3;
+                std::cout << "\n【分配】粮草留存突围之用，士兵们略有微词。\n";
+            } else {
+                std::cout << "\n（未作分配）\n";
+                console::pause();
+                return;
+            }
+            std::cout << "当前军心 " << qs.morale << "\n";
+            qs.q3 = 3;
+        } else {
+            std::cout << "粮仓官：“粮草已按大王的意思分派妥当。”\n";
+        }
+        console::pause();
+    }
+}
+
+// 支线一：荒郊逃兵对话
+static void talkDeserter(QuestState& qs, const std::string& name) {
+    console::clearScreen();
+    console::setColor(10);
+    std::cout << "\n===== " << name << " =====" << std::endl;
+    console::setColor(7);
+    int idx = (name == "逃兵甲") ? 0 : (name == "逃兵乙" ? 1 : 2);
+    if (!qs.deserterTalked[idx]) {
+        qs.deserterTalked[idx] = true;
+        qs.deserters++;
+        if (idx == 0)      std::cout << "逃兵甲：“楚歌四起，弟兄们都以为家乡尽失……大王既亲来相劝，我跟您回去！”\n";
+        else if (idx == 1) std::cout << "逃兵乙：“家中老母尚在……但大王不弃，我愿再持干戈！”\n";
+        else               std::cout << "逃兵丙：“我等糊涂，听了一夜楚歌便散了军心——大王，走！”\n";
+        std::cout << "\n已劝回逃兵 " << qs.deserters << "/3\n";
+        if (qs.deserters >= 3 && qs.q1 == 1) {
+            qs.q1 = 2;
+            console::setColor(14);
+            std::cout << "三名逃兵均已回心转意，回营地老兵处复命吧！\n";
+            console::setColor(7);
+        }
+    } else {
+        std::cout << "“大王，我这就随您回营。”\n";
+    }
+    console::pause();
+}
+
+// 支线二：田夫对话
+static void talkTianfu(QuestState& qs) {
+    console::clearScreen();
+    console::setColor(10);
+    std::cout << "\n===== 田夫 =====" << std::endl;
+    console::setColor(7);
+    if (!qs.yinlingUnlocked) {
+        std::cout << "田夫：“将军不知，此去北岸有一条阴陵古道，\n"
+                     "        迷雾深处连着古渡，只是从没人走通过……\n"
+                     "        若要寻浅滩，需先有渡河图；寒水刺骨，还须蓑衣护体。”\n";
+        qs.yinlingUnlocked = true;
+        console::setColor(14);
+        std::cout << "\n阴陵古道入口已在北岸显现（白色传送门 ↓）。\n";
+        console::setColor(7);
+    } else {
+        std::cout << "田夫：“阴陵古道凶险，将军保重。雾中浅滩需凭渡河图辨认。”\n";
+    }
+    console::pause();
+}
+
 // =========================================================================
 // 运行场景地图 WASD 交互循环（含支线子地图传送）
 // =========================================================================
@@ -503,222 +670,23 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
 
     MapGrid grid = buildSceneMap(scene_id, branch_id);
 
-    // 跑一场战斗（复用 battle_test.json），返回是否胜利
-    auto runBattle = [&](const std::string& enemyName) -> bool {
-        console::clearScreen();
-        console::setColor(12);
-        std::cout << "===== 遭遇 " << enemyName << "！战斗开始！ =====" << std::endl;
-        console::setColor(7);
-        console::pause();
-
-        bool won = false;
-        try {
-            Battle battle = DataLoader::loadBattle("data/battle_test.json", game.getGameData());
-
-            Combatant* p = &game.getPlayer();
-            std::vector<Combatant*> companions;  // 地图遭遇战不带同伴
-            std::vector<Combatant*> enemies;
-            for (const auto& e : battle.enemies) enemies.push_back(e.get());
-
-            CombatSystem combat(player, companions, enemies, battle.config, &gameData.itemPool);
-            bool won = combat.startBattle();
-            save.save(1, party, gameData.skillPool);
-
-            console::clearScreen();
-            if (won) {
-                console::setColor(10);
-                std::cout << "战斗胜利！击败了 " << name << std::endl;
-            } else {
-                console::setColor(12);
-                std::cout << "战斗失败..." << std::endl;
-            }
-            console::setColor(7);
-            std::cout << "按任意键返回地图" << std::endl;
-            console::pause();
-        } catch (const std::exception& e) {
-            std::cerr << "战斗系统错误: " << e.what() << std::endl;
-        }
-
-    // ----- 物品拾取回调 -----
-    grid.onItem = [&](const std::string& name) {
-        console::setColor(14);
-        std::cout << "\n[拾取] 获得「" << name << "」！" << std::endl;
-        console::setColor(7);
-        // 拾取入包：按名称匹配物品池定义，加入角色背包
-        const Item* it = findItemByName(game.getItemPool(), name);
-        if (it != nullptr) {
-            game.getPlayer().addItem(it->getId(), 1);
-            std::cout << "「" << name << "」已放入背包。（按 B 打开背包查看）" << std::endl;
-        } else {
-            std::cout << "（物品池中未找到「" << name << "」的定义）" << std::endl;
-        }
-        console::pause();
-    };
-
-    // ----- 幕次跳转回调 -----
-    grid.onAdvance = [&, scene_id](const std::string& name) {
-        console::clearScreen();
-        if (won) {
-            console::setColor(10);
-            std::cout << "战斗胜利！击败了 " << enemyName << std::endl;
-        } else {
-            console::setColor(12);
-            std::cout << "战斗失败..." << std::endl;
-        }
-        console::setColor(7);
-        std::cout << "按任意键返回地图" << std::endl;
-        console::pause();
-        return won;
-    };
-
-    // ===== 支线一：委托对话状态机 =====
-    auto talkQuest = [&](const std::string& name) {
-        console::clearScreen();
-        console::setColor(10);
-        std::cout << "\n===== " << name << " =====" << std::endl;
-        console::setColor(7);
-
-        if (name == "老兵") {
-            if (qs.q1 == 0) {
-                std::cout << "老兵：“大王！昨夜又有几名弟兄趁夜逃了……\n"
-                             "        他们就在营外荒郊，求大王把他们劝回来！”\n";
-                std::cout << "\n【接受委托】寻回逃兵（0/3）—— 从北门白色传送门进入荒郊\n";
-                qs.q1 = 1;
-            } else if (qs.q1 == 1) {
-                std::cout << "老兵：“逃兵们就在营外荒郊，已劝回 " << qs.deserters << "/3。”\n";
-            } else if (qs.q1 == 2) {
-                std::cout << "老兵：“三名弟兄都回来了！多谢大王！\n";
-                game.getGold() += 30;
-                player.addItem("herb_potion", 1);
-                qs.morale += 15;
-                std::cout << "【奖励】金币 +30、伤药 ×1，军心 +15（当前军心 " << qs.morale << "）\n";
-                qs.q1 = 3;
-            } else {
-                std::cout << "老兵：“军心已定，愿随大王死战！”\n";
-            }
-            console::pause();
-            return;
-        }
-
-        if (name == "粮官") {
-            if (qs.q2 == 0) {
-                std::cout << "粮官：“南门最近有汉军哨骑出没，请大王巡视南门、将其击退！”\n";
-                std::cout << "\n【接受委托】巡南门 —— 出南门击败汉军哨骑\n";
-                qs.q2 = 1;
-            } else if (qs.q2 == 1) {
-                std::cout << "粮官：“南门外的汉军哨骑仍在游荡，请大王出手！”\n";
-            } else if (qs.q2 == 2) {
-                std::cout << "粮官：“哨骑已退！这是赏格，请大王收下。\n";
-                game.getGold() += 20;
-                player.addItem("iron_sword", 1);
-                qs.morale += 10;
-                std::cout << "【奖励】金币 +20、铁剑 ×1，军心 +10（当前军心 " << qs.morale << "）\n";
-                qs.q2 = 3;
-            } else {
-                std::cout << "粮官：“南门安宁，全赖大王。”\n";
-            }
-            console::pause();
-            return;
-        }
-
-        if (name == "粮仓") {
-            if (qs.q3 == 0) {
-                std::cout << "粮仓官：“仓中余粮无多，请大王示下如何分配？”\n\n"
-                             "  1. 优先士兵 —— 伤药×2，军心 +5\n"
-                             "  2. 优先战马 —— 草料×2，军心不变\n"
-                             "  3. 留存突围 —— 木炭×2，军心 -5\n"
-                             "\n请输入 1 / 2 / 3：";
-                int key = console::readKey();
-                if (key == '1') {
-                    player.addItem("herb_potion", 2);
-                    qs.morale += 5; qs.q3choice = 1;
-                    std::cout << "\n【分配】粮草优先士兵，营中士气大振。\n";
-                } else if (key == '2') {
-                    player.addItem("fodder", 2);
-                    qs.q3choice = 2;
-                    std::cout << "\n【分配】粮草优先战马，马匹膘壮。\n";
-                } else if (key == '3') {
-                    player.addItem("charcoal", 2);
-                    qs.morale -= 5; qs.q3choice = 3;
-                    std::cout << "\n【分配】粮草留存突围之用，士兵们略有微词。\n";
-                } else {
-                    std::cout << "\n（未作分配）\n";
-                    console::pause();
-                    return;
-                }
-                std::cout << "当前军心 " << qs.morale << "\n";
-                qs.q3 = 3;
-            } else {
-                std::cout << "粮仓官：“粮草已按大王的意思分派妥当。”\n";
-            }
-            console::pause();
-            return;
-        }
-    };
-
-    // 荒郊逃兵对话
-    auto talkDeserter = [&](const std::string& name) {
-        console::clearScreen();
-        console::setColor(10);
-        std::cout << "\n===== " << name << " =====" << std::endl;
-        console::setColor(7);
-        int idx = (name == "逃兵甲") ? 0 : (name == "逃兵乙" ? 1 : 2);
-        if (!qs.deserterTalked[idx]) {
-            qs.deserterTalked[idx] = true;
-            qs.deserters++;
-            if (idx == 0)      std::cout << "逃兵甲：“楚歌四起，弟兄们都以为家乡尽失……大王既亲来相劝，我跟您回去！”\n";
-            else if (idx == 1) std::cout << "逃兵乙：“家中老母尚在……但大王不弃，我愿再持干戈！”\n";
-            else               std::cout << "逃兵丙：“我等糊涂，听了一夜楚歌便散了军心——大王，走！”\n";
-            std::cout << "\n已劝回逃兵 " << qs.deserters << "/3\n";
-            if (qs.deserters >= 3 && qs.q1 == 1) {
-                qs.q1 = 2;
-                console::setColor(14);
-                std::cout << "三名逃兵均已回心转意，回营地老兵处复命吧！\n";
-                console::setColor(7);
-            }
-        } else {
-            std::cout << "“大王，我这就随您回营。”\n";
-        }
-        console::pause();
-    };
-
-    // ===== 支线二：田夫 =====
-    auto talkTianfu = [&]() {
-        console::clearScreen();
-        console::setColor(10);
-        std::cout << "\n===== 田夫 =====" << std::endl;
-        console::setColor(7);
-        if (!qs.yinlingUnlocked) {
-            std::cout << "田夫：“将军不知，此去北岸有一条阴陵古道，\n"
-                         "        迷雾深处连着古渡，只是从没人走通过……\n"
-                         "        若要寻浅滩，需先有渡河图；寒水刺骨，还须蓑衣护体。”\n";
-            qs.yinlingUnlocked = true;
-            console::setColor(14);
-            std::cout << "\n阴陵古道入口已在北岸显现（白色传送门 ↓）。\n";
-            console::setColor(7);
-        } else {
-            std::cout << "田夫：“阴陵古道凶险，将军保重。雾中浅滩需凭渡河图辨认。”\n";
-        }
-        console::pause();
-    };
-
     // ===== 给当前地图挂接回调 =====
     auto configure = [&](const std::string& mn) {
         // 对话
         grid.onTalk = [&, mn](const std::string& name) {
             // 支线一·营地委托
             if (mn == "垓下营地" && (name == "老兵" || name == "粮官" || name == "粮仓")) {
-                talkQuest(name);
+                talkQuest(game, player, qs, name);
                 return;
             }
             // 支线一·荒郊逃兵
             if (mn == "营外荒郊" && name.compare(0, 2, "逃兵") == 0) {
-                talkDeserter(name);
+                talkDeserter(qs, name);
                 return;
             }
             // 支线二·田夫
             if (mn == "淮河" && name == "田夫") {
-                talkTianfu();
+                talkTianfu(qs);
                 return;
             }
             int cid = findTalkCharacterId(scene_id, branch_id, name);
@@ -737,7 +705,7 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
 
         // 战斗
         grid.onBattle = [&, mn](const std::string& name) {
-            bool won = runBattle(name);
+            bool won = runBattle(game, player, name);
             // 委托二：南门外哨骑
             if (won && mn == "垓下营地" && qs.q2 == 1 && name == "汉军哨骑") {
                 qs.q2 = 2;
@@ -831,24 +799,22 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
         };
 
         // 传送门
-        grid.onPortal = [&, mn](const std::string& target) {
+        grid.onPortal = [&, mn](const std::string& target, int) -> bool {
             // 支线二：阴陵入口需田夫指路
             if (mn == "淮河" && target == "阴陵一" && !qs.yinlingUnlocked) {
-                grid.portalTriggered = false;
                 console::setColor(14);
                 std::cout << "\n荒草丛生，似乎无路……先找附近的「田夫」问问吧。" << std::endl;
                 console::setColor(7);
                 console::pause();
-                return;
+                return false;
             }
             // 支线二：三层返回门需先击败灌婴
             if (mn == "阴陵三" && target == "淮河" && !qs.guanyingDefeated) {
-                grid.portalTriggered = false;
                 console::setColor(12);
                 std::cout << "\n古渡被汉军封锁——先击败深处的灌婴！" << std::endl;
                 console::setColor(7);
                 console::pause();
-                return;
+                return false;
             }
             // 支线二：下三层时蓑衣检查
             if (mn == "阴陵二" && target == "阴陵三" &&
@@ -865,6 +831,7 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
             std::cout << "\n传送 → " << target << std::endl;
             console::setColor(7);
             console::pause();
+            return true;
         };
     };
 
