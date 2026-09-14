@@ -6,6 +6,7 @@
 #include "combat/skill.h"
 #include "combat/item.h"
 #include "story/QuestState.h"
+#include "story/WorldState.h"
 
 // ---------------------------------------------------------------------------
 // 存档管理（JSON 文件）：维护我方角色的运行时状态 + 游戏进度元信息。
@@ -26,12 +27,13 @@ class SaveManager {
 public:
     static constexpr int SLOT_COUNT = 2;
 
-    // 存档元信息：剧情进度 / 第二幕分支 / 金币 / 支线进度
+    // 存档元信息：剧情进度 / 第二幕分支 / 金币 / 支线进度 / 地图状态
     struct Meta {
         int sceneId;
         int branchId;
         int gold;
         QuestState quest;
+        WorldState world;
         Meta() : sceneId(0), branchId(0), gold(0) {}
     };
 

@@ -110,6 +110,19 @@ void SaveManager::save(int slot, const std::vector<Combatant*>& party,
     quest.set("raincoatWarned", q.raincoatWarned);
     root.set("quest", quest);
 
+    json::Value world = json::Value::object();
+    world.set("mapName", meta.world.mapName);
+    world.set("playerRow", meta.world.playerRow);
+    world.set("playerCol", meta.world.playerCol);
+    json::Value cleared = json::Value::object();
+    for (const auto& kv : meta.world.cleared) {
+        json::Value arr = json::Value::array();
+        for (int code : kv.second) arr.push(code);
+        cleared.set(kv.first, arr);
+    }
+    world.set("cleared", cleared);
+    root.set("world", world);
+
     json::Value partyArr = json::Value::array();
     for (const Combatant* c : party) {
         json::Value obj = json::Value::object();
@@ -179,6 +192,19 @@ SaveManager::SaveData SaveManager::load(int slot, const SkillPool& skillPool,
     data.meta.branchId = root["branch"].asInt();
     data.meta.gold = root["gold"].asInt();
     parseQuest(root, data.meta.quest);
+    if (root.has("world")) {
+        const json::Value& w = root["world"];
+        if (w.has("mapName")) data.meta.world.mapName = w["mapName"].asString();
+        if (w.has("playerRow")) data.meta.world.playerRow = w["playerRow"].asInt();
+        if (w.has("playerCol")) data.meta.world.playerCol = w["playerCol"].asInt();
+        if (w.has("cleared")) {
+            const json::Value& cleared = w["cleared"];
+            for (const auto& key : cleared.keys()) {
+                const json::Value& arr = cleared[key];
+                for (size_t i = 0; i < arr.size(); i++) data.meta.world.cleared[key].push_back(arr[i].asInt());
+            }
+        }
+    }
 
     const json::Value& party = root["party"];
     for (size_t i = 0; i < party.size(); i++) {
