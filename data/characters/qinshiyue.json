@@ -1,0 +1,12 @@
+{
+	"name": "秦时月",
+	"id": "qinshiyue",
+	"level": 3,
+	"hp": 120,
+	"sp": 45,
+	"maxHp": 120,
+	"maxSp": 45,
+	"exp": 0,
+	"baseStats": [ 6, 10, 6, 9 ],
+	"skills": [ "fireball", "frost_arrow" ]
+}

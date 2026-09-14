@@ -1,0 +1,12 @@
+{
+  "name": "王翳",
+  "id": "wangyi",
+  "level": 4,
+  "hp": 150,
+  "sp": 35,
+  "maxHp": 150,
+  "maxSp": 35,
+  "exp": 0,
+  "baseStats": [9, 5, 8, 10],
+  "skills": ["cleave", "frost_arrow"]
+}

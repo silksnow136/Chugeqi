@@ -1,0 +1,12 @@
+{
+  "name": "汉军铁骑",
+  "id": "iron_cavalry",
+  "level": 2,
+  "hp": 90,
+  "sp": 20,
+  "maxHp": 90,
+  "maxSp": 20,
+  "exp": 0,
+  "baseStats": [7, 3, 6, 8],
+  "skills": ["cleave"]
+}

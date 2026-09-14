@@ -1,0 +1,12 @@
+{
+	"name": "吕胜",
+	"id": "lvsheng",
+	"level": 3,
+	"hp": 110,
+	"sp": 30,
+	"maxHp": 110,
+	"maxSp": 30,
+	"exp": 0,
+	"baseStats": [ 8, 5, 7, 9 ],
+	"skills": [ "fireball" ]
+}

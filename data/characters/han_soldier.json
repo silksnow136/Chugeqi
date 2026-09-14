@@ -1,0 +1,12 @@
+{
+  "name": "汉军",
+  "id": "han_soldier",
+  "level": 3,
+  "hp": 100,
+  "sp": 20,
+  "maxHp": 100,
+  "maxSp": 20,
+  "exp": 0,
+  "baseStats": [7, 4, 6, 8],
+  "skills": ["fireball"]
+}

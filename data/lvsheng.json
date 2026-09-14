@@ -1,9 +1,0 @@
-{
-	"name": "吕胜",
-	"id": "lvsheng",
-	"level": 1,
-	"hp": 110,
-	"sp": 30,
-	"exp": 0,
-	"baseStats": [ 6, 4, 3, 7 ]
-}

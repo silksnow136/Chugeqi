@@ -1,9 +1,0 @@
-{
-	"name": "王翦",
-	"id": "wangjian",
-	"level": 1,
-	"hp": 130,
-	"sp": 40,
-	"exp": 0,
-	"baseStats": [ 1, 7, 6, 6 ]
-}

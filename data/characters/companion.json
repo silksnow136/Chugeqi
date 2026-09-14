@@ -1,12 +1,12 @@
 {
   "id": "companion_1",
-  "name": "伙伴1",
+  "name": "钟离昧",
   "level": 1,
   "hp": 90,
-  "sp": 40,
+  "sp": 60,
   "maxHp": 90,
-  "maxSp": 40,
+  "maxSp": 60,
   "exp": 0,
   "baseStats": [8, 6, 10, 9],
-  "skills": ["heal"]
+  "skills": ["heal", "mass_heal"]
 }

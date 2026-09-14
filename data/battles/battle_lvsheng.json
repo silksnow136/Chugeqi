@@ -1,0 +1,9 @@
+{
+    "name": "遭遇吕胜",
+    "first_side": "player",
+    "disable_run": true,
+    "disable_items": false,
+    "enemies_ref": [
+        "../characters/lvsheng.json"
+    ]
+}

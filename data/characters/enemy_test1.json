@@ -1,0 +1,12 @@
+{
+  "name": "测试用敌人1",
+  "id": "enemy_test1",
+  "level": 1,
+  "hp": 100,
+  "sp": 20,
+  "maxHp": 100,
+  "maxSp": 20,
+  "exp": 0,
+  "baseStats": [7, 3, 5, 8],
+  "skills": ["fireball"]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "汉军斥候",
+  "id": "scout",
+  "level": 2,
+  "hp": 70,
+  "sp": 15,
+  "maxHp": 70,
+  "maxSp": 15,
+  "exp": 0,
+  "baseStats": [6, 3, 4, 9],
+  "skills": ["frost_arrow"]
+}

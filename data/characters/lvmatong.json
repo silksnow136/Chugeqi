@@ -1,0 +1,12 @@
+{
+  "name": "吕马童",
+  "id": "lvmatong",
+  "level": 4,
+  "hp": 140,
+  "sp": 30,
+  "maxHp": 140,
+  "maxSp": 30,
+  "exp": 0,
+  "baseStats": [8, 5, 7, 9],
+  "skills": ["thunder_crash"]
+}

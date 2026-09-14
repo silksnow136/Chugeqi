@@ -1,0 +1,12 @@
+{
+    "name": "杨武",
+    "id": "yangwu",
+    "level": 4,
+    "hp": 160,
+    "sp": 35,
+    "maxHp": 160,
+    "maxSp": 35,
+    "exp": 0,
+    "baseStats": [ 10, 5, 8, 8 ],
+    "skills": [ "cleave", "thunder_crash" ]
+}

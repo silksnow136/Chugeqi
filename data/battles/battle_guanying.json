@@ -1,0 +1,9 @@
+{
+    "name": "古渡之战·灌婴",
+    "first_side": "player",
+    "disable_run": true,
+    "disable_items": false,
+    "enemies_ref": [
+        "../characters/guanying.json"
+    ]
+}

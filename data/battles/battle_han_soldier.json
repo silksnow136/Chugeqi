@@ -1,0 +1,9 @@
+{
+    "name": "遭遇汉军",
+    "first_side": "player",
+    "disable_run": false,
+    "disable_items": false,
+    "enemies_ref": [
+        "../characters/han_soldier.json"
+    ]
+}

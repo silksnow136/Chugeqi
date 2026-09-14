@@ -1,0 +1,79 @@
+{
+  "normal_attack": {
+    "name": "普攻",
+    "description": "普通攻击",
+    "type": "damage",
+    "cost": 0,
+    "power": 5,
+    "scope": "single"
+  },
+  "overlord_slash": {
+    "name": "霸王斩",
+    "description": "凝聚巨力的一击，伤害极高。",
+    "type": "damage",
+    "cost": 8,
+    "power": 12,
+    "scope": "single"
+  },
+  "cleave": {
+    "name": "横扫千军",
+    "description": "横扫四方，攻击全体敌人。",
+    "type": "damage",
+    "cost": 16,
+    "power": 7,
+    "scope": "all"
+  },
+  "fireball": {
+    "name": "火球",
+    "description": "发射火球，附带灼烧。",
+    "type": "damage",
+    "cost": 10,
+    "power": 8,
+    "scope": "single",
+    "statusEffect": "burn"
+  },
+  "thunder_crash": {
+    "name": "奔雷",
+    "description": "雷霆一击，附带眩晕。",
+    "type": "damage",
+    "cost": 12,
+    "power": 9,
+    "scope": "single",
+    "statusEffect": "stun"
+  },
+  "frost_arrow": {
+    "name": "寒冰",
+    "description": "寒气凝箭，附带迟缓。",
+    "type": "damage",
+    "cost": 10,
+    "power": 7,
+    "scope": "single",
+    "statusEffect": "slow"
+  },
+  "heal": {
+    "name": "治疗",
+    "description": "恢复目标生命。",
+    "type": "heal",
+    "cost": 8,
+    "healAmount": 30,
+    "scope": "single"
+  },
+  "mass_heal": {
+    "name": "群疗",
+    "description": "恢复全队生命。",
+    "type": "heal",
+    "cost": 16,
+    "healAmount": 18,
+    "scope": "all"
+  },
+  "charge_boost": {
+    "name": "聚力",
+    "description": "蓄力提升全属性。",
+    "type": "charge",
+    "cost": 10,
+    "multiplier": 1.5,
+    "targetStat": -1,
+    "duration": 3,
+    "scope": "single"
+  }
+}

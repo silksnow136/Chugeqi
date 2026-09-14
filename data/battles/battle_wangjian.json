@@ -3,5 +3,7 @@
     "first_side": "player",
     "disable_run": true,
     "disable_items": false,
-    "enemies_ref": [ "wangjian.json" ]
+    "enemies_ref": [
+        "../characters/wangjian.json"
+    ]
 }
