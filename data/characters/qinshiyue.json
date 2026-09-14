@@ -2,9 +2,9 @@
   "name": "秦时月",
   "id": "qinshiyue",
   "level": 3,
-  "hp": 120,
+  "hp": 340,
   "sp": 45,
-  "maxHp": 120,
+  "maxHp": 340,
   "maxSp": 45,
   "exp": 0,
   "baseStats": [

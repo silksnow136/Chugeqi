@@ -22,7 +22,8 @@ public:
     CombatSystem(Combatant* player, std::vector<Combatant*> companions,
                  std::vector<Combatant*> enemies,
                  const CombatConfig& config,
-                 const ItemPool* itemPool = nullptr);
+                 const ItemPool* itemPool = nullptr,
+                 bool headless = false);
     ~CombatSystem();
 
     // 启动战斗，返回是否胜利（逃跑返回 false，可通过 escaped() 区分）
@@ -48,6 +49,7 @@ private:
     bool playerEscaped = false; // 是否成功逃跑（与 playerWon 互斥）
     bool playerAiAssisted = false; // 玩家是否开启全员 AI 托管
     bool companionAiAssisted = false; // 同伴独立 AI 托管（同伴菜单切换）
+    bool headless = false; // 无交互模式（自动 AI 托管、不读键），供战斗模拟/测试
     BattleLog log;
     mutable std::mt19937 rng; // 随机数引擎，构造时用 random_device 播种
 

@@ -63,7 +63,22 @@ add_executable(portalTest
     src/core/console.cpp
 )
 
-foreach(TGT Chugeqi combatTest portalTest)
+# 战斗模拟器（无交互，双方 AI 托管，用于量化难度/平衡性）
+add_executable(battleSim
+    src/combat/battleSimMain.cpp
+    src/combat/battleLog.cpp
+    src/combat/character.cpp
+    src/combat/combatSystem.cpp
+    src/combat/combatSystemUI.cpp
+    src/combat/combatSystemTurns.cpp
+    src/combat/combatSystemActions.cpp
+    src/combat/item.cpp
+    src/combat/skill.cpp
+    src/data/dataLoader.cpp
+    src/core/console.cpp
+)
+
+foreach(TGT Chugeqi combatTest portalTest battleSim)
     target_include_directories(${TGT} PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/src"
     )

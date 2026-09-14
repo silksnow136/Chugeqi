@@ -120,6 +120,7 @@ void CombatSystem::manualTurn(Combatant* actor, int maxChoice) {
 
 // AI 行动后的等待：任意键继续；ESC 立即退出所有托管模式，下一步即恢复手操
 void CombatSystem::aiPause() {
+    if (headless) return; // 无交互模式：不等待
     if (console::readKey() == 27) {
         if (playerAiAssisted) {
             playerAiAssisted = false;

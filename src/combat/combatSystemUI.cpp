@@ -7,6 +7,7 @@
 // ---------------------------------------------------------------------------
 
 void CombatSystem::displayBattle() {
+    if (headless) return; // 无交互模式：不渲染
     console::clearScreen();
     console::setCursorVisible(false);  // 渲染期间隐藏光标
 

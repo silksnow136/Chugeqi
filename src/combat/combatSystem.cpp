@@ -11,8 +11,9 @@
 CombatSystem::CombatSystem(Combatant* player, std::vector<Combatant*> companions,
                            std::vector<Combatant*> enemies,
                            const CombatConfig& config,
-                           const ItemPool* itemPool)
-    : player(player), companions(companions), enemies(enemies), config(config), itemPool(itemPool) {
+                           const ItemPool* itemPool,
+                           bool headless)
+    : player(player), companions(companions), enemies(enemies), config(config), itemPool(itemPool), headless(headless) {
     std::random_device rd;
     rng.seed(rd());
 }
@@ -29,6 +30,12 @@ bool CombatSystem::startBattle() {
     battleEnded = false;
     playerWon = false;
     playerEscaped = false;
+
+    // 无交互模式：强制全员 AI 托管，跳过所有按键等待，自动打完
+    if (headless) {
+        playerAiAssisted = true;
+        companionAiAssisted = true;
+    }
 
     // 主循环：我方（玩家 + 同伴）→ 敌方。每轮统一在轮首结算、轮末递减状态。
     while (!battleEnded) {
@@ -87,6 +94,7 @@ bool CombatSystem::startBattle() {
         addLog(playerWon ? "战斗胜利！" : "战斗失败...");
     }
     displayBattle();
+    if (headless) return playerWon;
     if (playerEscaped) {
         std::cout << "成功逃跑，战斗结束。" << std::endl;
     } else {
@@ -126,7 +134,9 @@ float CombatSystem::calculateHitRate(float baseHitRate, int attackerAgility, int
 }
 
 int CombatSystem::calculateDamage(int strength, int power, int defense) {
-    int dmg = strength * power - defense;
+    // 伤害 = 力量 * 威力 / 3 - 耐力：降低单次伤害基数，拉长回合、凸显属性成长。
+    // 普攻威力固定为 10（见 performAttack），此处 /3 后约为原公式的 1/3。
+    int dmg = strength * power / 3 - defense;
     if (dmg < 0) dmg = 0;
     return dmg;
 }
