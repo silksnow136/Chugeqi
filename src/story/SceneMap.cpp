@@ -65,33 +65,58 @@ static bool runBattle(Game& game, Combatant& player, const std::string& enemyNam
     return won;
 }
 
+// 主线地图名（按幕次）
+static std::string mainMapName(int scene_id) {
+    switch (scene_id) {
+        case 1: return "垓下营地";
+        case 2: return "淮河";
+        case 3: return "东城";
+        default: return "乌江";
+    }
+}
+
+// 按地图名构建网格：主线地图按 scene_id 布局，子地图按名称
+static MapGrid buildMapByName(const std::string& name, int scene_id, int branch_id, const Combatant& player) {
+    if (name == "垓下营地" || name == "淮河" || name == "东城" || name == "乌江")
+        return MapLayouts::buildSceneMap(scene_id, branch_id);
+    return MapLayouts::buildNamedMap(name, player);
+}
+
+// 应用已清除的格子（击败的敌人 / 拾取的道具），保证往返地图不刷新
+static void applyCleared(MapGrid& grid, const WorldState& world, const std::string& mapName) {
+    auto it = world.cleared.find(mapName);
+    if (it == world.cleared.end()) return;
+    for (int code : it->second) grid.clearTile(code / 1000, code % 1000);
+}
+
 bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
     QuestState& qs = sm.getQuestState();
     Combatant& player = game.getPlayer();
+    WorldState& world = game.getWorld();
 
-    std::string mapName;
-    switch (scene_id) {
-        case 1:  mapName = "垓下营地"; break;
-        case 2:  mapName = "淮河"; break;
-        case 3:  mapName = "东城"; break;
-        default: mapName = "乌江"; break;
+    // 当前地图：读档恢复用保存的地图名，否则按幕次取主线地图
+    if (world.mapName.empty()) world.mapName = mainMapName(scene_id);
+
+    MapGrid grid = buildMapByName(world.mapName, scene_id, branch_id, player);
+    applyCleared(grid, world, world.mapName);
+    if (world.playerRow >= 0 && world.playerCol >= 0) {
+        grid.setPlayer(world.playerRow, world.playerCol); // 读档恢复坐标
     }
 
-    MapGrid grid = MapLayouts::buildSceneMap(scene_id, branch_id);
-
-    // 单一交互回调：[&] 捕获，mapName 随传送更新，无需按地图重新实现
+    // 单一交互回调：[&] 捕获，world.mapName 随传送更新，无需按地图重新实现
     auto interact = [&](TileType type, const std::string& name, int row, int col) {
         switch (type) {
             case TileType::FRIEND: {
-                if (SideQuest::tryHandleTalk(game, player, qs, mapName, name)) break;
+                if (SideQuest::tryHandleTalk(game, player, qs, world.mapName, name)) break;
                 if (sm.getTalkManager().talkCharacterExternal(scene_id, name, branch_id)) break;
                 sm.getTalkManager().playSimpleTalk(name);
                 break;
             }
             case TileType::ENEMY: {
                 if (runBattle(game, player, name)) {
-                    SideQuest::onBattleWon(qs, mapName, name);
-                    grid.clearTile(row, col); // 击败后该敌人从地图上消失
+                    SideQuest::onBattleWon(qs, world.mapName, name);
+                    grid.clearTile(row, col);
+                    world.markCleared(world.mapName, row, col); // 击败后不再刷新
                 }
                 break;
             }
@@ -105,6 +130,7 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
             }
             case TileType::ITEM: {
                 player.addItem(name, 1);  // name 即物品 ID
+                world.markCleared(world.mapName, row, col); // 拾取后不再刷新
                 const ItemPool& pool = game.getItemPool();
                 auto it = pool.find(name);
                 std::string displayName = (it != pool.end()) ? it->second->getName() : name;
@@ -133,13 +159,15 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
                 int key = console::readKey();
                 if (key == 'y' || key == 'Y') {
                     grid.advanceTriggered = true;
+                    world.mapName.clear();          // 进入新幕，重置地图定位
+                    world.playerRow = world.playerCol = -1;
                     if (scene_id < 4) { sm.changeScene(scene_id + 1); sm.ShowBackground(scene_id + 1); }
                     else { sm.ShowBackground(4); }
                 }
                 break;
             }
             case TileType::PORTAL: {
-                if (SideQuest::canEnterPortal(player, qs, mapName, name)) {
+                if (SideQuest::canEnterPortal(player, qs, world.mapName, name)) {
                     grid.portalTriggered = true;
                     grid.portalTarget = name;
                 }
@@ -153,8 +181,8 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
 
     // ===== WASD 主循环 =====
     grid.render();
-    std::cout << "第" << scene_id << "幕 · " << mapName
-              << " —— WASD 移动，白色箭头=传送门，ESC 退出场景" << std::endl;
+    std::cout << "第" << scene_id << "幕 · " << world.mapName
+              << " —— WASD 移动，白色箭头=传送门，E 存读档，ESC 退出场景" << std::endl;
 
     while (true) {
         int key = console::readKey();
@@ -162,6 +190,13 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
         char dir = static_cast<char>(std::tolower(key));
         if (dir == 'b') { // 背包与属性
             showBackpack(&player, game.getItemPool());
+            grid.render();
+            continue;
+        }
+        if (dir == 'e') { // 存读档
+            if (game.saveMenu()) {
+                return true; // 发生了读档，已切换到新地图，结束当前循环
+            }
             grid.render();
             continue;
         }
@@ -174,21 +209,28 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
             grid.portalTriggered = false;
             grid.portalTarget.clear();
             grid.advanceTriggered = false;
-            mapName = target;
-            SideQuest::onEnterMap(qs, mapName);
+            world.mapName = target;
+            SideQuest::onEnterMap(qs, world.mapName);
             grid = MapLayouts::buildNamedMap(target, player);
             grid.onInteract = interact;  // grid 重建后重新绑定回调
+            applyCleared(grid, world, world.mapName);
+            world.playerRow = grid.getPlayerRow();
+            world.playerCol = grid.getPlayerCol();
             grid.render();
-            std::cout << "当前位置：" << mapName << std::endl;
+            std::cout << "当前位置：" << world.mapName << std::endl;
             continue;
         }
 
         if (grid.advanceTriggered) break;
 
+        world.playerRow = grid.getPlayerRow();
+        world.playerCol = grid.getPlayerCol();
         grid.render();
     }
 
     console::clearScreen();
+    world.mapName.clear();          // 退出地图，不再处于地图内
+    world.playerRow = world.playerCol = -1;
     return true;
 }
 

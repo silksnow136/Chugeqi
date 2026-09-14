@@ -288,7 +288,7 @@ void MapGrid::render() const {
     std::cout << "█";
     console::setColor(7);
     std::cout << "=墙" << std::endl;
-    std::cout << "B=背包与属性（装配/卸下/用药/查看）" << std::endl;
+    std::cout << "B=背包与属性  E=存读档" << std::endl;
     std::cout << "> ";
 
     console::setCursorVisible(true);
