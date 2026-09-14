@@ -228,118 +228,35 @@ static void buildYinlingFloor3(MapGrid& grid) {
     grid.setTile(8, 8, "灌婴", TileType::ENEMY, "灌婴");
 }
 
+// 第三幕：东城快战（限制探索范围的战场）
 static void buildDongcheng(MapGrid& grid) {
     grid.setPlayer(13, 13);
 
-    grid.buildCheval(9, 9);  grid.buildCheval(9, 17);
-    grid.buildCheval(17, 9); grid.buildCheval(17, 17);
-    grid.buildCheval(10, 8); grid.buildCheval(10, 18);
-    grid.buildCheval(16, 8); grid.buildCheval(16, 18);
+    // 战场围栏（墙圈出活动区，限制探索范围）
+    grid.buildRoom(8, 6, 21, 20, 13);   // 门在 (8,13) 和 (21,13)
 
-    grid.setTile(8, 13, "碎石", TileType::WALL);
-    grid.setTile(18, 13, "碎石", TileType::WALL);
-    grid.setTile(13, 8, "碎石", TileType::WALL);
-    grid.setTile(13, 18, "碎石", TileType::WALL);
+    // 拒马
+    grid.buildCheval(10, 10); grid.buildCheval(10, 16);
+    grid.buildCheval(18, 10); grid.buildCheval(18, 16);
 
-    grid.setTile(1, 5, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(1, 6, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(1, 12, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(1, 13, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(1, 14, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(1, 20, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(1, 21, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(2, 8, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(2, 18, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(25, 5, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(25, 6, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(25, 12, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(25, 13, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(25, 14, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(25, 20, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(25, 21, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(24, 8, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(24, 18, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(5, 25, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(12, 25, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(13, 25, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(14, 25, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(21, 25, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(5, 1, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(12, 1, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(13, 1, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(14, 1, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(21, 1, "汉骑", TileType::ENEMY, "汉军");
+    // 汉军骑兵（战场内的遭遇战）
+    grid.setTile(9, 9, "汉骑", TileType::ENEMY, "汉军");
+    grid.setTile(9, 17, "汉骑", TileType::ENEMY, "汉军");
+    grid.setTile(19, 9, "汉骑", TileType::ENEMY, "汉军");
+    grid.setTile(19, 17, "汉骑", TileType::ENEMY, "汉军");
+    grid.setTile(14, 7, "汉骑", TileType::ENEMY, "汉军");
+    grid.setTile(14, 19, "汉骑", TileType::ENEMY, "汉军");
 
-    grid.setTile(2, 13, "汉骑", TileType::ENEMY, "汉军");
-
-    grid.setTile(11, 11, "楚骑", TileType::FRIEND, "楚骑·甲");
-    grid.setTile(11, 15, "楚骑", TileType::FRIEND, "楚骑·乙");
-    grid.setTile(12, 10, "楚骑", TileType::FRIEND, "楚骑·丙");
-    grid.setTile(12, 16, "楚骑", TileType::FRIEND, "楚骑·丁");
-    grid.setTile(14, 10, "楚骑", TileType::FRIEND, "楚骑·戊");
-    grid.setTile(14, 16, "楚骑", TileType::FRIEND, "楚骑·己");
-    grid.setTile(15, 11, "楚骑", TileType::FRIEND, "楚骑·庚");
-    grid.setTile(15, 15, "楚骑", TileType::FRIEND, "楚骑·辛");
-    grid.setTile(11, 13, "副将", TileType::FRIEND, "副将");
-    grid.setTile(15, 13, "乌骓", TileType::FRIEND, "乌骓");
-
-    grid.setTile(7, 11, "赤泉", TileType::FRIEND, "赤泉侯");
-    grid.setTile(7, 15, "时月", TileType::FRIEND, "秦时月");
-    grid.setTile(9, 13, "钟离", TileType::FRIEND, "钟离昧");
+    // 友方
     grid.setTile(11, 13, "二八", TileType::FRIEND, "二十八骑");
+    grid.setTile(16, 13, "钟离", TileType::FRIEND, "钟离昧");
+    grid.setTile(12, 16, "副将", TileType::FRIEND, "副将");
 
-    grid.setTile(13, 11, "楚旗", TileType::ITEM, "dc_banner");
-    grid.setTile(13, 15, "太阿", TileType::ITEM, "dc_tai_a");
-    grid.setTile(10, 13, "楚酒", TileType::ITEM, "dc_wine_r");
+    // 野战医帐
+    grid.setTile(17, 13, "野帐", TileType::PHARMACY, "野战医帐");
 
-    grid.setTile(3, 3, "野帐", TileType::PHARMACY, "野战医帐");
-
-    grid.setTile(26, 13, "突围", TileType::ADVANCE, "突围");
-}
-
-static void buildWujiang(MapGrid& grid) {
-    grid.setPlayer(20, 13);
-
-    grid.buildWater(1, 1, 26);
-    grid.buildWater(2, 1, 26);
-    grid.buildWater(3, 1, 26);
-
-    grid.setTile(4, 12, "船埠", TileType::DOOR, "船埠");
-    grid.setTile(4, 13, "船埠", TileType::DOOR, "船埠");
-    grid.setTile(5, 12, "小舟", TileType::FRIEND, "乌江亭长");
-    grid.setTile(5, 13, "渡船", TileType::ADVANCE, "渡船");
-
-    grid.buildCheval(6, 5);  grid.buildCheval(6, 20);
-    grid.buildCheval(8, 4);  grid.buildCheval(8, 21);
-    grid.buildCheval(10, 3); grid.buildCheval(10, 22);
-    grid.setTile(7, 8, "老柳", TileType::WALL);
-    grid.setTile(7, 18, "老柳", TileType::WALL);
-    grid.setTile(9, 10, "残碑", TileType::WALL);
-    grid.setTile(9, 16, "残碑", TileType::WALL);
-
-    grid.buildRoom(6, 11, 9, 16, 13);
-
-    grid.setTile(18, 11, "楚骑", TileType::FRIEND, "楚骑·甲");
-    grid.setTile(18, 15, "楚骑", TileType::FRIEND, "楚骑·乙");
-    grid.setTile(19, 10, "楚骑", TileType::FRIEND, "楚骑·丙");
-    grid.setTile(19, 16, "楚骑", TileType::FRIEND, "楚骑·丁");
-    grid.setTile(21, 11, "副将", TileType::FRIEND, "副将");
-    grid.setTile(21, 15, "乌骓", TileType::FRIEND, "乌骓");
-
-    grid.setTile(7, 13, "铜镜", TileType::ITEM, "wj_mirror");
-    grid.setTile(20, 13, "楚旗", TileType::ITEM, "wj_banner");
-    grid.setTile(22, 8, "楚酒", TileType::ITEM, "wj_wine_h");
-
-    grid.setTile(25, 5, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(25, 6, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(25, 13, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(25, 14, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(25, 20, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(25, 21, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(24, 8, "吕马", TileType::ENEMY, "吕马童");
-    grid.setTile(24, 18, "王翳", TileType::ENEMY, "王翳");
-
-    grid.setTile(22, 5, "篝火", TileType::PHARMACY, "残火（疗伤）");
+    // 突围（触发乌江结局）
+    grid.setTile(20, 13, "突围", TileType::ADVANCE, "突围");
 }
 
 MapGrid buildSceneMap(int scene_id, int) {
@@ -348,7 +265,6 @@ MapGrid buildSceneMap(int scene_id, int) {
         case 1: buildGaiXia(grid); break;
         case 2: buildHuaiRiver(grid); break;
         case 3: buildDongcheng(grid); break;
-        case 4: buildWujiang(grid); break;
         default: break;
     }
     return grid;
