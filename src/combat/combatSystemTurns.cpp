@@ -18,23 +18,30 @@ void CombatSystem::processCompanionTurn(Combatant* companion) {
 
 // 手动回合：玩家(maxChoice=5，含全员托管切换)与同伴(maxChoice=3，含同伴托管切换)共用
 void CombatSystem::manualTurn(Combatant* actor, int maxChoice) {
-    // 眩晕：跳过本回合行动（状态持续回合在轮末统一递减）
+    // 眩晕：跳过本回合行动（在目标自己的回合被跳过时消费掉眩晕）
     if (actor->hasStatusEffect(StatusEffect::Stun)) {
+        actor->removeStatusEffect(StatusEffect::Stun);
         addLog(actor->getName() + " 处于眩晕，无法行动！");
         displayBattle();
         console::pause();
         return;
     }
+    const bool isPlayer = (maxChoice >= 5);
+    const bool canRun = isPlayer && !config.disableRun;
     while (true) {
         displayBattle(); // 行动前刷新一次界面
-        if (maxChoice >= 5)
-            std::cout << "[1]攻击  [2]技能  [3]道具  [4]逃跑  [5]"
+        if (isPlayer) {
+            std::cout << "[1]攻击  [2]技能  [3]道具";
+            if (canRun) std::cout << "  [4]逃跑";
+            std::cout << "  [" << (canRun ? 5 : 4) << "]"
                       << (playerAiAssisted ? "关闭全员AI托管" : "开启全员AI托管") << std::endl;
-        else
+        } else {
             std::cout << actor->getName() << " 的行动：[1]攻击  [2]技能  [3]"
                       << (companionAiAssisted ? "关闭AI托管" : "AI托管") << std::endl;
+        }
 
-        switch (readMenuChoice(1, maxChoice)) {
+        int choice = readMenuChoice(1, canRun ? 5 : (isPlayer ? 4 : 3));
+        switch (choice) {
             case 1: { // 普通攻击：手动选择目标
                 Combatant* t = selectTarget(getAliveEnemies(), "选择攻击目标：");
                 if (!t) continue; // 取消，返回主菜单
@@ -56,7 +63,7 @@ void CombatSystem::manualTurn(Combatant* actor, int maxChoice) {
                 break;
             }
             case 3:
-                if (maxChoice >= 5) { // 玩家：道具（使用药品，指令 use+编号）
+                if (isPlayer) { // 玩家：道具（使用药品，指令 use+编号）
                     if (config.disableItems) {
                         addLog("此战斗禁止使用道具！");
                         std::cout << "此战斗禁止使用道具！" << std::endl;
@@ -81,8 +88,22 @@ void CombatSystem::manualTurn(Combatant* actor, int maxChoice) {
                 std::cout << "已关闭 " << actor->getName() << " 的 AI 托管。" << std::endl;
                 console::pause();
                 continue;
-            case 4: // 逃跑（仅玩家）
-                attemptRun(actor);
+            case 4:
+                if (isPlayer && !canRun) {
+                    // 逃跑被禁用：第 4 项即全员 AI 托管切换
+                    playerAiAssisted = !playerAiAssisted;
+                    if (playerAiAssisted) {
+                        addLog("全体我方角色进入了 AI 托管。");
+                        processAllyAITurn(actor);
+                        return;
+                    }
+                    companionAiAssisted = false;
+                    addLog("全体我方角色退出了 AI 托管。");
+                    std::cout << "已关闭全员 AI 托管。" << std::endl;
+                    console::pause();
+                    continue;
+                }
+                attemptRun(actor); // 逃跑（仅玩家）
                 return;
             case 5: // 切换全员 AI 托管：开启后立即由 AI 接管本回合
                 playerAiAssisted = !playerAiAssisted;
@@ -120,6 +141,7 @@ void CombatSystem::aiPause() {
 void CombatSystem::processEnemyTurn(Combatant* enemy) {
     // 敌人 AI：眩晕跳过；否则按策略选择普攻或技能，集火我方残血
     if (enemy->hasStatusEffect(StatusEffect::Stun)) {
+        enemy->removeStatusEffect(StatusEffect::Stun);
         addLog(enemy->getName() + " 处于眩晕，无法行动！");
         displayBattle();
         aiPause();
@@ -162,6 +184,7 @@ void CombatSystem::processEnemyTurn(Combatant* enemy) {
 void CombatSystem::processAllyAITurn(Combatant* actor) {
     // 眩晕跳过
     if (actor->hasStatusEffect(StatusEffect::Stun)) {
+        actor->removeStatusEffect(StatusEffect::Stun);
         addLog(actor->getName() + " 处于眩晕，无法行动！");
         displayBattle();
         aiPause();

@@ -30,7 +30,7 @@ int main() {
         std::vector<Combatant*> enemies;
         for (const auto& e : battle.enemies) enemies.push_back(e.get());
 
-        CombatSystem combat(player, companions, enemies, battle.config);
+        CombatSystem combat(player, companions, enemies, battle.config, &gameData.itemPool);
         combat.startBattle();
 
         // 5. 战斗结束，把队伍最新状态写回存档

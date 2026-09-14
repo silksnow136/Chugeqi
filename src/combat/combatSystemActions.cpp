@@ -149,7 +149,7 @@ bool CombatSystem::useItemInBattle(Combatant* actor) {
     std::string cmd = console::readLine();
     if (cmd.empty()) return false; // 直接回车返回主菜单
     // 解析 use+编号（支持 use3 / use 3 / 直接数字）
-    if (cmd[0] == 'u' || cmd[0] == 'U') {
+    if ((cmd[0] == 'u' || cmd[0] == 'U') && cmd.size() >= 3) {
         cmd = cmd.substr(3);
         while (!cmd.empty() && (cmd[0] == ' ' || cmd[0] == '\t')) cmd.erase(cmd.begin());
     }

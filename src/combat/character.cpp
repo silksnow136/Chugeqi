@@ -65,6 +65,12 @@ void Combatant::addStatusEffect(StatusEffect type, int duration, int targetStat,
 
 void Combatant::updateStatusEffects() {
     for (auto it = activeStatusEffects.begin(); it != activeStatusEffects.end(); ) {
+        if (it->type == StatusEffect::Stun) {
+            // 眩晕在目标自己的回合被跳过时消费，不按轮次递减（避免敌方后手施加的眩晕
+            // 在轮末被清掉，导致对友方单位无效）
+            ++it;
+            continue;
+        }
         it->duration--;
         if (it->duration <= 0) {
             it = activeStatusEffects.erase(it);
@@ -72,6 +78,14 @@ void Combatant::updateStatusEffects() {
             ++it;
         }
     }
+    recalcStatusFlags();
+}
+
+void Combatant::removeStatusEffect(StatusEffect type) {
+    activeStatusEffects.erase(
+        std::remove_if(activeStatusEffects.begin(), activeStatusEffects.end(),
+            [type](const StatusEffectInstance& effect) { return effect.type == type; }),
+        activeStatusEffects.end());
     recalcStatusFlags();
 }
 

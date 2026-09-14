@@ -33,7 +33,7 @@ void Game::gameLoop() {
 	string command;
 	while (running) {
 		cout << "\n>";
-		getline(cin, command);
+		if (!getline(cin, command)) break; // stdin 关闭（EOF）：退出，避免死循环
 		gameCommand(command);
 	}
 }

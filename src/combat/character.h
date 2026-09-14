@@ -68,6 +68,7 @@ public:
     // 状态管理
     void addStatusEffect(StatusEffect type, int duration, int targetStat = -1, float mult = 0.0f);
     void updateStatusEffects(); // 每回合结束调用，减少持续回合，移除到期状态
+    void removeStatusEffect(StatusEffect type); // 立即移除指定状态（眩晕在目标回合被跳过时消费）
 
     // 属性获取（含装备加成）
     int getEffectiveStat(int index) const; // index 0~3

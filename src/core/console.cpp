@@ -24,7 +24,11 @@ namespace console {
         FillConsoleOutputAttribute(h, csbi.wAttributes, cells, origin, &written);
         SetConsoleCursorPosition(h, origin);
     }
-    int readKey() { return _getch(); }
+    int readKey() {
+        int k = _getch();
+        if (k == EOF) std::exit(0); // stdin 关闭：优雅退出，避免死循环
+        return k;
+    }
     void pause() { _getch(); }
     bool pauseEsc() { return _getch() == 27; } // ESC 的键码为 27
     void setColor(int colorCode) {
@@ -147,7 +151,11 @@ namespace console {
         bool wasRaw = g_raw;   // 记录是否已处于 raw：若是，读完不恢复，交由外层统一恢复
         enterRaw();
         int c = std::getchar();
-        if (c == EOF) { if (!wasRaw) restoreCanonical(); return c; }
+        if (c == EOF) {
+            // stdin 关闭（EOF）：优雅退出，避免各输入循环因持续读到 EOF 而死循环
+            if (!wasRaw) restoreCanonical();
+            std::exit(0);
+        }
         if (c != 27) { if (!wasRaw) restoreCanonical(); return c; } // 普通按键
         // ESC：可能是裸 ESC，也可能是方向键转义序列 \033[A/B/C/D
         if (!pollIn(20)) { if (!wasRaw) restoreCanonical(); return 27; }

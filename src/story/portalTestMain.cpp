@@ -61,12 +61,9 @@ int main() {
             console::setColor(7);
             console::pause();
         } else if (type == TileType::PORTAL) {
-            int target = mapIndexByName(name);
-            if (target < 0) return;
-            cur = target;
-            grid = buildMap(cur);
-            grid.onInteract = interact;
-            grid.render();
+            // 延迟到 move() 返回后再重建地图，避免在回调执行中销毁自身（use-after-free）
+            grid.portalTriggered = true;
+            grid.portalTarget = name;
         }
     };
     grid.onInteract = interact;
@@ -80,6 +77,17 @@ int main() {
         char dir = static_cast<char>(std::tolower(key));
         if (dir == 'w' || dir == 'a' || dir == 's' || dir == 'd') {
             grid.move(dir);
+            if (grid.portalTriggered) {
+                std::string target = grid.portalTarget;
+                int targetIdx = mapIndexByName(target);
+                grid.portalTriggered = false;
+                grid.portalTarget.clear();
+                if (targetIdx >= 0) {
+                    cur = targetIdx;
+                    grid = buildMap(cur);
+                    grid.onInteract = interact;
+                }
+            }
             grid.render();
         }
     }

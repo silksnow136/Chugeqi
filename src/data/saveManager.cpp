@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <filesystem>
 #include <cstdio>
+#include <exception>
 
 namespace {
 
@@ -105,16 +106,21 @@ SaveManager::SlotInfo SaveManager::getSlotInfo(int slot) const {
     std::string text = readFile(path(slot));
     if (text.empty()) return info;
 
-    json::Value root = json::Value::parse(text);
-    info.hasSave = true;
-    info.gold = root["gold"].asInt();
-    info.sceneId = root["scene"].asInt();
-    info.branchId = root["branch"].asInt();
+    try {
+        json::Value root = json::Value::parse(text);
+        info.gold = root["gold"].asInt();
+        info.sceneId = root["scene"].asInt();
+        info.branchId = root["branch"].asInt();
 
-    const json::Value& party = root["party"];
-    if (party.size() > 0) {
-        info.name = party[0]["name"].asString();
-        info.level = party[0]["level"].asInt();
+        const json::Value& party = root["party"];
+        if (party.size() > 0) {
+            info.name = party[0]["name"].asString();
+            info.level = party[0]["level"].asInt();
+        }
+        info.hasSave = true; // 全部字段读取成功后才标记为有效存档
+    } catch (const std::exception&) {
+        // 存档损坏或字段缺失：按空档位处理（允许覆盖），避免异常上抛导致崩溃
+        return info;
     }
     return info;
 }

@@ -194,9 +194,11 @@ void MapGrid::buildPortal(int r, int c, PortalDir dir, const std::string& dest, 
         grid[r][cc] = t;
     }
 
-    if (isValid(r, c - 1) && grid[r][c - 1].type != TileType::PLAYER) {
+    // 装饰横条「══」放在文字延伸方向的反侧（入口侧），避免覆盖文字
+    int barCol = (dc < 0) ? c + 1 : c - 1;
+    if (isValid(r, barCol) && grid[r][barCol].type != TileType::PLAYER) {
         Tile bar("══", TileType::PORTAL, dest, static_cast<int>(dir));
-        grid[r][c - 1] = bar;
+        grid[r][barCol] = bar;
     }
 }
 
