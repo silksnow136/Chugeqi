@@ -44,6 +44,9 @@ public:
 	// 读档恢复：跳过幕次剧情，直接进入指定幕的地图
 	void resumeScene(int scene_id, int branch_id);
 
+	// 播放终幕结局（乌江：final 决战 + 结算）
+	void playEnding();
+
 	void nextLine();
 
 	void deleteWords(string tip);

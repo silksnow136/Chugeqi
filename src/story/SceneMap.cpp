@@ -23,7 +23,6 @@ static const char* battleFileForEnemy(const std::string& npc) {
     if (npc == "汉军斥候") return "data/battles/battle_scout.json";
     if (npc == "灌婴")     return "data/battles/battle_guanying.json";
     if (npc == "王翳")     return "data/battles/battle_wangyi.json";
-    if (npc == "吕马童")   return "data/battles/battle_lvmatong.json";
     return "data/battles/battle_han_soldier.json";
 }
 
@@ -67,14 +66,13 @@ static std::string mainMapName(int scene_id) {
     switch (scene_id) {
         case 1: return "垓下营地";
         case 2: return "淮河";
-        case 3: return "东城";
-        default: return "乌江";
+        default: return "";
     }
 }
 
 // 按地图名构建网格：主线地图按 scene_id 布局，子地图按名称
 static MapGrid buildMapByName(const std::string& name, int scene_id, int branch_id, const Combatant& player) {
-    if (name == "垓下营地" || name == "淮河" || name == "东城" || name == "乌江")
+    if (name == "垓下营地" || name == "淮河")
         return MapLayouts::buildSceneMap(scene_id, branch_id);
     return MapLayouts::buildNamedMap(name, player);
 }
@@ -114,6 +112,8 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
                     SideQuest::onBattleWon(qs, world.mapName, name);
                     grid.clearTile(row, col);
                     world.markCleared(world.mapName, row, col); // 击败后不再刷新
+                } else if (!player.isAlive()) {
+                    game.showDefeatEnding(); // 玩家战死 → 败亡结算
                 }
                 break;
             }
@@ -148,18 +148,22 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
                     if (!insert.empty()) sm.printWords(insert, 14, 300, 60);
                 }
                 console::setColor(14);
-                if (scene_id < 4)
+                if (scene_id < 3)
                     std::cout << "\n是否进入第 " << (scene_id + 1) << " 幕？（Y 确认 / N 留在当前场景）" << std::endl;
                 else
-                    std::cout << "\n是否渡江？（Y 确认 / N 留在江畔）" << std::endl;
+                    std::cout << "\n是否突围，奔赴乌江？（Y 确认 / N 留在战场）" << std::endl;
                 console::setColor(7);
                 int key = console::readKey();
                 if (key == 'y' || key == 'Y') {
                     grid.advanceTriggered = true;
                     world.mapName.clear();          // 进入新幕，重置地图定位
                     world.playerRow = world.playerCol = -1;
-                    if (scene_id < 4) { sm.changeScene(scene_id + 1); sm.ShowBackground(scene_id + 1); }
-                    else { sm.ShowBackground(4); }
+                    if (scene_id < 3) {
+                        sm.changeScene(scene_id + 1);
+                        sm.ShowBackground(scene_id + 1);
+                    } else {
+                        sm.playEnding();            // 终幕突围 → 结局
+                    }
                 }
                 break;
             }

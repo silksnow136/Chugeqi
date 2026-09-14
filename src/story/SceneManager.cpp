@@ -108,6 +108,23 @@ void SceneManager::resumeScene(int scene_id, int branch_id) {
 	showSceneManager(scene_id, branch_id);
 }
 
+// 播放终幕结局（乌江：final 决战 + 结算）
+void SceneManager::playEnding() {
+	const Scene* scene = nullptr;
+	for (const auto& s : scenes) {
+		if (s.id == 3) { scene = &s; break; }
+	}
+	if (!scene) return;
+
+	// 播放结局（含 final 战斗）；失败时败亡结算已在 playLines 里处理
+	if (!playLines(scene->ending)) {
+		return;
+	}
+
+	// 通关结算
+	game.showVictoryEnding();
+}
+
 
 // 进入药店系统（供地图移动交互调用）
 void SceneManager::enterPharmacy(Game& game1) {
@@ -117,8 +134,8 @@ void SceneManager::enterPharmacy(Game& game1) {
 			game1.getGold()
 		);
 	}
-	// 清理可能残留的输入缓冲区
-	cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	// 非阻塞清理可能残留的输入，避免阻塞等待回车
+	console::drainInput();
 	pharManager->phar(game1.getPlayer());
 }
 
@@ -160,7 +177,6 @@ void SceneManager::printWords(string tips,int color,int sleep,int sleep1) {
 void SceneManager::ShowBackground(int scene_id = 0) {
 	int key1;
 	int branch_id = 0;
-	string command = "quit";//控制游戏结束后结束循环退出游戏
 
 	// 找到对应场景
 	const Scene* scene = nullptr;
@@ -187,16 +203,6 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 		current_branch_id = branch_id; // 记录当前分支，供存档
 
 		console::sleep(2000);
-	}
-
-	// 第四幕：结束游戏
-	if (scene_id == 4) {
-		cout << "游戏结束，感谢您的游玩" << "\n"
-			<< "请输入任意键退出游戏" << "\n";
-
-		key1 = console::readKey();
-		game.gameCommand(command);
-		return;
 	}
 
 	cout << "输入任意按键继续";
@@ -232,8 +238,11 @@ bool SceneManager::playLines(const std::vector<StoryLine>& lines)
 
 			bool victory = startStoryBattle(line.battleId);
 
-			// 战斗失败，不继续播放后面的剧情
+			// 战斗失败：玩家死亡则进败亡结算，否则中断后续剧情
 			if (!victory) {
+				if (!game.getPlayer().isAlive()) {
+					game.showDefeatEnding();
+				}
 				return false;
 			}
 		}

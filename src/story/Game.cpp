@@ -32,7 +32,12 @@ void Game::initialize() {
 void Game::gameLoop() {
 	string command;
 	while (running) {
-		cout << "\n>";
+		if (scene_id != 0) {
+			// 从剧情/地图返回：避免只显示裸提示符，给出行提示
+			cout << "\n（输入 start 返回主界面，help 查看帮助）\n>";
+		} else {
+			cout << "\n>";
+		}
 		if (!getline(cin, command)) break; // stdin 关闭（EOF）：退出，避免死循环
 		gameCommand(command);
 	}
@@ -88,6 +93,34 @@ void Game::showHelp() {
 		<< "  " << "start " << "        " << "开始界面" << "\n"
 		<< "  " << "q/Q " << "        " << "加速当前对话剧情" << "\n"
 		<< "===========================" << "\n";
+}
+
+// 通关结算：霸王落幕
+void Game::showVictoryEnding() {
+	console::clearScreen();
+	console::setColor(4);
+	cout << "\n========== 霸王落幕 ==========\n\n";
+	console::setColor(14);
+	cout << "乌江之畔，霸王自刎，一代英雄就此陨落。\n\n";
+	cout << "  项羽   等级 Lv." << player->getLevel() << "\n";
+	cout << "  军心   " << sceneManager.getQuestState().morale << "\n";
+	cout << "  金币   " << gold << "\n\n";
+	console::setColor(7);
+	cout << "========== 感谢游玩 ==========\n";
+	console::pause();
+	exit(0);
+}
+
+// 败亡结算：霸王殒命
+void Game::showDefeatEnding() {
+	console::clearScreen();
+	console::setColor(12);
+	cout << "\n========== 霸王殒命 ==========\n\n";
+	console::setColor(7);
+	cout << "项羽倒在了战场上，楚汉之争就此落幕……\n\n";
+	cout << "========== 游戏结束 ==========\n";
+	console::pause();
+	exit(0);
 }
 
 Combatant& Game::getPlayer()

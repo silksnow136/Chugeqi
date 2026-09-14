@@ -37,6 +37,10 @@ public:
     // 存读档界面（清屏显示槽位与信息，单键操作；返回 true 表示发生了读档）
     bool saveMenu();
 
+    // 结局结算（通关 / 败亡）
+    void showVictoryEnding();
+    void showDefeatEnding();
+
 
 private:
     bool running = true;
