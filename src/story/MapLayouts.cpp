@@ -149,7 +149,7 @@ static void buildHuaiRiver(MapGrid& grid) {
 
     // 【支线二】田夫指路 + 阴陵古道入口（白色传送门）
     grid.setTile(6, 9, "田夫", TileType::FRIEND, "田夫");
-    grid.buildPortal(6, 13, PortalDir::Down, "阴陵一");
+    grid.buildPortal(6, 13, PortalDir::Up, "阴陵一");
 
     grid.setTile(6, 5, "哨兵", TileType::FRIEND, "哨兵");
     grid.setTile(6, 22, "农人", TileType::FRIEND, "农人");

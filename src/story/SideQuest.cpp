@@ -134,7 +134,7 @@ static void talkTianfu(QuestState& qs) {
                      "        若要寻浅滩，需先有渡河图；寒水刺骨，还须蓑衣护体。”\n";
         qs.yinlingUnlocked = true;
         console::setColor(14);
-        std::cout << "\n阴陵古道入口已在北岸显现（白色传送门 ↓）。\n";
+        std::cout << "\n阴陵古道入口已在北岸显现（白色传送门 ↑）。\n";
         console::setColor(7);
     } else {
         std::cout << "田夫：“阴陵古道凶险，将军保重。雾中浅滩需凭渡河图辨认。”\n";
