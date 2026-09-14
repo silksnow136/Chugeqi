@@ -165,6 +165,15 @@ Combatant* Game::getCompanion()
     return companion.get();
 }
 
+void Game::restoreCompanion()
+{
+    if (!companion) return;
+    companion->heal(companion->getMaxHP());
+    companion->restoreSP(companion->getMaxSP());
+    companion->removeStatusEffect(StatusEffect::Burn);
+    companion->removeStatusEffect(StatusEffect::Stun);
+}
+
 ItemPool& Game::getItemPool()
 {
     return gameData.itemPool;

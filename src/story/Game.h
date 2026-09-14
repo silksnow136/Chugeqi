@@ -23,6 +23,9 @@ public:
     // 同伴（钟离昧等，可能为空）
     Combatant* getCompanion();
 
+    // 战斗结束后恢复同伴满状态（解决同伴阵亡后无法战斗外复活的问题）
+    void restoreCompanion();
+
     // 药店需要
     ItemPool& getItemPool();
     int& getGold();

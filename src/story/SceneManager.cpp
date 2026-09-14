@@ -339,7 +339,9 @@ bool SceneManager::startStoryBattle(const std::string& battleId)
                 &game.getGameData().itemPool
         );
 
-        return combat.startBattle();
+        bool won = combat.startBattle();
+        game.restoreCompanion(); // 战斗结束即让同伴满状态复活
+        return won;
     }
     catch (const std::exception& e) {
         std::cerr << "\n战斗加载失败：" << e.what() << "\n";

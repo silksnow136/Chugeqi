@@ -48,6 +48,7 @@ static bool runBattle(Game& game, Combatant& player, const std::string& enemyNam
 
         CombatSystem combat(p, companions, enemies, battle.config, &game.getGameData().itemPool);
         won = combat.startBattle();
+        game.restoreCompanion(); // 战斗结束即让同伴满状态复活，避免阵亡后无法战斗外恢复
 
         console::clearScreen();
         console::setColor(won ? 10 : 12);
