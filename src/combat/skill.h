@@ -43,7 +43,7 @@ private:
     float hitRate; // 基础命中率
 public:
     DamageSkill(const std::string& name, const std::string& description, int cost, int power,
-                AttackScope scope, StatusEffect statusEffect = StatusEffect::None, float hitRate = 0.95f);
+                AttackScope scope, StatusEffect statusEffect = StatusEffect::None, float hitRate = 0.85f);
     int getPower() const;
     StatusEffect getStatusEffect() const;
     float getHitRate() const;

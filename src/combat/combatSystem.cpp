@@ -118,10 +118,10 @@ int CombatSystem::roll(int upper) const {
 }
 
 float CombatSystem::calculateHitRate(float baseHitRate, int attackerAgility, int defenderAgility) {
-    int sum = attackerAgility + defenderAgility;
-    float agiFactor = (sum == 0) ? 0.5f : static_cast<float>(attackerAgility) / static_cast<float>(sum);
-    float rate = baseHitRate * agiFactor + 0.05f;
-    if (rate > 0.99f) rate = 0.99f;
+    // 命中率 = 基础命中 + 敏捷差加成（每点敏捷差 ±2%）。
+    // 更快者命中更高、更慢者更低；上限 92%（最快攻击者对常规目标），下限 10%（保底）。
+    float rate = baseHitRate + (attackerAgility - defenderAgility) * 0.02f;
+    if (rate > 0.92f) rate = 0.92f;
     if (rate < 0.10f) rate = 0.10f;
     return rate;
 }
@@ -158,7 +158,8 @@ void CombatSystem::applyStatusEffects(Combatant* c) {
     if (!c->isAlive()) return;
 
     if (c->hasStatusEffect(StatusEffect::Burn)) {
-        int damage = std::max(1, c->getEffectiveStat(1) * 10); // 灼烧伤害按魔力结算，至少 1 点
+        // 灼烧伤害 = 目标最大生命的 10%（至少 1 点），与目标自身魔力无关
+        int damage = std::max(1, c->getMaxHP() / 10);
         c->takeDamage(damage);
         addLog(c->getName() + " 被灼烧，受到 " + std::to_string(damage) + " 点伤害。");
     }

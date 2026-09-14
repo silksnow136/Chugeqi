@@ -79,7 +79,7 @@ SkillPool DataLoader::loadSkills(const std::string& path) {
         } else {
             int power = s["power"].asInt();
             StatusEffect se = s.has("statusEffect") ? parseStatusEffect(s["statusEffect"].asString()) : StatusEffect::None;
-            float hit = s.has("hitRate") ? static_cast<float>(s["hitRate"].asDouble()) : 0.95f;
+            float hit = s.has("hitRate") ? static_cast<float>(s["hitRate"].asDouble()) : 0.85f;
             pool[id] = std::make_unique<DamageSkill>(name, desc, cost, power, scope, se, hit);
         }
     }
