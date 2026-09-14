@@ -19,20 +19,17 @@ namespace console {
     void clearScreen(); // 清屏
     int  readKey();     // 读取一个按键（无回显）
     void pause();       // 等待任意按键
-    bool pauseEsc();    // 等待按键，若按下 ESC 返回 true
     void setColor(int colorCode); // 设置文字颜色（0~15，Windows 控制台色码）
     void sleep(int ms); // 延时（毫秒）
     bool kbhit();       // 非阻塞检测是否有按键
-    void moveCursor(int row, int col); // 移动光标到 (row, col)，0 起始（用于覆盖重绘防闪烁）
     void setCursorVisible(bool visible); // 显示/隐藏光标（渲染时隐藏，防光标乱闪）
     void clearToEnd(); // 清光标到屏幕底（覆盖重绘后清掉尾部残留）
 
     // 终端模式切换（Linux 有效，Windows 空实现）
     // 语义：readKey/kbhit 会进入 raw 模式；若调用前已是 raw（如 printWords 主动
     // 持有 raw），则读完后不恢复，交由外层统一恢复，从而在整个输出期间吞掉按键。
-    void enterRaw();         // 进入原始模式：单键即时读取、关闭回显
-    void restoreCanonical(); // 恢复行缓冲模式：让 getline / cin >> 等行输入正常工作
-    void drainInput();       // 丢弃所有待读按键并恢复 canonical（用于播放结束后清残留）
+    void enterRaw();   // 进入原始模式：单键即时读取、关闭回显
+    void drainInput(); // 丢弃所有待读按键并恢复 canonical（用于播放结束后清残留）
 
     // 读取一行命令：回显 + 退格 + 回车结束 + ESC 取消（返回空串）
     std::string readLine();

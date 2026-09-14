@@ -30,18 +30,12 @@ namespace console {
         return k;
     }
     void pause() { _getch(); }
-    bool pauseEsc() { return _getch() == 27; } // ESC 的键码为 27
     void setColor(int colorCode) {
         HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
         SetConsoleTextAttribute(h, static_cast<WORD>(colorCode));
     }
     void sleep(int ms) { Sleep(ms); }
     bool kbhit() { return _kbhit() != 0; }
-    void moveCursor(int row, int col) {
-        HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
-        COORD pos = { static_cast<SHORT>(col), static_cast<SHORT>(row) };
-        SetConsoleCursorPosition(h, pos);
-    }
     void setCursorVisible(bool visible) {
         HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
         CONSOLE_CURSOR_INFO info;
@@ -63,7 +57,6 @@ namespace console {
 
     // Windows 控制台天然支持 _getch 单键读取，无需切换终端模式
     void enterRaw() {}
-    void restoreCanonical() {}
     void drainInput() {}
 
     std::string readLine() {
@@ -114,6 +107,13 @@ namespace {
         g_raw = false;
     }
 
+    // 恢复行缓冲模式：让 getline / cin >> 等行输入正常工作（仅内部使用）
+    void restoreCanonical() {
+        if (!g_raw) return;
+        if (g_saved) tcsetattr(STDIN_FILENO, TCSANOW, &g_original);
+        g_raw = false;
+    }
+
     // 非阻塞检测 stdin 是否有可读字节
     bool pollIn(int timeoutMs) {
         pollfd pfd{STDIN_FILENO, POLLIN, 0};
@@ -138,13 +138,6 @@ namespace console {
         raw.c_cc[VMIN] = 1;
         raw.c_cc[VTIME] = 0;
         if (tcsetattr(STDIN_FILENO, TCSANOW, &raw) == 0) g_raw = true;
-    }
-
-    // 恢复行缓冲模式：让 getline / cin >> 等行输入正常工作
-    void restoreCanonical() {
-        if (!g_raw) return;
-        if (g_saved) tcsetattr(STDIN_FILENO, TCSANOW, &g_original);
-        g_raw = false;
     }
 
     int readKey() {
@@ -174,7 +167,6 @@ namespace console {
     }
 
     void pause() { readKey(); }
-    bool pauseEsc() { return readKey() == 27; }
 
     void setColor(int colorCode) {
         // Windows 色码 → ANSI 前景色（0~15 → 30~37 / 90~97）
@@ -204,7 +196,6 @@ namespace console {
         restoreCanonical();
     }
 
-    void moveCursor(int row, int col) { std::printf("\033[%d;%dH", row + 1, col + 1); }
     void setCursorVisible(bool visible) { std::printf(visible ? "\033[?25h" : "\033[?25l"); }
     void clearToEnd() { std::printf("\033[J"); }
 
