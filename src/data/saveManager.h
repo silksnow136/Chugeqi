@@ -19,7 +19,7 @@
 //     "scene": 2, "branch": 1, "gold": 88,
 //     "quest": { morale, q1, q2, q3, q3choice, deserters,
 //                deserterTalked[], yinlingUnlocked, guanyingDefeated, raincoatWarned },
-//     "party": [ { id, name, level, hp, sp, maxHp, maxSp, exp, str, mag, end, agi,
+//     "party": [ { id, name, level, hp, sp, maxHp, maxSp, exp, str, end, agi,
 //                  skills: [...], items: {...}, equip: {...} } ]
 //   }
 // ---------------------------------------------------------------------------

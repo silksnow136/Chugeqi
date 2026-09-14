@@ -135,9 +135,8 @@ void SaveManager::save(int slot, const std::vector<Combatant*>& party,
         obj.set("maxSp", c->getMaxSP());
         obj.set("exp", c->getExp());
         obj.set("str", c->getBaseStat(0));
-        obj.set("mag", c->getBaseStat(1));
-        obj.set("end", c->getBaseStat(2));
-        obj.set("agi", c->getBaseStat(3));
+        obj.set("end", c->getBaseStat(1));
+        obj.set("agi", c->getBaseStat(2));
 
         json::Value skills = json::Value::array();
         for (auto* s : c->getSkills()) {
@@ -154,7 +153,7 @@ void SaveManager::save(int slot, const std::vector<Combatant*>& party,
         obj.set("items", items);
 
         json::Value equip = json::Value::object();
-        for (int es = 0; es < 4; es++) {
+        for (int es = 0; es < 2; es++) {
             const std::string& itemId = c->getEquippedItemId(es);
             if (itemId.empty()) continue;
             equip.set(std::to_string(es), itemId);
@@ -211,7 +210,7 @@ SaveManager::SaveData SaveManager::load(int slot, const SkillPool& skillPool,
         const json::Value& c = party[i];
         std::string id = c["id"].asString();
         std::string name = c["name"].asString();
-        int stats[4] = { c["str"].asInt(), c["mag"].asInt(), c["end"].asInt(), c["agi"].asInt() };
+        int stats[3] = { c["str"].asInt(), c["end"].asInt(), c["agi"].asInt() };
         int maxHp = c.has("maxHp") ? c["maxHp"].asInt() : -1;
         int maxSp = c.has("maxSp") ? c["maxSp"].asInt() : -1;
 
@@ -239,7 +238,7 @@ SaveManager::SaveData SaveManager::load(int slot, const SkillPool& skillPool,
                 if (it != itemPool.end()) {
                     const Equipment* eq = dynamic_cast<const Equipment*>(it->second.get());
                     if (eq) {
-                        int bonus[4];
+                        int bonus[3];
                         eq->getStatBonus(bonus);
                         combatant->equipItem(es, itemId, bonus);
                     }

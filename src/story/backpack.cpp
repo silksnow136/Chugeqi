@@ -4,8 +4,8 @@
 #include <algorithm>
 #include <cctype>
 
-// 槽位名称（与 EquipmentSlot 一致：0=防具 1=武器 2=鞋子 3=配饰）
-static const char* kSlotNames[4] = { "防具", "武器", "鞋子", "配饰" };
+// 槽位名称（与 EquipmentSlot 一致：0=防具 1=武器）
+static const char* kSlotNames[2] = { "防具", "武器" };
 
 // 分类排序权重：装备0 药水1 材料2
 static int categoryRank(const std::string& cat) {
@@ -46,7 +46,7 @@ void showBackpack(Combatant* player, const ItemPool& pool) {
 
         // 当前装备
         std::cout << "【当前装备】\n";
-        for (int s = 0; s < 4; s++) {
+        for (int s = 0; s < 2; s++) {
             const std::string& id = player->getEquippedItemId(s);
             if (id.empty()) std::cout << "  " << kSlotNames[s] << "：(无)\n";
             else {
@@ -120,7 +120,7 @@ void showBackpack(Combatant* player, const ItemPool& pool) {
             if (eq == nullptr) {
                 std::cout << "「" << e.name << "」不是装备，无法装配。\n";
             } else {
-                int bonus[4];
+                int bonus[3];
                 eq->getStatBonus(bonus);
                 int slot = static_cast<int>(eq->getSlot());
                 player->equipItem(slot, eq->getId(), bonus);

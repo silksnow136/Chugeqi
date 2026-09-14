@@ -9,9 +9,7 @@ namespace {
 
 StatusEffect parseStatusEffect(const std::string& s) {
     if (s == "burn") return StatusEffect::Burn;
-    if (s == "slow") return StatusEffect::Slow;
     if (s == "stun") return StatusEffect::Stun;
-    if (s == "charge") return StatusEffect::Charge;
     return StatusEffect::None;
 }
 
@@ -19,12 +17,10 @@ AttackScope parseScope(const std::string& s) {
     return (s == "all") ? AttackScope::All : AttackScope::Single;
 }
 
-// 装备槽位字符串 -> 枚举（与 item.h EquipmentSlot 一致：armor/weapon/shoes/accessory）
+// 装备槽位字符串 -> 枚举（与 item.h EquipmentSlot 一致：armor/weapon）
 EquipmentSlot parseSlot(const std::string& s) {
     if (s == "weapon") return EquipmentSlot::Weapon;
-    if (s == "armor") return EquipmentSlot::Armor;
-    if (s == "shoes") return EquipmentSlot::Shoes;
-    return EquipmentSlot::Accessory;
+    return EquipmentSlot::Armor;
 }
 
 StoryLine parseLine(const json::Value& v) {
@@ -71,11 +67,6 @@ SkillPool DataLoader::loadSkills(const std::string& path) {
         if (type == "heal") {
             int healAmount = s["healAmount"].asInt();
             pool[id] = std::make_unique<HealSkill>(name, desc, cost, healAmount, scope);
-        } else if (type == "charge") {
-            float mult = s.has("multiplier") ? static_cast<float>(s["multiplier"].asDouble()) : 1.0f;
-            int stat = s.has("targetStat") ? s["targetStat"].asInt() : -1;
-            int dur = s.has("duration") ? s["duration"].asInt() : 1;
-            pool[id] = std::make_unique<ChargingSkill>(name, desc, cost, mult, stat, dur, scope);
         } else {
             int power = s["power"].asInt();
             StatusEffect se = s.has("statusEffect") ? parseStatusEffect(s["statusEffect"].asString()) : StatusEffect::None;
@@ -103,13 +94,13 @@ ItemPool DataLoader::loadItems(const std::string& path) {
                  (it.has("healSP") && it["healSP"].asInt() > 0)) category = "potion";
         else category = "material";
 
-        // 装备：type == "equipment"，带 slot 与四项属性加成 bonus[s,m,e,a]
+        // 装备：type == "equipment"，带 slot 与三项属性加成 bonus[s,e,a]
         if (it.has("type") && it["type"].asString() == "equipment") {
             EquipmentSlot slot = parseSlot(it.has("slot") ? it["slot"].asString() : "");
-            int bonus[4] = {0, 0, 0, 0};
+            int bonus[3] = {0, 0, 0};
             if (it.has("bonus")) {
                 const auto& b = it["bonus"];
-                for (size_t i = 0; i < 4 && i < b.size(); i++) bonus[i] = b[i].asInt();
+                for (size_t i = 0; i < 3 && i < b.size(); i++) bonus[i] = b[i].asInt();
             }
             pool[id] = std::make_unique<Equipment>(id, name, desc, price, slot, bonus, category);
             continue;
@@ -143,10 +134,10 @@ std::unique_ptr<Combatant> DataLoader::loadCombatant(const std::string& path,
     int maxHp = c.has("maxHp") ? c["maxHp"].asInt() : -1;
     int maxSp = c.has("maxSp") ? c["maxSp"].asInt() : -1;
 
-    int baseStats[4] = {0, 0, 0, 0};
+    int baseStats[3] = {0, 0, 0};
     if (c.has("baseStats")) {
         const auto& bs = c["baseStats"];
-        for (size_t i = 0; i < 4 && i < bs.size(); i++) baseStats[i] = bs[i].asInt();
+        for (size_t i = 0; i < 3 && i < bs.size(); i++) baseStats[i] = bs[i].asInt();
     }
 
     std::vector<SkillBase*> skills;
