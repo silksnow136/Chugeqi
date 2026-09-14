@@ -1,0 +1,9 @@
+{
+    "name": "陷泽追兵",
+    "first_side": "player",
+    "disable_run": true,
+    "disable_items": false,
+    "enemies_ref": [
+        "../characters/iron_cavalry.json"
+    ]
+}
