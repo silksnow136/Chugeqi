@@ -189,11 +189,13 @@ void Combatant::addExp(int amount) {
 
 void Combatant::levelUp() {
     level++;
-    // 全属性+1
-    for (int i = 0; i < 3; ++i) baseStats[i] += 1;
+    // 升级成长：力量成长较快（决定伤害），耐力/敏捷稳步提升
+    baseStats[0] += 2;  // 力量
+    baseStats[1] += 1;  // 耐力
+    baseStats[2] += 1;  // 敏捷
     // 提升上限并恢复满HP/SP
-    maxHp += 10;
-    maxSp += 5;
+    maxHp += 15;
+    maxSp += 6;
     hp = maxHp;
     sp = maxSp;
 }
