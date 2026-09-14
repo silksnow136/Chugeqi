@@ -205,6 +205,8 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
 
         grid.move(dir);
 
+        if (!game.isRunning()) break; // 结局结算后退出
+
         if (grid.portalTriggered) {
             std::string target = grid.portalTarget;
             grid.portalTriggered = false;

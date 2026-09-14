@@ -14,6 +14,9 @@ public:
     void run();
     void gameCommand(const std::string& command);
 
+    // 游戏是否仍在运行（结局/退出后为 false，供地图循环判断是否结束）
+    bool isRunning() const { return running; }
+
     // 玩家
     Combatant& getPlayer();
 
