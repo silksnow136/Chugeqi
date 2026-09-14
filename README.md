@@ -58,7 +58,7 @@ Chugeqi/
 │   │   ├── combatSystemTurns.cpp     # 回合处理（玩家/同伴/敌方/AI 托管）
 │   │   ├── combatSystemActions.cpp   # 行动执行（攻击/技能/道具/逃跑）
 │   │   ├── character.h/.cpp          # 角色（Character/Combatant，含装备槽位/maxHP/maxSP）
-│   │   ├── skill.h/.cpp              # 技能（伤害/治疗/充能）
+│   │   ├── skill.h/.cpp              # 技能（伤害/治疗）
 │   │   ├── item.h/.cpp               # 物品（消耗品/装备）
 │   │   ├── battleLog.h/.cpp          # 战斗日志
 │   │   └── combatTestMain.cpp        # 战斗测试入口
@@ -149,11 +149,11 @@ Linux 运行：
 - **剧情**：四幕（垓下/淮河/东城/乌江），从 `story.json` 加载；逐字打印、自动/手动播放（ESC 切换）、按 q 加速、第二幕分支选择、幕次跳转旁白（`advance` 字段）。
 - **剧情 ↔ 战斗衔接**：`story.json` 中 `battle`/`battleId` 触发的三场战斗（王翦/秦时月/最终决战）接入 `CombatSystem`；战斗失败中断后续剧情。
 - **对话**：场景内选择角色对话，从 `talk.json` 加载——「`simple` 表」按 NPC 名播放单句、「`scenes` 表」按 `scene_id/branch_id/character_id` 播放多句；另有支线专属对话走 `SideQuest`。
-- **战斗**：回合制，玩家 + 同伴（钟离昧随队出战，持久化到存档）；普通攻击、伤害/治疗/充能技能、逃跑（可禁用）、战斗内使用道具；命中率 = 基础命中 + 敏捷差加成（更快者命中更高，上限 92%）。
+- **战斗**：回合制，玩家 + 同伴（钟离昧随队出战，持久化到存档）；普通攻击、伤害/治疗技能、逃跑（可禁用）、战斗内使用道具；命中率 = 基础命中 + 敏捷差加成（更快者命中更高，上限 92%）。
 - **敌人 AI**：敌方回击，按策略选技能或集火残血；我方支持 AI 托管。
-- **状态效果**：灼烧 / 迟缓 / 眩晕 / 充能，统一在主循环每轮结算（灼烧按目标最大生命 10% 扣血）。
+- **状态效果**：灼烧 / 眩晕，统一在主循环每轮结算（灼烧按目标最大生命 10% 扣血）。
 - **角色成长**：经验值与升级；`maxHP`/`maxSP` 随等级成长并接入存档。
-- **装备**：四槽位（防具/武器/鞋子/配饰）装配/卸下，属性加成叠加进 `getEffectiveStat`。
+- **装备**：两槽位（防具/武器）装配/卸下，属性加成叠加进 `getEffectiveStat`。
 - **物品**：消耗品（回 HP/SP）、装备、材料三类，从 `item.json` 加载；背包界面（`backpack`）可装配/卸下/使用/查看属性。
 - **药店**：金币购买、使用药品、查看背包（`PharManager`）。
 - **网格地图**：`MapGrid` 支持 WASD 移动、边界/碰撞检测、按格子类型触发交互（对话/战斗/药店/拾取/门/幕次跳转/传送门）、拟物建造（房间/栅栏/拒马/水域/传送门）、光标定位渲染防闪烁。
@@ -183,9 +183,9 @@ Linux 运行：
 
 - `data/story/story.json`：四幕剧情。每幕含 `advance`（幕次跳转旁白）与 `lines`（`text`/`color`/`sleep`/`wait`/`battle`/`battleId`），第二幕含 `choice`（`prompt` + `options`，每项含 `key`/`branch`/`lines`）。
 - `data/story/talk.json`：两层结构——`simple` 表（NPC 名 → 单句文本，供未接入主对话的 NPC）与 `scenes[]`（`scene_id`/`branch_id`/`characters[]`，每句含 `speaker`/`text`）。
-- `data/core/skill.json`：技能池，`type`（damage/heal/charge）、`cost`、`power`、`healAmount`、`multiplier`、`targetStat`、`duration`、`statusEffect`、`scope` 等。
-- `data/core/item.json`：物品池，含 `category`（equipment/potion/material）、装备的 `slot`+`bonus[4]`、消耗品的 `healHP`/`healSP` 等。
-- `data/characters/*.json`：角色模板（`player`/`companion`/各敌人），`baseStats[4]`、`maxHp`/`maxSp`、`skills`、`inventory`。
+- `data/core/skill.json`：技能池，`type`（damage/heal）、`cost`、`power`、`healAmount`、`statusEffect`（burn/stun）、`scope` 等。
+- `data/core/item.json`：物品池，含 `category`（equipment/potion/material）、装备的 `slot`+`bonus[3]`、消耗品的 `healHP`/`healSP` 等。
+- `data/characters/*.json`：角色模板（`player`/`companion`/各敌人），`baseStats[3]`、`maxHp`/`maxSp`、`skills`、`inventory`。
 - `data/battles/battle_*.json`：战斗配置，通过 `player_ref`/`companions_ref`/`enemies_ref`（相对路径 `../characters/xxx.json`）引用角色模板，含 `first_side`/`disable_run`/`disable_items`。
 
 ---
