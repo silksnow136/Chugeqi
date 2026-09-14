@@ -1,0 +1,73 @@
+%% 楚歌起 · 回合内决策（manualTurn / AI 回合）
+flowchart TD
+    MT[manualTurn actor, maxChoice] --> MT0{眩晕?}
+    MT0 -- 是 --> STUN[移除眩晕<br/>addLog 无法行动<br/>返回]
+    MT0 -- 否 --> MT1[displayBattle]
+    MT1 --> MT2[打印菜单]
+    MT2 --> MT3[readMenuChoice 1..max]
+
+    MT3 -- "1 攻击" --> A1[selectTarget 敌方可选]
+    A1 -- 取消 --> MT1
+    A1 --> A2[performAttack]
+    A2 --> A2a[calculateHitRate<br/>roll 命中判定]
+    A2a -- 未命中 --> A2b[addLog 未命中]
+    A2a -- 命中 --> A2c[calculateDamage<br/>target.takeDamage]
+    A2b --> END
+    A2c --> END
+
+    MT3 -- "2 技能" --> SK[selectSkill]
+    SK -- 取消 --> MT1
+    SK --> BT[buildSkillTargets<br/>单体选择/全体自动]
+    BT -- 取消 --> MT1
+    BT --> PS[performSkill]
+    PS --> PS0{SP 足够?}
+    PS0 -- 否 --> PS1[addLog SP不足]
+    PS0 -- 是 --> PS2[restoreSP 扣费]
+    PS2 --> PS3{dynamic_cast}
+    PS3 -- DamageSkill --> PS4[命中/伤害<br/>附加状态效果]
+    PS3 -- HealSkill --> PS5[heal 恢复]
+    PS3 -- 其他 --> PS6[未实现提示]
+    PS1 --> END
+    PS4 --> END
+    PS5 --> END
+    PS6 --> END
+
+    MT3 -- "3 道具(玩家)" --> IT{禁止道具?}
+    IT -- 是 --> IT0[提示 禁止使用]
+    IT0 --> MT1
+    IT -- 否 --> IT1[useItemInBattle<br/>列出药水 use+编号]
+    IT1 -- 未使用 --> MT1
+    IT1 -- 已使用 --> END
+
+    MT3 -- "3 (同伴) 切换AI" --> AI[companionAiAssisted 翻转]
+    AI -- 开启 --> AIA[processAllyAITurn 接管]
+    AIA --> END
+    AI -- 关闭 --> MT1
+
+    MT3 -- "4/5 逃跑或切换全员AI" --> RUN{canRun?}
+    RUN -- 逃跑 --> RA[attemptRun]
+    RA --> RA1{disableRun?}
+    RA1 -- 是 --> RA2[提示 禁止逃跑]
+    RA2 --> END
+    RA1 -- 否 --> RA3[roll 逃跑判定]
+    RA3 -- 成功 --> RA4[battleEnded=true<br/>playerEscaped=true]
+    RA3 -- 失败 --> RA5[addLog 逃跑失败]
+    RA4 --> END
+    RA5 --> END
+    RUN -- 切换AI托管 --> TG[playerAiAssisted 翻转<br/>开启则接管]
+    TG --> END
+
+    END[displayBattle 刷新<br/>console::pause<br/>返回]
+
+    subgraph AI_AI["AI 回合（敌人 / 我方托管）"]
+        direction TB
+        E1[眩晕检查] --> E2{低血?}
+        E2 -- 我方托管 是 --> E3[找治疗技能]
+        E2 -- 否 --> E4[chooseAISkill<br/>60% 用伤害技能]
+        E3 --> E5{有可用技能?}
+        E4 --> E5
+        E5 -- 是 --> E6[performSkill<br/>单体集火/全体]
+        E5 -- 否 --> E7[performAttack 集火残血]
+        E6 --> E8[aiPause<br/>ESC 退出托管]
+        E7 --> E8
+    end

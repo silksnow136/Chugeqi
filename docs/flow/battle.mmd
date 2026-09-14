@@ -1,0 +1,35 @@
+%% 楚歌起 · 战斗主流程（CombatSystem::startBattle）
+flowchart TD
+    S[startBattle] --> S0[初始化 battleEnded/playerWon/playerEscaped]
+    S0 --> S1{headless 无交互?}
+    S1 -- 是 --> S2[强制全员 AI 托管]
+    S1 -- 否 --> L
+    S2 --> L
+
+    L --> L1[applyRoundStartStatus<br/>回合开始: 灼烧扣血]
+    L1 --> L2{敌人全灭?}
+    L2 -- 是 --> W[playerWon=true]
+    L2 -- 否 --> L3{我方全灭?}
+    L3 -- 是 --> LO[playerWon=false]
+    L3 -- 否 --> P
+
+    P{player 存活?} -- 是 --> PT[processPlayerTurn<br/>手动或 AI 托管]
+    P -- 否 --> PB
+    PT --> PE{battleEnded 逃跑?}
+    PE -- 是 --> W0[playerEscaped=true]
+    PE -- 否 --> PB
+    PB{敌人全灭?} -- 是 --> W
+    PB -- 否 --> PC[遍历同伴<br/>processCompanionTurn]
+    PC --> PB2{敌人全灭?}
+    PB2 -- 是 --> W
+    PB2 -- 否 --> PE2[遍历敌人<br/>processEnemyTurn 回击]
+    PE2 --> PB3{我方全灭?}
+    PB3 -- 是 --> LO
+    PB3 -- 否 --> LEND[applyRoundEndStatus<br/>回合结束: 状态递减]
+    LEND --> L
+
+    W --> EXP[胜利结算: 按敌人等级发放经验<br/>player/companions addExp]
+    W0 --> FIN
+    LO --> FIN
+    EXP --> FIN
+    FIN[addLog 结果<br/>displayBattle<br/>console::pause] --> R[return playerWon]

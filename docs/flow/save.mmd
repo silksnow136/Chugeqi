@@ -1,0 +1,43 @@
+%% 楚歌起 · 存档 / 读档流程（JSON 双槽位）
+flowchart TD
+    subgraph SAVE["写档 SaveManager::save"]
+        S1[save slot, party, skillPool, meta] --> S2[构建 JSON 根节点]
+        S2 --> S3[scene / branch / gold]
+        S3 --> S4[quest: 军心/委托/解锁 flag]
+        S4 --> S5[world: 地图名/坐标/已清除格子]
+        S5 --> S6[遍历 party]
+        S6 --> S7[每角色: id/name/level/hp/sp/maxHp/maxSp/exp/str/end/agi]
+        S7 --> S8[skills: findSkillId 反查 id]
+        S8 --> S9[items: 背包]
+        S9 --> S10[equip: 两槽位装备]
+        S10 --> S11[create_directories + 写文件 save_&lt;slot&gt;.json]
+    end
+
+    subgraph LOAD["读档 SaveManager::load"]
+        L1[load slot, skillPool, itemPool] --> L2[readFile + json::Value::parse]
+        L2 --> L3[读 scene/branch/gold/quest/world]
+        L3 --> L4[遍历 party 逐人]
+        L4 --> L5[构造 Combatant]
+        L5 --> L6[skills 经 skillPool.find 反查指针]
+        L6 --> L7[items 经 addItem 恢复]
+        L7 --> L8[equip 经 itemPool + equipItem 恢复加成]
+        L8 --> L9[返回 SaveData]
+    end
+
+    subgraph UI["存读档界面"]
+        U1[saveMenu 列出两槽位] --> U2[readKey 0/1/2]
+        U2 -- "1/2" --> U3[slotMenu 子菜单]
+        U3 --> U4[1 存档 / 2 读档 / 0 返回]
+        U4 -- 存档且有旧档 --> U5[覆盖确认 y/n]
+        U5 -- y --> S1
+        U4 -- 读档 --> U6{槽位非空?}
+        U6 -- 是 --> U7[Game::doLoad]
+        U6 -- 否 --> U8[提示为空]
+        U4 -- 存档空槽 --> S1
+    end
+
+    U7 --> D1[恢复 player/companion]
+    D1 --> D2[恢复 gold/scene/quest/world]
+    D2 --> D3{mapName 非空?}
+    D3 -- 是 --> D4[resumeScene 直接进地图<br/>跳过幕次剧情]
+    D3 -- 否 --> D5[ShowBackground 播剧情]

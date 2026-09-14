@@ -1,0 +1,153 @@
+%% 楚歌起 · 战斗模块类图（src/combat/）
+%% 职责：回合制战斗、角色/技能/物品/状态效果/日志
+classDiagram
+    direction TB
+
+    class Combatant {
+        <<character.h/.cpp>>
+        -string name
+        -string id
+        -int hp, sp, maxHp, maxSp
+        -int level, exp
+        -int baseStats[3]          (力量/耐力/敏捷)
+        -int equipmentBonus[3]
+        -string equippedItemIds[2]
+        -int slotBonuses[2][3]
+        -vector~StatusEffectInstance~ activeStatusEffects
+        -vector~SkillBase*~ skills
+        -unordered_map~string,int~ inventory
+        +getName() string
+        +getId() string
+        +hasStatusEffect(e) bool
+        +addStatusEffect(e, d)
+        +updateStatusEffects()
+        +removeStatusEffect(e)
+        +isAlive() bool
+        +takeDamage(d)
+        +heal(a) / restoreSP(a)
+        +getEffectiveStat(i) int
+        +getBaseStat(i) int
+        +getHP/SP/MaxHP/MaxSP/Level/Exp()
+        +setEquipmentBonus(b) / clearEquipmentBonus()
+        +equipItem(slot, id, bonus) bool
+        +unequipItem(slot)
+        +getEquippedItemId(slot) string
+        +addSkill(s) / getSkills()
+        +hasItem(id) / addItem(id, n) / consumeItem(id, n) bool / getInventory()
+        +addExp(a) / levelUp()
+        +showStats()
+    }
+    class StatusEffectInstance {
+        +StatusEffect type
+        +int duration
+    }
+    class SkillBase {
+        <<abstract>>
+        -string name
+        -string description
+        -int cost
+        -AttackScope scope
+        +getName() string
+        +getDescription() string
+        +getCost() int
+        +getScope() AttackScope
+    }
+    class DamageSkill {
+        -int power
+        -StatusEffect statusEffect
+        -float hitRate
+        +getPower() int
+        +getStatusEffect() StatusEffect
+        +getHitRate() float
+        +calculateDamage(str, def) int
+    }
+    class HealSkill {
+        -int healAmount
+        +getHealAmount() int
+    }
+    class Item {
+        <<abstract>>
+        -string id, name, description
+        -int price
+        -string category
+        +getId() / getName() / getDescription() / getPrice() / getCategory()
+    }
+    class Consumable {
+        -int healHP, healSP
+        -int statBonus, statIndex, duration
+        +getHealHP() / getHealSP() / getStatBonus() / getStatIndex() / getDuration()
+    }
+    class Equipment {
+        -EquipmentSlot slot
+        -int statBonus[3]
+        +getSlot() EquipmentSlot
+        +getStatBonus(out[3])
+    }
+    class BattleLog {
+        -deque~string~ lines_
+        +add(msg)
+        +lines() const deque~string~&
+    }
+    class CombatSystem {
+        <<combatSystem.h + UI/Turns/Actions>>
+        -Combatant* player
+        -vector~Combatant*~ companions
+        -vector~Combatant*~ enemies
+        -CombatConfig config
+        -const ItemPool* itemPool
+        -bool battleEnded, playerWon, playerEscaped
+        -bool playerAiAssisted, companionAiAssisted
+        -bool headless
+        -BattleLog log
+        -mt19937 rng
+        +startBattle() bool
+        +escaped() bool
+        +getLog() const deque~string~&
+        -roll(upper) int
+        -manualTurn(actor, maxChoice)
+        -processPlayerTurn() / processCompanionTurn() / processEnemyTurn()
+        -processAllyAITurn(actor)
+        -aiPause()
+        -performAttack(a, t) / performSkill(u, s, targets) / performItem(u, id)
+        -useItemInBattle(actor) bool
+        -attemptRun(runner)
+        -calculateHitRate(base, aAgi, dAgi) float
+        -calculateDamage(str, power, def) int
+        -getAliveEnemies() / getAliveAllies()
+        -applyStatusEffects(c) / applyRoundStartStatus() / applyRoundEndStatus()
+        -chooseAISkill(ai) / chooseAITarget(ai, targets)
+        -readMenuChoice(min, max, back) int
+        -selectSkill(actor) / selectTarget(cands, prompt)
+        -buildSkillTargets(allies, enemies, skill)
+        -statusName(e) / defaultStatusDuration(e)
+    }
+    class CombatConfig {
+        +bool disableRun = false
+        +bool disableItems = false
+    }
+    class ItemPool {
+        <<typedef>>
+        unordered_map~string, unique_ptr~Item~~
+    }
+    class SkillPool {
+        <<typedef>>
+        unordered_map~string, unique_ptr~SkillBase~~
+    }
+
+    %% 继承
+    SkillBase <|-- DamageSkill
+    SkillBase <|-- HealSkill
+    Item <|-- Consumable
+    Item <|-- Equipment
+
+    %% 组合 / 依赖
+    Combatant *-- StatusEffectInstance : 状态列表
+    Combatant --> SkillBase : 技能(裸指针, 由 SkillPool 拥有)
+    Combatant --> Item : 背包/装备按 ID 引用
+    CombatSystem --> Combatant : 玩家/同伴/敌人
+    CombatSystem *-- CombatConfig : 配置
+    CombatSystem *-- BattleLog : 日志
+    CombatSystem --> SkillBase : dynamic_cast 分派执行
+    CombatSystem --> ItemPool : 战斗内道具(可空)
+    SkillPool o-- SkillBase : 唯一持有
+    ItemPool o-- Item : 唯一持有

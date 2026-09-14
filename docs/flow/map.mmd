@@ -1,0 +1,50 @@
+%% 楚歌起 · 地图交互流程（SceneMap::runSceneMap）
+flowchart TD
+    S[runSceneMap] --> S1[取 questState / player / world]
+    S1 --> S2{mapName 为空?}
+    S2 -- 是 --> S3[按 scene_id 取主线地图名]
+    S2 -- 否 --> S4
+    S3 --> S4[buildMapByName<br/>主线 buildSceneMap / 子图 buildNamedMap]
+    S4 --> S5[applyCleared 清除已击败/已拾取]
+    S5 --> S6{有保存坐标?}
+    S6 -- 是 --> S7[setPlayer 恢复坐标]
+    S6 -- 否 --> S8
+    S7 --> S8[定义 interact 回调]
+    S8 --> S9[grid.onInteract = interact]
+    S9 --> R[grid.render]
+
+    R --> L[WASD 主循环]
+    L --> L0[readKey]
+    L0 -- ESC --> OUT[清屏<br/>清空地图定位<br/>return true]
+    L0 -- B --> B1[showBackpack 背包]
+    B1 --> R
+    L0 -- E --> E1[saveMenu 存读档]
+    E1 -- 发生读档 --> RET[return true]
+    E1 -- 未读档 --> R
+    L0 -- WASD --> MV[grid.move]
+    MV --> MV1{isRunning?}
+    MV1 -- 否 --> OUT
+    MV1 -- 是 --> MV2{portalTriggered?}
+    MV2 -- 是 --> PT[重建子地图<br/>onEnterMap<br/>重新绑定回调]
+    PT --> R
+    MV2 -- 否 --> MV3{advanceTriggered?}
+    MV3 -- 是 --> OUT
+    MV3 -- 否 --> MV4[记录玩家坐标]
+    MV4 --> R
+
+    subgraph IA["interact 回调（踩格触发）"]
+        direction TB
+        I1{FRIEND 友方} --> I1a[SideQuest.tryHandleTalk]
+        I1a -- 未处理 --> I1b[talkCharacterExternal]
+        I1b -- 未找到 --> I1c[playSimpleTalk]
+        I2{ENEMY 敌方} --> I2a[runBattle 加载 battle_*.json<br/>CombatSystem.startBattle]
+        I2a -- 胜利 --> I2b[SideQuest.onBattleWon<br/>clearTile + markCleared]
+        I2a -- 战败死亡 --> I2c[showDefeatEnding]
+        I3{PHARMACY 药店} --> I3a[SceneManager.enterPharmacy]
+        I4{ITEM 物品} --> I4a[player.addItem<br/>markCleared<br/>拾取提示]
+        I5{ADVANCE 跳转点} --> I5a[播旁白 + advanceNarration]
+        I5a --> I5b{Y/N 确认}
+        I5b -- 是 --> I5c[changeScene 下一幕<br/>或 playEnding 结局]
+        I6{PORTAL 传送门} --> I6a[SideQuest.canEnterPortal 前置检查]
+        I6a -- 允许 --> I6b[portalTriggered=true]
+    end

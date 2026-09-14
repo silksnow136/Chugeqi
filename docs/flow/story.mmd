@@ -1,0 +1,48 @@
+%% 楚歌起 · 剧情播放流程（SceneManager::ShowBackground → playLines → playChoice）
+flowchart TD
+    S[ShowBackground scene_id] --> S1[按 id 查找 Scene]
+    S1 --> S2{找到?}
+    S2 -- 否 --> RET[返回]
+    S2 -- 是 --> S3[clearScreen]
+    S3 --> S4[playLines scene.lines]
+    S4 --> S5{返回 true?}
+    S5 -- 否 --> RET
+    S5 -- 是 --> S6{有 choice 分支?}
+    S6 -- 是 --> S7[playChoice]
+    S7 --> S8{返回 true?}
+    S8 -- 否 --> RET
+    S8 -- 是 --> S9[记录 branch_id]
+    S6 -- 否 --> S10
+    S9 --> S10[提示 按任意键继续]
+    S10 --> S11[readKey]
+    S11 --> S12[clearScreen]
+    S12 --> S13[showSceneManager -> SceneMap::runSceneMap]
+
+    subgraph PL["playLines 逐行播放"]
+        direction TB
+        P1[遍历 lines] --> P2[printWords 逐字打印<br/>按 q 加速]
+        P2 --> P3{line.wait?}
+        P3 -- 是 --> P4[nextLine 等待/自动]
+        P3 -- 否 --> P5
+        P4 --> P5{line.battle?}
+        P5 -- 是 --> P6[startStoryBattle battleId]
+        P6 --> P7{胜利?}
+        P7 -- 否 --> P8{玩家死亡?}
+        P8 -- 是 --> P9[showDefeatEnding]
+        P8 -- 否 --> P10[return false 中断剧情]
+        P7 -- 是 --> P1
+        P5 -- 否 --> P1
+        P1 -- 行结束 --> P11[return true]
+    end
+
+    subgraph PC["playChoice 分支选择"]
+        direction TB
+        C1[printWords prompt] --> C2[readKey 读选择]
+        C2 --> C3{匹配 option.key?}
+        C3 -- 是 --> C4[playLines option.lines]
+        C4 --> C5{成功?}
+        C5 -- 是 --> C6[branch_id = option.branch<br/>return true]
+        C5 -- 否 --> C7[return false]
+        C3 -- 否 --> C8[提示 未知分支 重新选择]
+        C8 --> C1
+    end

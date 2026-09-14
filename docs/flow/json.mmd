@@ -1,0 +1,51 @@
+%% 楚歌起 · JSON 数据加载流程（DataLoader + json::Value::parse）
+flowchart TD
+    subgraph A["静态数据加载 DataLoader"]
+        A1[loadGameData data/core/] --> A2[loadSkills skill.json]
+        A1 --> A3[loadItems item.json]
+        A2 --> A2a[readFileText 读文件]
+        A2a --> A2b[json::Value::parse]
+        A2b --> A2c[遍历技能 id]
+        A2c --> A2d{type?}
+        A2d -- heal --> A2e[make_unique HealSkill]
+        A2d -- damage --> A2f[make_unique DamageSkill<br/>含 statusEffect/hitRate]
+        A2e --> A2g[SkillPool]
+        A2f --> A2g
+        A3 --> A3a[readFileText -> parse]
+        A3a --> A3b{category/type 推断}
+        A3b -- equipment --> A3c[make_unique Equipment<br/>slot + bonus 三项]
+        A3b -- potion/material --> A3d[make_unique Consumable<br/>healHP/healSP]
+        A3c --> A3e[ItemPool]
+        A3d --> A3e
+    end
+
+    subgraph B["角色/战斗/剧情加载"]
+        B1[loadCombatant 角色模板] --> B2[parse: name/id/level/hp/sp/exp/maxHp/maxSp]
+        B2 --> B3[baseStats 三维]
+        B3 --> B4[skills 经 skillPool.find 反查指针]
+        B4 --> B5[inventory]
+        B5 --> B6[make_unique Combatant]
+        B7[loadBattle battle_*.json] --> B8[enemies_ref 逐个 loadCombatant]
+        B7 --> B9[读 config: disable_run / disable_items]
+        B10[loadStory story.json] --> B11[scenes: lines/choice/ending/advance]
+    end
+
+    subgraph C["json::Value::parse 递归下降"]
+        C1[parseValue] --> C2{首字符}
+        C2 -- 左花括号 --> C3[parseObject 键值对 -> map]
+        C2 -- 左方括号 --> C4[parseArray 顺序 -> vector]
+        C2 -- 引号 --> C5[parseString 转义/\\u]
+        C2 -- t/f --> C6[parseBool]
+        C2 -- n --> C7[null]
+        C2 -- 数字 --> C8[parseNumber int/double]
+        C3 --> C9[返回 Value]
+        C4 --> C9
+        C5 --> C9
+        C6 --> C9
+        C7 --> C9
+        C8 --> C9
+    end
+
+    A2b -.-> C1
+    A3a -.-> C1
+    B1 -.-> C1

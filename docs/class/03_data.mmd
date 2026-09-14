@@ -1,0 +1,75 @@
+%% 楚歌起 · 数据模块类图（src/data/）
+%% 职责：JSON 加载（DataLoader）、JSON 存档（SaveManager）
+classDiagram
+    direction TB
+
+    class GameData {
+        <<dataLoader.h>>
+        +SkillPool skillPool
+        +ItemPool itemPool
+    }
+    class Battle {
+        <<dataLoader.h>>
+        +vector~unique_ptr~Combatant~~ enemies
+        +CombatConfig config
+    }
+    class StoryData {
+        <<dataLoader.h>>
+        +vector~Scene~ scenes
+    }
+    class DataLoader {
+        <<dataLoader.h/.cpp>>
+        +readFileText(path) string
+        +loadSkills(path) SkillPool
+        +loadItems(path) ItemPool
+        +loadCombatant(path, pool) unique_ptr~Combatant~
+        +loadGameData(dir) GameData
+        +loadPartyTemplates(path, pool) vector
+        +loadBattle(path, data) Battle
+        +loadStory(path) StoryData
+    }
+    class SaveManager {
+        <<saveManager.h/.cpp>>
+        +save(slot, party, pool, meta)
+        +save(slot, unique_ptr party, pool, meta)
+        +load(slot, pool, itemPool) SaveData
+        +hasSave(slot) bool
+        +getSlotInfo(slot) SlotInfo
+        +resetSave(slot)
+    }
+    class SaveData {
+        +vector~unique_ptr~Combatant~~ party
+        +Meta meta
+    }
+    class SaveMeta {
+        <<SaveManager::Meta>>
+        +int sceneId, branchId, gold
+        +QuestState quest
+        +WorldState world
+    }
+    class SlotInfo {
+        <<SaveManager::SlotInfo>>
+        +bool hasSave
+        +int level, gold, sceneId, branchId
+        +string name
+    }
+
+    %% 关系
+    DataLoader ..> GameData : 载入
+    DataLoader ..> Battle : 载入
+    DataLoader ..> StoryData : 载入
+    DataLoader ..> Combatant : 创建角色
+    DataLoader ..> SkillPool : 创建技能
+    DataLoader ..> ItemPool : 创建物品
+    DataLoader ..> json_Value : 解析
+    SaveManager ..> Combatant : 序列化队伍
+    SaveManager ..> json_Value : 序列化/解析
+    SaveData *-- SaveMeta : 元信息
+    SaveData o-- Combatant : 队伍(unique_ptr)
+    SaveMeta *-- QuestState : 支线进度
+    SaveMeta *-- WorldState : 地图状态
+    GameData *-- SkillPool : 持有
+    GameData *-- ItemPool : 持有
+    Battle *-- Combatant : 敌方(unique_ptr)
+    Battle *-- CombatConfig : 配置
+    StoryData *-- Scene : 场景列表

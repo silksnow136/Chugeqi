@@ -76,8 +76,8 @@ Chugeqi/
 │       ├── WorldState.h             # 地图持久状态（地图名/玩家坐标/已清除格子）
 │       ├── PharManager.h/.cpp       # 药店（购买/使用药品/查看背包）
 │       └── portalTestMain.cpp       # 传送门地图链测试入口
-├── archive/                  # 归档文档（历史 README/开发日志/软件设计/需求分析）
-└── docs/                     # 流程图
+├── archive/                  # 归档文档（历史 README/开发日志/软件设计/需求分析 + 旧版图表）
+└── docs/                     # 架构图：类图(class/) + 流程图(flow/) + diagrams.html
 ```
 
 ---
@@ -196,4 +196,5 @@ Linux 运行：
 ## 更多文档
 
 - 开发进度、实现细节、文件职能、测试方法：见 [开发日志.md](./开发日志.md)。
-- 归档的历史文档：`archive/`（旧 README、旧开发日志、软件设计、需求分析）。
+- 架构图（类图 + 依赖 + 流程图）：`docs/diagrams.html`（浏览器打开渲染），源文件与渲染图位于 `docs/class/`、`docs/flow/`。
+- 归档的历史文档：`archive/`（旧 README、旧开发日志、软件设计、需求分析、旧版图表）。

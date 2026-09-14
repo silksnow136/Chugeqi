@@ -1,0 +1,61 @@
+%% 楚歌起 · 模块依赖关系图
+%% 依赖方向：箭头指向被依赖者（A --> B 表示 A 依赖 B）
+flowchart LR
+
+    subgraph story["story 剧情/场景"]
+        Game
+        SceneManager
+        SceneMap
+        MapGrid
+        MapLayouts
+        TalkManager
+        PharManager
+        SideQuest
+        backpack
+        QuestState
+        WorldState
+    end
+
+    subgraph combat["combat 战斗内核"]
+        CombatSystem
+        Combatant
+        Skill
+        Item
+        BattleLog
+    end
+
+    subgraph data["data 数据层"]
+        DataLoader
+        SaveManager
+        GameData
+        Battle
+    end
+
+    subgraph core["core 核心/平台"]
+        json["json::Value"]
+        console["console"]
+    end
+
+    %% story 依赖 combat / data / core
+    story --> combat
+    story --> data
+    story --> core
+
+    %% data 依赖 combat / core
+    data --> combat
+    data --> core
+
+    %% combat 依赖 core
+    combat --> core
+
+    %% core 无内部依赖
+
+    %% 关键类级依赖（跨模块示例）
+    Game --> DataLoader
+    Game --> SaveManager
+    SceneManager --> CombatSystem
+    SceneMap --> CombatSystem
+    DataLoader --> json
+    SaveManager --> json
+    CombatSystem --> console
+    MapGrid --> console

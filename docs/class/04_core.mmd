@@ -1,0 +1,48 @@
+%% 楚歌起 · 核心模块类图（src/core/）
+%% 职责：平台抽象（console）与轻量 JSON 解析器（json）
+classDiagram
+    direction TB
+
+    class json_Value {
+        <<json.h>>
+        -Type type_
+        -bool boolVal_
+        -long long intVal_
+        -double doubleVal_
+        -string strVal_
+        -vector~Value~ arr_
+        -map~string, Value~ obj_
+        +type() Type
+        +isNull() / isObject() / isArray() / isString() / isNumber() / isBool()
+        +asBool() / asInt() / asDouble() / asString()
+        +operator[] (index / key)
+        +has(key) bool
+        +size() int
+        +keys() vector~string~
+        +set(key, v) Value&
+        +push(v) Value&
+        +object() Value
+        +array() Value
+        +stringify() string
+        +parse(text) Value
+        -escapeString(s) string
+        -skipWhitespace() / parseValue() / parseObject() / parseArray()
+        -parseString() / parseNumber() / parseBool() / expect()
+    }
+    class json_Type {
+        <<enum class Value::Type>>
+        Null, Bool, Int, Double, String, Array, Object
+    }
+
+    json_Value ..> json_Type : 类型标记
+
+    %% console 为命名空间（非类），以注释块说明
+    class console {
+        <<namespace console（非类）>>
+        平台抽象：init / clearScreen / readKey / pause /
+        setColor / sleep / kbhit / setCursorVisible /
+        clearToEnd / enterRaw / drainInput / readLine /
+        displayWidth
+        Windows: conio.h + windows.h
+        Linux: termios + poll
+    }

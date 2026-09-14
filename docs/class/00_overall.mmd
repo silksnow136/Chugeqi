@@ -1,0 +1,300 @@
+%% 楚歌起 · 总体类图（全模块）
+%% 依据当前代码：src/{core,data,combat,story}
+classDiagram
+    direction LR
+
+    %% ============ core / 核心 ============
+    class json_Value {
+        <<core/json.h>>
+        +parse(text) Value
+        +stringify() string
+        +asInt() int
+        +asDouble() double
+        +asString() string
+        +asBool() bool
+        +has(key) bool
+        +size() int
+        +keys() vector~string~
+        +set(key, v) Value
+        +push(v) Value
+    }
+
+    %% ============ combat / 战斗 ============
+    class Combatant {
+        <<combat/character.h>>
+        -string name
+        -string id
+        -int hp / sp / maxHp / maxSp
+        -int level / exp
+        -int baseStats[3]
+        -int equipmentBonus[3]
+        -string equippedItemIds[2]
+        -int slotBonuses[2][3]
+        -vector~StatusEffectInstance~ activeStatusEffects
+        -vector~SkillBase*~ skills
+        -map~string,int~ inventory
+        +getName() / getId()
+        +hasStatusEffect() / addStatusEffect() / updateStatusEffects() / removeStatusEffect()
+        +isAlive() / takeDamage() / heal() / restoreSP()
+        +getEffectiveStat() / getBaseStat() / getHP() / getSP() / getMaxHP() / getMaxSP()
+        +getLevel() / getExp() / addExp() / levelUp()
+        +equipItem() / unequipItem() / getEquippedItemId()
+        +addSkill() / getSkills()
+        +hasItem() / addItem() / consumeItem() / getInventory()
+        +showStats()
+    }
+    class StatusEffectInstance {
+        <<combat/character.h>>
+        +StatusEffect type
+        +int duration
+    }
+    class SkillBase {
+        <<combat/skill.h>>
+        -string name
+        -string description
+        -int cost
+        -AttackScope scope
+        +getName() / getCost() / getScope()
+    }
+    class DamageSkill {
+        -int power
+        -StatusEffect statusEffect
+        -float hitRate
+        +getPower() / getHitRate()
+        +calculateDamage(str, def) int
+    }
+    class HealSkill {
+        -int healAmount
+        +getHealAmount()
+    }
+    class Item {
+        <<combat/item.h>>
+        -string id
+        -string name
+        -string description
+        -int price
+        -string category
+        +getId() / getName() / getPrice() / getCategory()
+    }
+    class Consumable {
+        -int healHP
+        -int healSP
+        -int statBonus
+        -int statIndex
+        -int duration
+        +getHealHP() / getHealSP()
+    }
+    class Equipment {
+        -EquipmentSlot slot
+        -int statBonus[3]
+        +getSlot() / getStatBonus()
+    }
+    class BattleLog {
+        <<combat/battleLog.h>>
+        -deque~string~ lines_
+        +add(msg)
+        +lines() deque~string~
+    }
+    class CombatSystem {
+        <<combat/combatSystem.h>>
+        -Combatant* player
+        -vector~Combatant*~ companions
+        -vector~Combatant*~ enemies
+        -CombatConfig config
+        -const ItemPool* itemPool
+        -BattleLog log
+        -mt19937 rng
+        +startBattle() bool
+        +escaped() bool
+        +getLog() deque~string~
+        -manualTurn() / processPlayerTurn() / processCompanionTurn() / processEnemyTurn()
+        -processAllyAITurn() / performAttack() / performSkill() / performItem() / attemptRun()
+        -applyStatusEffects() / applyRoundStartStatus() / applyRoundEndStatus()
+        -chooseAISkill() / chooseAITarget()
+    }
+    class CombatConfig {
+        <<combat/combatSystem.h>>
+        +bool disableRun
+        +bool disableItems
+    }
+
+    %% ============ data / 数据 ============
+    class GameData {
+        <<data/dataLoader.h>>
+        +SkillPool skillPool
+        +ItemPool itemPool
+    }
+    class Battle {
+        <<data/dataLoader.h>>
+        +vector~unique_ptr~Combatant~~ enemies
+        +CombatConfig config
+    }
+    class DataLoader {
+        <<data/dataLoader.h>>
+        +readFileText(path) string
+        +loadSkills(path) SkillPool
+        +loadItems(path) ItemPool
+        +loadCombatant(path, pool) unique_ptr~Combatant~
+        +loadGameData(dir) GameData
+        +loadPartyTemplates(path, pool) vector
+        +loadBattle(path, data) Battle
+        +loadStory(path) StoryData
+    }
+    class SaveManager {
+        <<data/saveManager.h>>
+        +save(slot, party, pool, meta)
+        +load(slot, pool, itemPool) SaveData
+        +hasSave(slot) bool
+        +getSlotInfo(slot) SlotInfo
+        +resetSave(slot)
+    }
+    class SaveData {
+        +vector~unique_ptr~Combatant~~ party
+        +Meta meta
+    }
+    class SaveMeta {
+        +int sceneId / branchId / gold
+        +QuestState quest
+        +WorldState world
+    }
+
+    %% ============ story / 剧情 ============
+    class Game {
+        <<story/Game.h>>
+        -GameData gameData
+        -unique_ptr~Combatant~ player
+        -unique_ptr~Combatant~ companion
+        -int gold
+        -WorldState world
+        -SceneManager sceneManager
+        +run() / gameCommand()
+        +getPlayer() / getCompanion() / getItemPool() / getGold() / getGameData() / getWorld()
+        +doSave() / doLoad() / saveMenu() / slotMenu()
+        +showVictoryEnding() / showDefeatEnding()
+        +isRunning() bool
+    }
+    class SceneManager {
+        <<story/SceneManager.h>>
+        -TalkManager talkManager
+        -QuestState questState
+        -unique_ptr~PharManager~ pharManager
+        -vector~Scene~ scenes
+        +ShowBackground() / showSceneManager() / resumeScene() / changeScene()
+        +printWords() / nextLine() / deleteWords()
+        +playEnding() / startStoryBattle()
+        +enterPharmacy()
+    }
+    class Scene {
+        <<story/dataLoader.h>>
+        +int id
+        +string advance
+        +vector~StoryLine~ lines
+        +StoryChoice choice
+        +vector~StoryLine~ ending
+    }
+    class StoryLine {
+        +string text
+        +int color / sleep
+        +bool wait / battle
+        +string battleId
+    }
+    class StoryChoice {
+        +string prompt
+        +vector~StoryOption~ options
+    }
+    class StoryOption {
+        +char key
+        +string text
+        +int branch
+        +vector~StoryLine~ lines
+    }
+    class MapGrid {
+        <<story/MapGrid.h>>
+        -vector~vector~Tile~~ grid
+        -int playerRow / playerCol
+        -Tile underPlayer
+        +setTile() / clearTile() / setPlayer() / render() / move()
+        +buildRoom() / buildFence() / buildCheval() / buildWater() / buildPortal()
+        +onInteract : function
+        +advanceTriggered / portalTriggered / portalTarget
+    }
+    class Tile {
+        +string display
+        +TileType type
+        +string name
+        +int portalDir
+    }
+    class TalkManager {
+        <<story/TalkManager.h>>
+        +talkCharacterExternal() bool
+        +playSimpleTalk() / playDialogue() / waitForReturn()
+    }
+    class PharManager {
+        <<story/PharManager.h>>
+        -const ItemPool& itemPool
+        -int& gold
+        +phar(player)
+        -showShop() / buyItem() / useItem() / showMedicineBag() / findMedicine()
+    }
+    class QuestState {
+        <<story/QuestState.h>>
+        +int morale / q1 / q2 / q3 / q3choice / deserters
+        +bool deserterTalked[3]
+        +bool wildUnlocked / yinlingUnlocked / guanyingDefeated / raincoatWarned
+    }
+    class WorldState {
+        <<story/WorldState.h>>
+        +string mapName
+        +int playerRow / playerCol
+        +map~string, vector~int~~ cleared
+        +markCleared(map, row, col)
+    }
+
+    %% ============ 继承关系 ============
+    SkillBase <|-- DamageSkill
+    SkillBase <|-- HealSkill
+    Item <|-- Consumable
+    Item <|-- Equipment
+
+    %% ============ 组合 / 依赖关系 ============
+    Combatant *-- StatusEffectInstance : 状态列表
+    Combatant --> SkillBase : 持有技能(裸指针, 外部拥有)
+    Combatant --> Item : 背包按 ID 引用
+    CombatSystem --> Combatant : 参战角色
+    CombatSystem *-- CombatConfig : 配置
+    CombatSystem *-- BattleLog : 日志
+    CombatSystem --> SkillBase : 执行技能(dynamic_cast 分派)
+    CombatSystem --> Item : 道具池(可空)
+    Battle *-- Combatant : 敌方(unique_ptr)
+    GameData *-- SkillBase : SkillPool(unique_ptr)
+    GameData *-- Item : ItemPool(unique_ptr)
+    DataLoader ..> Combatant : 创建(unique_ptr)
+    DataLoader ..> SkillBase : 创建(unique_ptr)
+    DataLoader ..> Item : 创建(unique_ptr)
+    DataLoader ..> Battle : 创建
+    DataLoader ..> StoryData : 创建
+    DataLoader ..> json_Value : 解析
+    SaveManager ..> Combatant : 读/写存档
+    SaveManager ..> json_Value : 序列化/解析
+    SaveData *-- SaveMeta : 元信息
+    SaveMeta *-- QuestState : 支线进度
+    SaveMeta *-- WorldState : 地图状态
+    Game *-- GameData : 静态数据
+    Game *-- Combatant : 主角(unique_ptr)
+    Game *-- Combatant : 同伴(unique_ptr, 可空)
+    Game *-- WorldState : 地图持久状态
+    Game *-- SceneManager : 场景管理
+    SceneManager *-- TalkManager : 对话
+    SceneManager *-- QuestState : 支线状态
+    SceneManager *-- PharManager : 药店(懒加载)
+    SceneManager *-- Scene : 剧情数据
+    Scene *-- StoryLine : 叙事行
+    Scene *-- StoryChoice : 分支
+    StoryChoice *-- StoryOption : 选项
+    StoryOption *-- StoryLine : 分支叙事
+    SceneManager ..> MapGrid : 调用 SceneMap 交互
+    SceneManager ..> CombatSystem : 剧情战斗
+    MapGrid *-- Tile : 网格
+    TalkManager ..> SceneManager : 打印回调
+    PharManager --> Item : 物品池
+    PharManager --> Combatant : 使用药品

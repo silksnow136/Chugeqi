@@ -1,0 +1,194 @@
+%% 楚歌起 · 剧情/场景模块类图（src/story/）
+%% 职责：游戏外壳、剧情播放、网格地图、对话、药店、支线任务
+classDiagram
+    direction TB
+
+    class Game {
+        <<Game.h/.cpp>>
+        -GameData gameData
+        -unique_ptr~Combatant~ player
+        -unique_ptr~Combatant~ companion
+        -int gold
+        -WorldState world
+        -SceneManager sceneManager
+        -bool running
+        -int scene_id
+        +run() / gameCommand(cmd)
+        +isRunning() bool
+        +getPlayer() Combatant&
+        +getCompanion() Combatant*
+        +getItemPool() ItemPool&
+        +getGold() int&
+        +getGameData() GameData&
+        +getWorld() WorldState&
+        +doSave(slot) / doLoad(slot)
+        +saveMenu() bool / slotMenu(slot) bool
+        +showVictoryEnding() / showDefeatEnding()
+    }
+    class SceneManager {
+        <<SceneManager.h/.cpp>>
+        -TalkManager talkManager
+        -QuestState questState
+        -unique_ptr~PharManager~ pharManager
+        -int current_scene_id / current_branch_id
+        -bool autoPlay
+        -vector~Scene~ scenes
+        +ShowBackground(scene_id)
+        +showSceneManager(scene_id, branch_id)
+        +resumeScene(scene_id, branch_id)
+        +changeScene(scene_id)
+        +playEnding()
+        +startStoryBattle(battleId) bool
+        +printWords(tips, color, sleep, sleep1)
+        +nextLine() / deleteWords(tip)
+        +changeAuto() / current_Auto() bool
+        +getTalkManager() / getQuestState()
+        +enterPharmacy(game)
+        +showScene_id() / showBranch_id()
+        +getAdvancePrompt(scene_id) string
+    }
+    class Scene {
+        <<dataLoader.h>>
+        +int id
+        +string advance
+        +vector~StoryLine~ lines
+        +StoryChoice choice
+        +vector~StoryLine~ ending
+    }
+    class StoryLine {
+        +string text
+        +int color, sleep
+        +bool wait, battle
+        +string battleId
+    }
+    class StoryChoice {
+        +string prompt
+        +vector~StoryOption~ options
+    }
+    class StoryOption {
+        +char key
+        +string text
+        +int branch
+        +vector~StoryLine~ lines
+    }
+    class MapGrid {
+        <<MapGrid.h/.cpp>>
+        -vector~vector~Tile~~ grid
+        -int playerRow, playerCol
+        -Tile underPlayer
+        +setTile(r, c, disp, type, name)
+        +clearTile(r, c)
+        +setPlayer(r, c)
+        +render()
+        +move(dir)
+        +getPlayerRow() / getPlayerCol()
+        +buildRoom(...) / buildFence(...)
+        +buildCheval(...) / buildWater(...)
+        +buildPortal(...)
+        +onInteract : function~void(TileType,string,int,int)~
+        +advanceTriggered : bool
+        +portalTriggered : bool
+        +portalTarget : string
+    }
+    class Tile {
+        +string display
+        +TileType type
+        +string name
+        +int portalDir
+    }
+    class TalkManager {
+        <<TalkManager.h/.cpp>>
+        -SceneManager* sceneManager
+        +setSceneManager(m)
+        +talkCharacterExternal(scene_id, name, branch_id) bool
+        +playSimpleTalk(name)
+        +playDialogue(speaker, text)
+        +waitForReturn()
+        -loadDialogue(scene_id, branch_id, name) bool
+    }
+    class PharManager {
+        <<PharManager.h/.cpp>>
+        -const ItemPool& itemPool
+        -int& gold
+        +phar(player)
+        -showShop()
+        -buyItem(player)
+        -useItem(player)
+        -showMedicineBag(player)
+        -findMedicine(itemId) const Consumable*
+    }
+    class QuestState {
+        <<QuestState.h>>
+        +int morale
+        +int q1, q2, q3, q3choice, deserters
+        +bool deserterTalked[3]
+        +bool wildUnlocked
+        +bool yinlingUnlocked
+        +bool guanyingDefeated
+        +bool raincoatWarned
+    }
+    class WorldState {
+        <<WorldState.h>>
+        +string mapName
+        +int playerRow, playerCol
+        +map~string, vector~int~~ cleared
+        +markCleared(map, row, col)
+    }
+
+    %% 命名空间（无状态，聚合于流程）
+    class SceneMap {
+        <<namespace SceneMap>>
+        +runSceneMap(game, sm, scene_id, branch_id) bool
+    }
+    class MapLayouts {
+        <<namespace MapLayouts>>
+        +buildSceneMap(scene_id, branch_id) MapGrid
+        +buildNamedMap(name, player) MapGrid
+    }
+    class SideQuest {
+        <<namespace SideQuest>>
+        +tryHandleTalk(...) bool
+        +onBattleWon(qs, map, npc)
+        +canEnterPortal(...) bool
+        +onEnterMap(qs, map)
+        +advanceNarration(qs, sceneId) string
+    }
+    class backpack {
+        <<namespace backpack>>
+        +collectBagEntries(player, pool, out)
+        +showBackpack(player, pool)
+    }
+
+    %% 组合 / 依赖
+    Game *-- SceneManager : 场景管理
+    Game *-- GameData : 静态数据
+    Game *-- Combatant : 主角(unique_ptr)
+    Game *-- Combatant : 同伴(unique_ptr, 可空)
+    Game *-- WorldState : 地图持久状态
+    SceneManager *-- TalkManager : 对话
+    SceneManager *-- QuestState : 支线状态
+    SceneManager *-- PharManager : 药店(懒加载)
+    SceneManager *-- Scene : 剧情数据
+    Scene *-- StoryLine : 叙事
+    Scene *-- StoryChoice : 分支
+    StoryChoice *-- StoryOption : 选项
+    StoryOption *-- StoryLine : 分支叙事
+    SceneManager ..> SceneMap : 进入地图交互
+    SceneManager ..> CombatSystem : 剧情战斗
+    SceneMap ..> MapGrid : 网格交互循环
+    SceneMap ..> MapLayouts : 构建地图
+    SceneMap ..> SideQuest : 支线处理
+    SceneMap ..> backpack : 背包
+    SceneMap ..> PharManager : 药店
+    SceneMap ..> TalkManager : 对话
+    SceneMap ..> CombatSystem : 地图遇敌战斗
+    MapGrid *-- Tile : 网格
+    TalkManager ..> SceneManager : 打印回调
+    PharManager --> ItemPool : 物品池
+    PharManager --> Combatant : 使用/购买药品
+    MapLayouts ..> MapGrid : 构建布局
+    MapLayouts ..> Combatant : 读取道具判定浅滩
+    SideQuest ..> QuestState : 读写进度
+    SideQuest ..> Combatant : 奖励/扣血
+    backpack ..> Combatant : 装配/使用
+    backpack ..> ItemPool : 查物品

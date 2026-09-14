@@ -1,0 +1,33 @@
+%% 楚歌起 · 主流程（启动 → 初始化 → 主循环 → 指令分发）
+flowchart TD
+    A[main] --> B[Game::run]
+    B --> B1[console::init 编码初始化]
+    B1 --> B2[Game::initialize]
+    B2 --> B3[DataLoader::loadGameData data/core/]
+    B3 --> B4[DataLoader::loadCombatant player.json]
+    B4 --> B5[DataLoader::loadCombatant companion.json]
+    B5 --> B6[showWelcome 欢迎界面]
+    B6 --> C[Game::gameLoop]
+    C --> C1[输出提示符 &gt;]
+    C1 --> C2[getline 读取指令]
+    C2 -- EOF --> CEND[退出]
+    C2 --> C3[gameCommand]
+
+    C3 --> D1{"指令?"}
+    D1 -- "1 (开始游戏)" --> E1[scene_id=1<br/>world 重置<br/>ShowBackground 1]
+    D1 -- "2 (继续征途)" --> E2[saveMenu 存读档界面]
+    D1 -- "help / 4" --> E3[showHelp 帮助]
+    D1 -- "quit / 3" --> E4[running=false]
+    D1 -- "start" --> E5[scene_id=0<br/>离开地图<br/>showWelcome]
+    D1 -- "其他" --> E6[未知指令提示]
+
+    E1 --> C
+    E2 --> C
+    E3 --> C
+    E4 --> C
+    E5 --> C
+    E6 --> C
+
+    C --> F{running?}
+    F -- true --> C1
+    F -- false --> G[结束]
