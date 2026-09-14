@@ -29,7 +29,6 @@ bool CombatSystem::startBattle() {
     battleEnded = false;
     playerWon = false;
     playerEscaped = false;
-    firstRender = true;
 
     // 主循环：我方（玩家 + 同伴）→ 敌方。每轮统一在轮首结算、轮末递减状态。
     while (!battleEnded) {

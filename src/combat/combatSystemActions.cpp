@@ -7,10 +7,9 @@
 // 行动执行
 // ---------------------------------------------------------------------------
 
-void CombatSystem::performAttack(Combatant* attacker, Combatant* target, bool isNormalAttack) {
+void CombatSystem::performAttack(Combatant* attacker, Combatant* target) {
     // 命中判定（基于敏捷）
-    float baseHit = isNormalAttack ? 0.85f : 0.90f;
-    float hitRate = calculateHitRate(baseHit, attacker->getEffectiveStat(3), target->getEffectiveStat(3));
+    float hitRate = calculateHitRate(0.85f, attacker->getEffectiveStat(3), target->getEffectiveStat(3));
     if (roll(100) >= static_cast<int>(hitRate * 100)) {
         addLog(attacker->getName() + " 攻击 " + target->getName() + "，但未命中！");
         return; // 未命中

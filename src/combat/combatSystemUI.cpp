@@ -7,13 +7,7 @@
 // ---------------------------------------------------------------------------
 
 void CombatSystem::displayBattle() {
-    // 首次清屏，之后光标回顶覆盖重绘（防闪烁）
-    if (firstRender) {
-        console::clearScreen();
-        firstRender = false;
-    } else {
-        console::moveCursor(0, 0);
-    }
+    console::clearScreen();
     console::setCursorVisible(false);  // 渲染期间隐藏光标
 
     // 每行补空格到固定宽度，覆盖旧内容残留
@@ -23,9 +17,6 @@ void CombatSystem::displayBattle() {
     };
 
     std::string out;
-    out += pad("   +-----------------------------------+", WIDTH) + '\n';
-    out += pad("   |        [ASCII Art 预留区域]       |", WIDTH) + '\n';
-    out += pad("   +-----------------------------------+", WIDTH) + '\n';
 
     // 战斗日志（固定 7 行）
     out += pad("=▽战斗日志▽============", WIDTH) + '\n';

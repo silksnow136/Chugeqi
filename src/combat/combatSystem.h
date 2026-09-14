@@ -48,7 +48,6 @@ private:
     bool playerEscaped = false; // 是否成功逃跑（与 playerWon 互斥）
     bool playerAiAssisted = false; // 玩家是否开启全员 AI 托管
     bool companionAiAssisted = false; // 同伴独立 AI 托管（同伴菜单切换）
-    bool firstRender = true; // 首次渲染清屏，之后光标回顶覆盖重绘
     BattleLog log;
     mutable std::mt19937 rng; // 随机数引擎，构造时用 random_device 播种
 
@@ -69,7 +68,7 @@ private:
     void aiPause(); // AI 行动后的等待：任意键继续，ESC 退出玩家 AI 托管
 
     // 行动执行
-    void performAttack(Combatant* attacker, Combatant* target, bool isNormalAttack = true);
+    void performAttack(Combatant* attacker, Combatant* target);
     void performSkill(Combatant* user, SkillBase* skill, std::vector<Combatant*>& targets);
     void performItem(Combatant* user, const std::string& itemId);
     bool useItemInBattle(Combatant* actor); // 战斗中道具菜单：use+编号 使用药品

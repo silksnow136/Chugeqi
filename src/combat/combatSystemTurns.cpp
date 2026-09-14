@@ -45,7 +45,7 @@ void CombatSystem::manualTurn(Combatant* actor, int maxChoice) {
             case 1: { // 普通攻击：手动选择目标
                 Combatant* t = selectTarget(getAliveEnemies(), "选择攻击目标：");
                 if (!t) continue; // 取消，返回主菜单
-                performAttack(actor, t, true);
+                performAttack(actor, t);
                 break;
             }
             case 2: { // 技能：单体手动选择目标
@@ -126,7 +126,7 @@ void CombatSystem::manualTurn(Combatant* actor, int maxChoice) {
 
 // AI 行动后的等待：任意键继续；ESC 立即退出所有托管模式，下一步即恢复手操
 void CombatSystem::aiPause() {
-    if (console::pauseEsc()) {
+    if (console::readKey() == 27) {
         if (playerAiAssisted) {
             playerAiAssisted = false;
             companionAiAssisted = false; // 一并清除同伴托管
@@ -175,7 +175,7 @@ void CombatSystem::processEnemyTurn(Combatant* enemy) {
     Combatant* target = chooseAITarget(enemy, targets);
     if (!target) return;
     displayBattle();
-    performAttack(enemy, target, true);
+    performAttack(enemy, target);
     displayBattle();
     aiPause();
 }
@@ -246,7 +246,7 @@ void CombatSystem::processAllyAITurn(Combatant* actor) {
     Combatant* t = chooseAITarget(actor, enemies);
     if (!t) return;
     displayBattle();
-    performAttack(actor, t, true);
+    performAttack(actor, t);
     displayBattle();
     aiPause();
 }
