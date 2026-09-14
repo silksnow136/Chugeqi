@@ -8,7 +8,7 @@
 int main() {
     try {
         // 1. 静态模板（JSON，长期维护）
-        GameData gameData = DataLoader::loadGameData("data/");
+        GameData gameData = DataLoader::loadGameData("data/core/");
 
         // 2. 存档（SQLite，玩家运行时状态）
         SaveManager save("saves");
@@ -17,12 +17,12 @@ int main() {
         auto saveData = save.load(1, gameData.skillPool, gameData.itemPool);
         std::vector<std::unique_ptr<Combatant>> party = std::move(saveData.party);
         if (party.empty()) {
-            party = DataLoader::loadPartyTemplates("data/battle_test.json", gameData.skillPool);
+            party = DataLoader::loadPartyTemplates("data/battles/battle_test.json", gameData.skillPool);
             save.save(1, party, gameData.skillPool);
         }
 
         // 4. 敌方与配置（JSON 模板，每场战斗单独加载）
-        Battle battle = DataLoader::loadBattle("data/battle_test.json", gameData);
+        Battle battle = DataLoader::loadBattle("data/battles/battle_test.json", gameData);
 
         Combatant* player = party[0].get();
         std::vector<Combatant*> companions;

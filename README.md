@@ -31,15 +31,19 @@ Chugeqi/
 ├── CMakeLists.txt            # 构建配置（3 个目标）
 ├── README.md                 # 本文件
 ├── 开发日志.md               # 开发进度与实现细节
-├── data/                     # JSON 数据（静态模板）
-│   ├── story.json            # 四幕剧情（旁白/对话/分支/战斗触发/幕次旁白 advance）
-│   ├── talk.json             # 场景对话（simple 简单对话 + scenes 按 id 索引）
-│   ├── skill.json            # 技能池
-│   ├── item.json             # 物品池（消耗品 + 装备 + 材料）
-│   ├── player.json           # 主角模板
-│   ├── companion.json        # 同伴模板
-│   ├── battle_*.json         # 战斗配置（battle_test / battle_wangjian / battle_qinshiyue / battle_final）
-│   └── enemy_test*.json / wangjian.json / qinshiyue.json / lvsheng.json / yangwu.json / yangxi.json  # 敌人模板
+├── data/                     # JSON 数据（静态模板，按用途分类）
+│   ├── core/                 # 核心数据池
+│   │   ├── skill.json        # 技能池
+│   │   └── item.json         # 物品池（消耗品 + 装备 + 材料）
+│   ├── story/                # 剧情文案
+│   │   ├── story.json        # 四幕剧情（旁白/对话/分支/战斗触发/幕次旁白 advance）
+│   │   └── talk.json         # 场景对话（simple 简单对话 + scenes 按 id 索引）
+│   ├── characters/           # 角色模板
+│   │   ├── player.json       # 主角模板
+│   │   ├── companion.json    # 同伴模板
+│   │   └── *.json            # 敌人模板（哨骑/铁骑/斥候/灌婴/汉军/王翦/秦时月/杨喜/王翳/吕胜/赤侯/吕马童/杨武/测试敌人等）
+│   └── battles/              # 战斗配置
+│       └── battle_*.json     # 战斗配置（test/wangjian/qinshiyue/final/sentinel/iron_cavalry/scout/guanying/han_soldier/yangxi/wangyi/lvsheng/chihou/lvmatong）
 ├── src/
 │   ├── core/                 # 平台抽象（共用）
 │   │   ├── console.h/.cpp    # 控制台抽象：清屏/按键/颜色/延时/编码/光标/raw 模式/整行输入
@@ -143,7 +147,7 @@ Linux 运行：
 - **剧情**：四幕（垓下/淮河/东城/乌江），从 `story.json` 加载；逐字打印、自动/手动播放（ESC 切换）、按 q 加速、第二幕分支选择、幕次跳转旁白（`advance` 字段）。
 - **剧情 ↔ 战斗衔接**：`story.json` 中 `battle`/`battleId` 触发的三场战斗（王翦/秦时月/最终决战）接入 `CombatSystem`；战斗失败中断后续剧情。
 - **对话**：场景内选择角色对话，从 `talk.json` 加载——「`simple` 表」按 NPC 名播放单句、「`scenes` 表」按 `scene_id/branch_id/character_id` 播放多句；另有支线专属对话走 `SideQuest`。
-- **战斗**：回合制，玩家 + 同伴；普通攻击、伤害/治疗/充能技能、逃跑（可禁用）、战斗内使用道具。
+- **战斗**：回合制，玩家 + 同伴（钟离昧随队出战，持久化到存档）；普通攻击、伤害/治疗/充能技能、逃跑（可禁用）、战斗内使用道具。
 - **敌人 AI**：敌方回击，按策略选技能或集火残血；我方支持 AI 托管。
 - **状态效果**：灼烧 / 迟缓 / 眩晕 / 充能，统一在主循环每轮结算。
 - **角色成长**：经验值与升级；`maxHP`/`maxSP` 随等级成长并接入存档。
@@ -151,40 +155,36 @@ Linux 运行：
 - **物品**：消耗品（回 HP/SP）、装备、材料三类，从 `item.json` 加载；背包界面（`backpack`）可装配/卸下/使用/查看属性。
 - **药店**：金币购买、使用药品、查看背包（`PharManager`）。
 - **网格地图**：`MapGrid` 支持 WASD 移动、边界/碰撞检测、按格子类型触发交互（对话/战斗/药店/拾取/门/幕次跳转/传送门）、拟物建造（房间/栅栏/拒马/水域/传送门）、光标定位渲染防闪烁。
-- **地图接入主游戏**：`SceneMap` + `MapLayouts` 将四幕地图接入主流程，含 `ADVANCE` 幕次跳转（帅帐/北渡/突围/渡船）；地图内 `B` 背包、`ESC` 退出。
+- **地图接入主游戏**：`SceneMap` + `MapLayouts` 将四幕地图接入主流程，含 `ADVANCE` 幕次跳转（帅帐/北渡/突围/渡船）；地图内 `B` 背包、`ESC` 退出；遇敌按 NPC 名匹配对应 `battle_*.json`。
 - **传送门地图链**：`PORTAL` 格 + `buildPortal` 支持上下左右链式传送，衔接子地图（营外荒郊 / 阴陵一/二/三），进入点与返回点成对。
 - **支线任务**（`SideQuest` + `QuestState`）：
   - 支线一「收拢军心」（第一幕）：老兵寻回逃兵、粮官巡南门、粮仓分配粮草，影响军心值与突围旁白。
   - 支线二「阴陵迷境」（第二幕）：田夫解锁入口、渡河图显浅滩、蓑衣避寒水、击败灌婴 BOSS 开启归路。
-- **存档**：JSON 双槽位（`saves/save_1.json`、`save_2.json`），持久化队伍状态（HP/SP/maxHP/maxSP/等级/经验/技能/背包/装备）+ 剧情进度（scene/branch/gold），提供存读档界面（覆盖需确认）。
+- **存档**：JSON 双槽位（`saves/save_1.json`、`save_2.json`），持久化队伍状态（HP/SP/maxHP/maxSP/等级/经验/技能/背包/装备）+ 剧情进度（scene/branch/gold）+ 支线进度（`quest`：军心/委托/阴陵 flag），提供存读档界面（覆盖需确认）。
 - **平台抽象**：`console` 15 个函数（`init`/`clearScreen`/`readKey`/`pause`/`pauseEsc`/`setColor`/`sleep`/`kbhit`/`moveCursor`/`setCursorVisible`/`clearToEnd`/`enterRaw`/`restoreCanonical`/`drainInput`/`readLine`），Windows / Linux 双端。
 
 ### 未实现 / 待办
 
-- **地图遇敌战斗按名匹配**：`SceneMap` 的遭遇战目前统一走 `battle_test.json`，尚未按 NPC 名称匹配对应战斗配置。
-- **支线进度入存档**：`QuestState`（军心/委托/阴陵 flag）目前仅存于内存，读档后不恢复。
-- **任务系统**：未实现（仅有上述两套硬编码支线）。
+- **任务系统**：未实现（仅有「收拢军心」「阴陵迷境」两套硬编码支线）。
 - **自动化测试**：目前为手工交互测试。
 
 ---
 
 ## 已知遗留 / 技术债
 
-- **地图遭遇战配置单一**：所有地图遇敌都复用 `battle_test.json`（`SceneMap.cpp`），且不携带同伴。
-- **支线状态不持久化**：`saveManager` 只存队伍 + `scene`/`branch`/`gold`，`QuestState` 不落盘。
-- **陈旧注释**（与现状不符）：`dataLoader.h:15-16` 分层说明仍写「适合 SQL/SQLite」，实际存档已改为 JSON。
-- **残留文件**：仓库根目录 `save.db`（早期 SQLite 存档）、`build/` 下已弃用的旧目标二进制（`mapTest`/`gaiXiaMap`/`huaiRiverMap`/`dongchengMap`/`wujiangMap`），均已 gitignore，不影响构建。
+- **地图遭遇战不携带额外敌人**：每场地图遇敌为单个敌人（1v1 + 同伴），暂无多敌人编队的地图遭遇配置。
+- **同伴死亡后无法在战斗外复活**：药店/背包的治疗仅作用于主角，同伴阵亡后需读档或新开游戏恢复。
 
 ---
 
 ## 数据文件说明
 
-- `story.json`：四幕剧情。每幕含 `advance`（幕次跳转旁白）与 `lines`（`text`/`color`/`sleep`/`wait`/`battle`/`battleId`），第二幕含 `choice`（`prompt` + `options`，每项含 `key`/`branch`/`lines`）。
-- `talk.json`：两层结构——`simple` 表（NPC 名 → 单句文本，供未接入主对话的 NPC）与 `scenes[]`（`scene_id`/`branch_id`/`characters[]`，每句含 `speaker`/`text`）。
-- `skill.json`：技能池，`type`（damage/heal/charge）、`cost`、`power`、`healAmount`、`multiplier`、`targetStat`、`duration`、`statusEffect`、`scope` 等。
-- `item.json`：物品池，含 `category`（equipment/potion/material）、装备的 `slot`+`bonus[4]`、消耗品的 `healHP`/`healSP` 等。
-- `player.json` / `companion.json` / 各敌人模板：角色模板，`baseStats[4]`、`maxHp`/`maxSp`、`skills`、`inventory`。
-- `battle_*.json`：战斗配置，通过 `player_ref`/`companions_ref`/`enemies_ref` 引用角色模板，含 `first_side`/`disable_run`/`disable_items`。
+- `data/story/story.json`：四幕剧情。每幕含 `advance`（幕次跳转旁白）与 `lines`（`text`/`color`/`sleep`/`wait`/`battle`/`battleId`），第二幕含 `choice`（`prompt` + `options`，每项含 `key`/`branch`/`lines`）。
+- `data/story/talk.json`：两层结构——`simple` 表（NPC 名 → 单句文本，供未接入主对话的 NPC）与 `scenes[]`（`scene_id`/`branch_id`/`characters[]`，每句含 `speaker`/`text`）。
+- `data/core/skill.json`：技能池，`type`（damage/heal/charge）、`cost`、`power`、`healAmount`、`multiplier`、`targetStat`、`duration`、`statusEffect`、`scope` 等。
+- `data/core/item.json`：物品池，含 `category`（equipment/potion/material）、装备的 `slot`+`bonus[4]`、消耗品的 `healHP`/`healSP` 等。
+- `data/characters/*.json`：角色模板（`player`/`companion`/各敌人），`baseStats[4]`、`maxHp`/`maxSp`、`skills`、`inventory`。
+- `data/battles/battle_*.json`：战斗配置，通过 `player_ref`/`companions_ref`/`enemies_ref`（相对路径 `../characters/xxx.json`）引用角色模板，含 `first_side`/`disable_run`/`disable_items`。
 
 ---
 

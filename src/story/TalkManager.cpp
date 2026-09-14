@@ -7,7 +7,7 @@
 namespace {
 // 缓存 talk.json 解析结果（只读一次，避免每次对话都重新读文件+解析）
 const json::Value& talkRoot() {
-	static json::Value root = json::Value::parse(DataLoader::readFileText("data/talk.json"));
+	static json::Value root = json::Value::parse(DataLoader::readFileText("data/story/talk.json"));
 	return root;
 }
 }
