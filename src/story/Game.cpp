@@ -1,6 +1,5 @@
 #include "Game.h"
 #include<iostream>
-#include "map.h"
 #include"SceneManager.h"
 #include "core/console.h"
 #include "data/saveManager.h"
@@ -36,7 +35,6 @@ void Game::gameLoop() {
 
 void Game::gameCommand(const string& command) {
 	if (command == "1" && scene_id == 0) {
-		//"开始游戏(剧情制作完成)";//不要忘记删除！！！！！！！
 		scene_id = 1;
 		sceneManager.ShowBackground(scene_id);
 	}
@@ -51,43 +49,11 @@ void Game::gameCommand(const string& command) {
 		cout << "感谢游玩。"<<"\n";
 		exit(0);
 	}
-	else if (command.empty()) {
-		return;
-	}
-	else if (command == "map") {
-		console::setColor(3);
-		map();
-		console::setColor(14);
-	}
-	else if (command == "south" || command =="w" || command == "W") {
-		scene_id++;
-		if (scene_id > 4) {
-			scene_id = 4;
-		}
-		sceneManager.ShowBackground(scene_id);
-	}
-	else if (command == "north" || command == "n" || command == "N") {
-		scene_id--;
-		if (scene_id < 0) {
-			scene_id = 0;
-		}
-		sceneManager.ShowBackground(scene_id);
-	}
-	else if (command == "auto") {
-		if (!sceneManager.current_Auto()) {
-			sceneManager.changeAuto();
-		}
-	}
-	else if (command == "manual") {
-		if (sceneManager.current_Auto()) {
-			sceneManager.changeAuto();
-		}
-	}
 	else if (command == "start") {
 		scene_id = 0;
 		showWelcome();
 	}
-	else {
+	else if (!command.empty()) {
 		cout << "未知指令：" << command << "\n";
 		cout << "请输入help查看帮助" << "\n";
 	}
@@ -111,15 +77,8 @@ void Game::showHelp() {
 	cout << "\n" << "========== 指令 ==========" << "\n"
 		<< "  " << "help     " << "     " << "查看帮助" << "\n"
 		<< "  " << "quit     " << "     " << "退出游戏" << "\n"
-		<< "  " << "map      " << "     " << "查看地图" << "\n"
-		<< "  " << "south(s)(S)" << "   " << "继续剧情" << "\n"
-		<< "  " << "north(n)(N)" << "   " << "回退剧情" << "\n"
-		<< "  " << "auto  " << "        " << "自动播放剧情" << "\n"
-		<< "  " << "manual" << "        " << "手动播放剧情" << "\n"
-		//<< "  " << "ESC   " << "      " << "切换自动/手动播放剧情" << "\n"
 		<< "  " << "start " << "        " << "开始界面" << "\n"
 		<< "  " << "q/Q " << "        " << "加速当前对话剧情" << "\n"
-		
 		<< "===========================" << "\n";
 }
 
