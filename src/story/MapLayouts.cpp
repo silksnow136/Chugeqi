@@ -14,7 +14,7 @@ static void buildGaiXia(MapGrid& grid) {
     grid.buildRoom( 4, 17, 9, 24, 20);
     grid.buildRoom(13, 3, 16, 8, 5);
     grid.buildRoom(10, 11, 17, 18, 14);
-    grid.buildRoom(10, 20, 14, 25, 22);
+    grid.buildRoom(11, 20, 15, 25, 22);
     grid.buildRoom(19, 3, 23, 10, 6);
     grid.buildRoom(19, 17, 22, 23, 19);
     grid.buildRoom(25, 3, 28, 8, 5);
@@ -39,7 +39,7 @@ static void buildGaiXia(MapGrid& grid) {
     grid.setTile(30, 14, "门", TileType::DOOR, "南门");
 
     // 【支线一】北门内侧传送门 → 营外荒郊
-    grid.buildPortal(3, 13, PortalDir::Up, "营外荒郊");
+    grid.buildPortal(3, 14, PortalDir::Up, "营外荒郊");
 
     // 友方 NPC
     grid.setTile(5, 5, "粮仓", TileType::FRIEND, "粮仓");
@@ -49,7 +49,7 @@ static void buildGaiXia(MapGrid& grid) {
     grid.setTile(6, 21, "马夫", TileType::FRIEND, "马夫");
     grid.setTile(14, 5, "军械", TileType::FRIEND, "军械库");
     grid.setTile(12, 14, "帅帐", TileType::ADVANCE, "帅帐");
-    grid.setTile(12, 22, "虞姬", TileType::FRIEND, "虞姬");
+    grid.setTile(13, 22, "虞姬", TileType::FRIEND, "虞姬");
     grid.setTile(20, 5, "伤兵", TileType::FRIEND, "伤兵");
     grid.setTile(20, 6, "伤兵", TileType::FRIEND, "伤兵");
     grid.setTile(20, 7, "伤兵", TileType::FRIEND, "伤兵");

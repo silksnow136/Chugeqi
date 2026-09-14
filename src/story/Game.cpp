@@ -73,6 +73,7 @@ void Game::gameCommand(const string& command) {
 }
 
 void Game::showWelcome(){
+	console::clearScreen();
 	console::setColor(14);
 	cout << R"( ████████╗ ██╗  ██╗ ███████╗     ███████╗  █████╗  ██╗      ██╗           ██████╗  ███████╗
  ╚══██╔══╝ ██║  ██║ ██╔════╝     ██╔════╝ ██╔══██╗ ██║      ██║          ██╔═══██╗ ██╔════╝
