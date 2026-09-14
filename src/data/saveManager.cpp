@@ -4,28 +4,9 @@
 #include <sstream>
 #include <stdexcept>
 #include <filesystem>
-#include <cstdio>
 #include <exception>
 
 namespace {
-
-// 转义 JSON 字符串中的特殊字符（引号/反斜杠/换行等）；中文 UTF-8 字节原样保留
-std::string jsonEscape(const std::string& s) {
-    std::string out;
-    for (unsigned char c : s) {
-        switch (c) {
-            case '"':  out += "\\\""; break;
-            case '\\': out += "\\\\"; break;
-            case '\n': out += "\\n"; break;
-            case '\r': out += "\\r"; break;
-            case '\t': out += "\\t"; break;
-            default:
-                if (c < 0x20) { char buf[8]; std::snprintf(buf, sizeof(buf), "\\u%04x", c); out += buf; }
-                else out += static_cast<char>(c);
-        }
-    }
-    return out;
-}
 
 // 由技能指针反查 skill_id
 std::string findSkillId(const SkillPool& skillPool, const SkillBase* skill) {
@@ -42,27 +23,6 @@ std::string readFile(const std::string& path) {
     std::stringstream ss;
     ss << in.rdbuf();
     return ss.str();
-}
-
-// 支线任务进度序列化为 JSON 片段（不含外层花括号）
-std::string questToJson(const QuestState& q) {
-    std::string s;
-    s += "\"morale\": " + std::to_string(q.morale) + ", ";
-    s += "\"q1\": " + std::to_string(q.q1) + ", ";
-    s += "\"q2\": " + std::to_string(q.q2) + ", ";
-    s += "\"q3\": " + std::to_string(q.q3) + ", ";
-    s += "\"q3choice\": " + std::to_string(q.q3choice) + ", ";
-    s += "\"deserters\": " + std::to_string(q.deserters) + ", ";
-    s += "\"deserterTalked\": [";
-    for (int i = 0; i < 3; i++) {
-        if (i) s += ", ";
-        s += q.deserterTalked[i] ? "true" : "false";
-    }
-    s += "], ";
-    s += "\"yinlingUnlocked\": " + std::string(q.yinlingUnlocked ? "true" : "false") + ", ";
-    s += "\"guanyingDefeated\": " + std::string(q.guanyingDefeated ? "true" : "false") + ", ";
-    s += "\"raincoatWarned\": " + std::string(q.raincoatWarned ? "true" : "false");
-    return s;
 }
 
 // 从存档根节点恢复支线任务进度（旧存档无 quest 字段时保留默认值）
@@ -129,73 +89,73 @@ void SaveManager::save(int slot, const std::vector<Combatant*>& party,
                        const SkillPool& skillPool, const Meta& meta) const {
     if (!validSlot(slot)) return;
 
-    std::string j;
-    j += "{\n";
-    j += "  \"scene\": " + std::to_string(meta.sceneId) + ",\n";
-    j += "  \"branch\": " + std::to_string(meta.branchId) + ",\n";
-    j += "  \"gold\": " + std::to_string(meta.gold) + ",\n";
-    j += "  \"quest\": { " + questToJson(meta.quest) + " },\n";
-    j += "  \"party\": [\n";
+    json::Value root;
+    root.set("scene", meta.sceneId);
+    root.set("branch", meta.branchId);
+    root.set("gold", meta.gold);
 
-    for (size_t i = 0; i < party.size(); i++) {
-        const Combatant* c = party[i];
-        j += "    {\"id\": \"" + jsonEscape(c->getId()) + "\", ";
-        j += "\"name\": \"" + jsonEscape(c->getName()) + "\", ";
-        j += "\"level\": " + std::to_string(c->getLevel()) + ", ";
-        j += "\"hp\": " + std::to_string(c->getHP()) + ", ";
-        j += "\"sp\": " + std::to_string(c->getSP()) + ", ";
-        j += "\"maxHp\": " + std::to_string(c->getMaxHP()) + ", ";
-        j += "\"maxSp\": " + std::to_string(c->getMaxSP()) + ", ";
-        j += "\"exp\": " + std::to_string(c->getExp()) + ", ";
-        j += "\"str\": " + std::to_string(c->getBaseStat(0)) + ", ";
-        j += "\"mag\": " + std::to_string(c->getBaseStat(1)) + ", ";
-        j += "\"end\": " + std::to_string(c->getBaseStat(2)) + ", ";
-        j += "\"agi\": " + std::to_string(c->getBaseStat(3)) + ", ";
+    const QuestState& q = meta.quest;
+    json::Value quest = json::Value::object();
+    quest.set("morale", q.morale);
+    quest.set("q1", q.q1);
+    quest.set("q2", q.q2);
+    quest.set("q3", q.q3);
+    quest.set("q3choice", q.q3choice);
+    quest.set("deserters", q.deserters);
+    json::Value talked = json::Value::array();
+    for (int i = 0; i < 3; i++) talked.push(q.deserterTalked[i]);
+    quest.set("deserterTalked", talked);
+    quest.set("yinlingUnlocked", q.yinlingUnlocked);
+    quest.set("guanyingDefeated", q.guanyingDefeated);
+    quest.set("raincoatWarned", q.raincoatWarned);
+    root.set("quest", quest);
 
-        // 技能
-        j += "\"skills\": [";
-        bool first = true;
+    json::Value partyArr = json::Value::array();
+    for (const Combatant* c : party) {
+        json::Value obj = json::Value::object();
+        obj.set("id", c->getId());
+        obj.set("name", c->getName());
+        obj.set("level", c->getLevel());
+        obj.set("hp", c->getHP());
+        obj.set("sp", c->getSP());
+        obj.set("maxHp", c->getMaxHP());
+        obj.set("maxSp", c->getMaxSP());
+        obj.set("exp", c->getExp());
+        obj.set("str", c->getBaseStat(0));
+        obj.set("mag", c->getBaseStat(1));
+        obj.set("end", c->getBaseStat(2));
+        obj.set("agi", c->getBaseStat(3));
+
+        json::Value skills = json::Value::array();
         for (auto* s : c->getSkills()) {
             std::string sid = findSkillId(skillPool, s);
             if (sid.empty()) continue;
-            if (!first) j += ", ";
-            j += "\"" + jsonEscape(sid) + "\"";
-            first = false;
+            skills.push(sid);
         }
-        j += "], ";
+        obj.set("skills", skills);
 
-        // 背包
-        j += "\"items\": {";
-        first = true;
+        json::Value items = json::Value::object();
         for (const auto& kv : c->getInventory()) {
-            if (!first) j += ", ";
-            j += "\"" + jsonEscape(kv.first) + "\": " + std::to_string(kv.second);
-            first = false;
+            items.set(kv.first, kv.second);
         }
-        j += "}, ";
+        obj.set("items", items);
 
-        // 装备槽位（只存非空槽）
-        j += "\"equip\": {";
-        first = true;
+        json::Value equip = json::Value::object();
         for (int es = 0; es < 4; es++) {
             const std::string& itemId = c->getEquippedItemId(es);
             if (itemId.empty()) continue;
-            if (!first) j += ", ";
-            j += "\"" + std::to_string(es) + "\": \"" + jsonEscape(itemId) + "\"";
-            first = false;
+            equip.set(std::to_string(es), itemId);
         }
-        j += "}}";
-        if (i + 1 < party.size()) j += ",";
-        j += "\n";
-    }
+        obj.set("equip", equip);
 
-    j += "  ]\n";
-    j += "}\n";
+        partyArr.push(obj);
+    }
+    root.set("party", partyArr);
 
     std::filesystem::create_directories(dir_);
     std::ofstream out(path(slot), std::ios::binary);
     if (!out) throw std::runtime_error("无法写入存档: " + path(slot));
-    out << j;
+    out << root.stringify();
 }
 
 void SaveManager::save(int slot, const std::vector<std::unique_ptr<Combatant>>& party,

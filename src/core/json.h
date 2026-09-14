@@ -6,6 +6,7 @@
 #include <cctype>
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 
 namespace json {
 
@@ -64,6 +65,54 @@ public:
         return out;
     }
 
+    // ===== 构造支持（用于写存档等场景）=====
+    // 作为对象插入键值对；返回 *this 便于链式调用
+    Value& set(const std::string& key, const Value& v) {
+        type_ = Type::Object;
+        obj_[key] = v;
+        return *this;
+    }
+    // 作为数组追加元素；返回 *this 便于链式调用
+    Value& push(const Value& v) {
+        type_ = Type::Array;
+        arr_.push_back(v);
+        return *this;
+    }
+
+    // 构造空对象 / 空数组（用于可能为空的容器字段，避免序列化成 null）
+    static Value object() { Value v; v.type_ = Type::Object; return v; }
+    static Value array()  { Value v; v.type_ = Type::Array;  return v; }
+
+    // 序列化为 JSON 文本（对象键按字典序输出）
+    std::string stringify() const {
+        switch (type_) {
+            case Type::Null:   return "null";
+            case Type::Bool:   return boolVal_ ? "true" : "false";
+            case Type::Int:    return std::to_string(intVal_);
+            case Type::Double: return std::to_string(doubleVal_);
+            case Type::String: return escapeString(strVal_);
+            case Type::Array: {
+                std::string s = "[";
+                for (size_t i = 0; i < arr_.size(); i++) {
+                    if (i) s += ",";
+                    s += arr_[i].stringify();
+                }
+                return s + "]";
+            }
+            case Type::Object: {
+                std::string s = "{";
+                bool first = true;
+                for (const auto& p : obj_) {
+                    if (!first) s += ",";
+                    s += escapeString(p.first) + ":" + p.second.stringify();
+                    first = false;
+                }
+                return s + "}";
+            }
+        }
+        return "null";
+    }
+
     // 解析整段 JSON 文本；有多余内容或语法错误时抛出 runtime_error
     static Value parse(const std::string& text) {
         size_t pos = 0;
@@ -81,6 +130,24 @@ private:
     std::string strVal_;
     std::vector<Value> arr_;
     std::map<std::string, Value> obj_;
+
+    // 转义 JSON 字符串中的特殊字符（引号/反斜杠/换行等）；中文 UTF-8 字节原样保留
+    static std::string escapeString(const std::string& s) {
+        std::string out = "\"";
+        for (unsigned char c : s) {
+            switch (c) {
+                case '"':  out += "\\\""; break;
+                case '\\': out += "\\\\"; break;
+                case '\n': out += "\\n"; break;
+                case '\r': out += "\\r"; break;
+                case '\t': out += "\\t"; break;
+                default:
+                    if (c < 0x20) { char buf[8]; std::snprintf(buf, sizeof(buf), "\\u%04x", c); out += buf; }
+                    else out += static_cast<char>(c);
+            }
+        }
+        return out + "\"";
+    }
 
     static void skipWhitespace(const std::string& s, size_t& pos) {
         while (pos < s.size() && std::isspace(static_cast<unsigned char>(s[pos]))) pos++;
