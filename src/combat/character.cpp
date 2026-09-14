@@ -9,7 +9,7 @@ Combatant::Combatant(const std::string& name, int level, int hp, int sp, int exp
                      const int baseStats[3], const std::vector<SkillBase*>& skills,
                      const std::unordered_map<std::string, int>& inventory, const std::string& id,
                      int maxHp, int maxSp)
-    : Character(name), id(id), hp(hp), sp(sp), level(level), exp(exp), statusFlags(0), skills(skills), inventory(inventory) {
+    : name(name), id(id), hp(hp), sp(sp), level(level), exp(exp), skills(skills), inventory(inventory) {
     std::copy(baseStats, baseStats + 3, this->baseStats);
     std::fill(equipmentBonus, equipmentBonus + 3, 0);
     std::fill(&slotBonuses[0][0], &slotBonuses[0][0] + 6, 0);
@@ -18,6 +18,8 @@ Combatant::Combatant(const std::string& name, int level, int hp, int sp, int exp
     this->maxSp = (maxSp >= 0) ? maxSp : sp;
 }
 
+const std::string& Combatant::getName() const { return name; }
+
 const std::string& Combatant::getId() const { return id; }
 
 Combatant::~Combatant() {
@@ -25,7 +27,9 @@ Combatant::~Combatant() {
 }
 
 bool Combatant::hasStatusEffect(StatusEffect effect) const {
-    return (statusFlags & static_cast<uint16_t>(effect)) != 0;
+    for (const auto& inst : activeStatusEffects)
+        if (inst.type == effect) return true;
+    return false;
 }
 
 bool Combatant::isAlive() const { return hp > 0; }
@@ -56,7 +60,6 @@ void Combatant::addStatusEffect(StatusEffect type, int duration) {
         StatusEffectInstance effect{type, duration};
         activeStatusEffects.push_back(effect);
     }
-    recalcStatusFlags();
 }
 
 void Combatant::updateStatusEffects() {
@@ -74,7 +77,6 @@ void Combatant::updateStatusEffects() {
             ++it;
         }
     }
-    recalcStatusFlags();
 }
 
 void Combatant::removeStatusEffect(StatusEffect type) {
@@ -82,14 +84,6 @@ void Combatant::removeStatusEffect(StatusEffect type) {
         std::remove_if(activeStatusEffects.begin(), activeStatusEffects.end(),
             [type](const StatusEffectInstance& effect) { return effect.type == type; }),
         activeStatusEffects.end());
-    recalcStatusFlags();
-}
-
-void Combatant::recalcStatusFlags() {
-    statusFlags = 0;
-    for (const auto& effect : activeStatusEffects) {
-        statusFlags |= static_cast<uint16_t>(effect.type);
-    }
 }
 
 int Combatant::getEffectiveStat(int index) const {

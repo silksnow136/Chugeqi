@@ -6,15 +6,6 @@
 
 class SkillBase; // 前向声明，避免与 skill.h 循环包含
 
-class Character {
-private:
-    std::string name;
-public:
-    Character(const std::string& name) : name(name) {}
-    virtual ~Character() = default;
-    const std::string& getName() const { return name; }
-};
-
 // 状态效果枚举（位标志）
 enum class StatusEffect : uint16_t {
     None   = 0,
@@ -29,8 +20,9 @@ struct StatusEffectInstance {
 };
 
 // 战斗角色
-class Combatant : public Character {
+class Combatant {
 private:
+    std::string name;
     std::string id;        // 稳定标识，用于存档/数据库主键（敌人可为空）
     int hp;
     int sp;
@@ -39,7 +31,6 @@ private:
     int level;
     int exp;
     int baseStats[3];      // strength, endurance, agility
-    uint16_t statusFlags;  // 快速检查位
     std::vector<StatusEffectInstance> activeStatusEffects; // 状态详细信息
     std::vector<SkillBase*> skills;
     std::unordered_map<std::string, int> inventory; // 物品ID -> 数量
@@ -50,6 +41,8 @@ public:
               const std::string& id = "",
               int maxHp = -1, int maxSp = -1);
     ~Combatant();
+
+    const std::string& getName() const;
 
     // 稳定标识
     const std::string& getId() const;
@@ -107,5 +100,4 @@ private:
     int equipmentBonus[3];          // 三项属性加成（各槽位加成之和）
     std::string equippedItemIds[2]; // 每槽位装备的物品ID（空串=未装备）
     int slotBonuses[2][3];          // 每槽位对三项属性的加成
-    void recalcStatusFlags(); // 根据activeStatusEffects更新statusFlags
 };
