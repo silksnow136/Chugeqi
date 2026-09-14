@@ -101,6 +101,13 @@ void SceneManager::showSceneManager(int scene_id, int branch_id) {
 	SceneMap::runSceneMap(game, *this, scene_id, branch_id);
 }
 
+// 读档恢复：跳过幕次剧情，直接进入指定幕的地图
+void SceneManager::resumeScene(int scene_id, int branch_id) {
+	current_scene_id = scene_id;
+	current_branch_id = branch_id;
+	showSceneManager(scene_id, branch_id);
+}
+
 
 // 进入药店系统（供地图移动交互调用）
 void SceneManager::enterPharmacy(Game& game1) {

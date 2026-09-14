@@ -41,6 +41,7 @@ void Game::gameLoop() {
 void Game::gameCommand(const string& command) {
 	if (command == "1" && scene_id == 0) {
 		scene_id = 1;
+		world = WorldState{}; // 新游戏：重置地图状态
 		sceneManager.ShowBackground(scene_id);
 	}
 	else if (command == "2" && scene_id == 0) {
@@ -56,6 +57,8 @@ void Game::gameCommand(const string& command) {
 	}
 	else if (command == "start") {
 		scene_id = 0;
+		world.mapName.clear();        // 回到主界面即离开地图
+		world.playerRow = world.playerCol = -1;
 		showWelcome();
 	}
 	else if (!command.empty()) {
@@ -112,6 +115,11 @@ GameData& Game::getGameData()
 {
 	return gameData;
 }
+
+WorldState& Game::getWorld()
+{
+	return world;
+}
 void Game::doSave(int slot)
 {
 	try {
@@ -121,12 +129,13 @@ void Game::doSave(int slot)
 		std::vector<Combatant*> party{ player.get() };
 		if (companion) party.push_back(companion.get());
 
-		// 元信息：剧情进度 / 分支 / 金币 / 支线进度
+		// 元信息：剧情进度 / 分支 / 金币 / 支线进度 / 地图状态
 		SaveManager::Meta meta;
 		meta.sceneId = sceneManager.showScene_id();
 		meta.branchId = sceneManager.showBranch_id();
 		meta.gold = gold;
 		meta.quest = sceneManager.getQuestState();
+		meta.world = world;
 
 		save.save(slot, party, gameData.skillPool, meta);
 
@@ -157,9 +166,15 @@ void Game::doLoad(int slot)
 		gold = data.meta.gold;
 		scene_id = data.meta.sceneId;
 		sceneManager.getQuestState() = data.meta.quest;
+		world = data.meta.world;
 
 		cout << "已读取存档位 " << slot << "。" << "\n";
-		sceneManager.ShowBackground(scene_id);
+		if (!world.mapName.empty()) {
+			// 存档时正处于地图内：直接恢复进地图，跳过幕次剧情
+			sceneManager.resumeScene(scene_id, data.meta.branchId);
+		} else {
+			sceneManager.ShowBackground(scene_id);
+		}
 	}
 	catch (const std::exception& e) {
 		cout << "读档失败：" << e.what() << "\n";

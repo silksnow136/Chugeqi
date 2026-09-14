@@ -41,6 +41,9 @@ public:
 	//场景功能显示管理
 	void showSceneManager(int scene_id = 0, int branch_id = 0);
 
+	// 读档恢复：跳过幕次剧情，直接进入指定幕的地图
+	void resumeScene(int scene_id, int branch_id);
+
 	void nextLine();
 
 	void deleteWords(string tip);

@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 #include "SceneManager.h"
+#include "WorldState.h"
 #include "data/dataLoader.h"
 
 // 负责控制游戏初始化以及指令处理
@@ -25,6 +26,9 @@ public:
 
 
     GameData& getGameData();
+
+    // 地图持久状态（当前地图 / 玩家坐标 / 已清除格子）
+    WorldState& getWorld();
 
     // 存档 / 读档（slot 1~2，供命令层与地图场景调用）
     void doSave(int slot);
@@ -58,6 +62,9 @@ private:
 
     // 当前金币
     int gold = 100;
+
+    // 地图持久状态（跨传送门/读档保留敌人、道具、坐标）
+    WorldState world;
 
     SceneManager sceneManager;
 };
