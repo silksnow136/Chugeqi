@@ -48,26 +48,6 @@ static bool runBattle(Game& game, Combatant& player, const std::string& enemyNam
     return won;
 }
 
-// 幕次跳转旁白（ADVANCE 格触发，按 scene_id 索引）
-static const char* kAdvancePrompts[] = {
-    nullptr,
-    "项羽立于帅帐之中，拔剑四顾。\n"
-    "营外楚歌四起，将士离散，军心已溃。\n"
-    "「此天亡楚也，非战之罪！」\n"
-    "霸王决意率八百骑趁夜突围，南走淮河……\n",
-    "渡过淮河，身后追兵渐远。\n"
-    "灌婴三千铁骑紧追不舍，项王仅余百余骑。\n"
-    "一路东行，东城在望——\n"
-    "那便是霸王最后的战场。\n",
-    "东城一战，二十八骑杀穿汉军重围。\n"
-    "项王仰天大笑：「今日固死，然愿快战三合！」\n"
-    "残兵南下，乌江在前——\n"
-    "江东子弟何在？天之亡我，何渡为！\n",
-    "乌江之畔，亭长泊舟以待。\n"
-    "「江东虽小，地方千里，众数十万，亦足王也。愿大王急渡！」\n"
-    "项王笑曰：「天之亡我，我何渡为！」\n",
-};
-
 bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
     QuestState& qs = sm.getQuestState();
     Combatant& player = game.getPlayer();
@@ -104,14 +84,12 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
                 break;
             }
             case TileType::ITEM: {
-                std::string itemId;
-                if (name == "渡河图") itemId = "hr_map";
-                else if (name == "蓑衣") itemId = "hr_raincoat";
-                else if (name == "草药") itemId = "herb";
-                else if (name == "草料") itemId = "fodder";
-                if (!itemId.empty()) player.addItem(itemId, 1);
+                player.addItem(name, 1);  // name 即物品 ID
+                const ItemPool& pool = game.getItemPool();
+                auto it = pool.find(name);
+                std::string displayName = (it != pool.end()) ? it->second->getName() : name;
                 console::setColor(14);
-                std::cout << "\n[拾取] 获得「" << name << "」！" << std::endl;
+                std::cout << "\n[拾取] 获得「" << displayName << "」！" << std::endl;
                 console::setColor(7);
                 console::pause();
                 break;
@@ -121,7 +99,7 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
                 console::setColor(13);
                 std::cout << "\n===== " << name << " =====" << std::endl;
                 console::setColor(7);
-                sm.printWords(kAdvancePrompts[scene_id], 11, 500, 80);
+                sm.printWords(sm.getAdvancePrompt(scene_id), 11, 500, 80);
                 if (scene_id == 1) {
                     std::string insert = SideQuest::advanceNarration(qs, scene_id);
                     if (!insert.empty()) sm.printWords(insert, 14, 300, 60);

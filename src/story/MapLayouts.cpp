@@ -68,9 +68,9 @@ static void buildGaiXia(MapGrid& grid) {
     grid.setTile(26, 5, "军医", TileType::PHARMACY, "军医");
 
     // 物品
-    grid.setTile(20, 12, "木炭", TileType::ITEM, "木炭");
-    grid.setTile(14, 7, "楚酒", TileType::ITEM, "楚酒");
-    grid.setTile(12, 24, "铜镜", TileType::ITEM, "铜镜");
+    grid.setTile(20, 12, "木炭", TileType::ITEM, "charcoal");
+    grid.setTile(14, 7, "楚酒", TileType::ITEM, "chu_wine");
+    grid.setTile(12, 24, "铜镜", TileType::ITEM, "bronze_mirror");
 
     // 汉军（南门外哨骑 —— 委托二的战斗目标）
     grid.setTile(1, 5, "汉军", TileType::ENEMY, "汉军哨骑");
@@ -106,8 +106,8 @@ static void buildWild(MapGrid& grid) {
     grid.setTile(7, 13, "逃兵", TileType::FRIEND, "逃兵丙");
 
     // 拾取物
-    grid.setTile(11, 4,  "草药", TileType::ITEM, "草药");
-    grid.setTile(11, 12, "草料", TileType::ITEM, "草料");
+    grid.setTile(11, 4,  "草药", TileType::ITEM, "herb");
+    grid.setTile(11, 12, "草料", TileType::ITEM, "fodder");
 
     // 巡逻汉军
     grid.setTile(9, 15, "汉军", TileType::ENEMY, "汉军哨骑");
@@ -161,9 +161,9 @@ static void buildHuaiRiver(MapGrid& grid) {
     grid.setTile(32, 13, "斥候", TileType::FRIEND, "斥候");
     grid.setTile(14, 13, "渔夫", TileType::FRIEND, "渔夫");
 
-    grid.setTile(6, 6, "渡图", TileType::ITEM, "渡河图");
-    grid.setTile(30, 6, "楚旗", TileType::ITEM, "残破楚旗");
-    grid.setTile(14, 14, "蓑衣", TileType::ITEM, "蓑衣");
+    grid.setTile(6, 6, "渡图", TileType::ITEM, "hr_map");
+    grid.setTile(30, 6, "楚旗", TileType::ITEM, "hr_banner");
+    grid.setTile(14, 14, "蓑衣", TileType::ITEM, "hr_raincoat");
 
     grid.setTile(35, 5, "汉骑", TileType::ENEMY, "汉军铁骑");
     grid.setTile(35, 6, "汉骑", TileType::ENEMY, "汉军铁骑");
@@ -288,9 +288,9 @@ static void buildDongcheng(MapGrid& grid) {
     grid.setTile(9, 13, "钟离", TileType::FRIEND, "钟离昧");
     grid.setTile(11, 13, "二八", TileType::FRIEND, "二十八骑");
 
-    grid.setTile(13, 11, "楚旗", TileType::ITEM, "楚军大旗");
-    grid.setTile(13, 15, "太阿", TileType::ITEM, "太阿剑");
-    grid.setTile(10, 13, "楚酒", TileType::ITEM, "楚酒（残）");
+    grid.setTile(13, 11, "楚旗", TileType::ITEM, "dc_banner");
+    grid.setTile(13, 15, "太阿", TileType::ITEM, "dc_tai_a");
+    grid.setTile(10, 13, "楚酒", TileType::ITEM, "dc_wine_r");
 
     grid.setTile(3, 3, "野帐", TileType::PHARMACY, "野战医帐");
 
@@ -326,9 +326,9 @@ static void buildWujiang(MapGrid& grid) {
     grid.setTile(21, 11, "副将", TileType::FRIEND, "副将");
     grid.setTile(21, 15, "乌骓", TileType::FRIEND, "乌骓");
 
-    grid.setTile(7, 13, "铜镜", TileType::ITEM, "虞姬铜镜");
-    grid.setTile(20, 13, "楚旗", TileType::ITEM, "楚军残旗");
-    grid.setTile(22, 8, "楚酒", TileType::ITEM, "楚酒（半坛）");
+    grid.setTile(7, 13, "铜镜", TileType::ITEM, "wj_mirror");
+    grid.setTile(20, 13, "楚旗", TileType::ITEM, "wj_banner");
+    grid.setTile(22, 8, "楚酒", TileType::ITEM, "wj_wine_h");
 
     grid.setTile(25, 5, "汉骑", TileType::ENEMY, "汉军");
     grid.setTile(25, 6, "汉骑", TileType::ENEMY, "汉军");

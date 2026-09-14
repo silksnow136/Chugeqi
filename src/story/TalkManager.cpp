@@ -4,6 +4,14 @@
 #include "core/console.h"
 #include "core/json.h"
 
+namespace {
+// 缓存 talk.json 解析结果（只读一次，避免每次对话都重新读文件+解析）
+const json::Value& talkRoot() {
+	static json::Value root = json::Value::parse(DataLoader::readFileText("data/talk.json"));
+	return root;
+}
+}
+
 TalkManager::TalkManager()
 {
 	sceneManager = nullptr;
@@ -32,7 +40,7 @@ bool TalkManager::talkCharacterExternal(int scene_id, const string& name, int br
 void TalkManager::playSimpleTalk(const string& name) {
 	string text;
 	try {
-		json::Value root = json::Value::parse(DataLoader::readFileText("data/talk.json"));
+		const json::Value& root = talkRoot();
 		if (root.has("simple") && root["simple"].has(name))
 			text = root["simple"][name].asString();
 	} catch (...) {}
@@ -59,7 +67,7 @@ bool TalkManager::loadDialogue(int scene_id, int branch_id, const string& name)
 {
 	try
 	{
-		json::Value root = json::Value::parse(DataLoader::readFileText("data/talk.json"));
+		const json::Value& root = talkRoot();
 		const auto& scenes = root["scenes"];
 
 		for (size_t i = 0; i < scenes.size(); i++)
