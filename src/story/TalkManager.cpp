@@ -37,7 +37,7 @@ void TalkManager::playDialogue(string speaker, string text)
 	
 	string words = speaker + "：" + text;
 
-	sceneManager->printWords(words,14,800,80);
+	sceneManager->printWords(words,14,600,80);
 	sceneManager->nextLine();
 	console::setColor(14);
 }

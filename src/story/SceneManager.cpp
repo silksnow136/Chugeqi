@@ -46,7 +46,7 @@ void SceneManager::nextLine() {
 	if (autoPlay) {
 		string tip = "  【按ESC手动对话，按q加速当前对话】";
 		cout << tip;
-		console::sleep(1500);//1500ms后播放下一条剧情
+		console::sleep(1200);//1200ms后播放下一条剧情
 		deleteWords(tip);
 		//console::kbhit()非阻塞检测按键输入
 		if (console::kbhit()) {
