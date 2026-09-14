@@ -21,6 +21,7 @@
 - 四幕网格地图（垓下营地 / 淮河 / 东城 / 乌江）由 `MapLayouts` 摆布局、`SceneMap` 跑交互，支持**传送门地图链**（垓下↔营外荒郊、淮河↔阴陵一/二/三）。
 - 两套**支线任务**（第一幕「收拢军心」、第二幕「阴陵迷境」）由 `SideQuest` + `QuestState` 驱动。
 - 存读档界面已实现（JSON 双槽位），战斗内道具使用已实现。
+- 地图状态持久化：击败的敌人、拾取的道具、玩家坐标在传送与读档间保留；读档可直接恢复进地图，不再重播幕次剧情。
 
 ---
 
@@ -50,7 +51,7 @@ Chugeqi/
 │   │   └── json.h            # 轻量 JSON 解析器
 │   ├── data/                 # 数据加载 + 存档
 │   │   ├── dataLoader.h/.cpp # 统一加载：战斗 + 剧情 + 物品/装备
-│   │   └── saveManager.h/.cpp# JSON 存档（2 槽位，存队伍 + 剧情进度）
+│   │   └── saveManager.h/.cpp# JSON 存档（2 槽位，存队伍 + 剧情进度 + 地图状态）
 │   ├── combat/               # 战斗内核
 │   │   ├── combatSystem.h/.cpp       # 战斗系统（回合流程/状态效果/核心）
 │   │   ├── combatSystemUI.cpp        # 界面（渲染/菜单/目标选择/状态显示）
@@ -71,6 +72,7 @@ Chugeqi/
 │       ├── backpack.h/.cpp          # 背包/物品工具（装配/卸下/使用/属性查看）
 │       ├── SideQuest.h/.cpp         # 支线任务逻辑（收拢军心 / 阴陵迷境）
 │       ├── QuestState.h             # 支线任务进度状态
+│       ├── WorldState.h             # 地图持久状态（地图名/玩家坐标/已清除格子）
 │       ├── PharManager.h/.cpp       # 药店（购买/使用药品/查看背包）
 │       └── portalTestMain.cpp       # 传送门地图链测试入口
 ├── archive/                  # 归档文档（历史 README/开发日志/软件设计/需求分析）
@@ -147,21 +149,21 @@ Linux 运行：
 - **剧情**：四幕（垓下/淮河/东城/乌江），从 `story.json` 加载；逐字打印、自动/手动播放（ESC 切换）、按 q 加速、第二幕分支选择、幕次跳转旁白（`advance` 字段）。
 - **剧情 ↔ 战斗衔接**：`story.json` 中 `battle`/`battleId` 触发的三场战斗（王翦/秦时月/最终决战）接入 `CombatSystem`；战斗失败中断后续剧情。
 - **对话**：场景内选择角色对话，从 `talk.json` 加载——「`simple` 表」按 NPC 名播放单句、「`scenes` 表」按 `scene_id/branch_id/character_id` 播放多句；另有支线专属对话走 `SideQuest`。
-- **战斗**：回合制，玩家 + 同伴（钟离昧随队出战，持久化到存档）；普通攻击、伤害/治疗/充能技能、逃跑（可禁用）、战斗内使用道具。
+- **战斗**：回合制，玩家 + 同伴（钟离昧随队出战，持久化到存档）；普通攻击、伤害/治疗/充能技能、逃跑（可禁用）、战斗内使用道具；命中率 = 基础命中 + 敏捷差加成（更快者命中更高，上限 92%）。
 - **敌人 AI**：敌方回击，按策略选技能或集火残血；我方支持 AI 托管。
-- **状态效果**：灼烧 / 迟缓 / 眩晕 / 充能，统一在主循环每轮结算。
+- **状态效果**：灼烧 / 迟缓 / 眩晕 / 充能，统一在主循环每轮结算（灼烧按目标最大生命 10% 扣血）。
 - **角色成长**：经验值与升级；`maxHP`/`maxSP` 随等级成长并接入存档。
 - **装备**：四槽位（防具/武器/鞋子/配饰）装配/卸下，属性加成叠加进 `getEffectiveStat`。
 - **物品**：消耗品（回 HP/SP）、装备、材料三类，从 `item.json` 加载；背包界面（`backpack`）可装配/卸下/使用/查看属性。
 - **药店**：金币购买、使用药品、查看背包（`PharManager`）。
 - **网格地图**：`MapGrid` 支持 WASD 移动、边界/碰撞检测、按格子类型触发交互（对话/战斗/药店/拾取/门/幕次跳转/传送门）、拟物建造（房间/栅栏/拒马/水域/传送门）、光标定位渲染防闪烁。
-- **地图接入主游戏**：`SceneMap` + `MapLayouts` 将四幕地图接入主流程，含 `ADVANCE` 幕次跳转（帅帐/北渡/突围/渡船）；地图内 `B` 背包、`ESC` 退出；遇敌按 NPC 名匹配对应 `battle_*.json`。
-- **传送门地图链**：`PORTAL` 格 + `buildPortal` 支持上下左右链式传送，衔接子地图（营外荒郊 / 阴陵一/二/三），进入点与返回点成对。
+- **地图接入主游戏**：`SceneMap` + `MapLayouts` 将四幕地图接入主流程，含 `ADVANCE` 幕次跳转（帅帐/北渡/突围/渡船）；地图内 `B` 背包、`E` 存读档、`ESC` 退出；遇敌按 NPC 名匹配对应 `battle_*.json`。
+- **传送门地图链**：`PORTAL` 格 + `buildPortal` 支持上下左右链式传送，衔接子地图（营外荒郊 / 阴陵一/二/三），进入点与返回点成对；往返传送不刷新已击败的敌人与已拾取的道具。
 - **支线任务**（`SideQuest` + `QuestState`）：
   - 支线一「收拢军心」（第一幕）：老兵寻回逃兵、粮官巡南门、粮仓分配粮草，影响军心值与突围旁白。
   - 支线二「阴陵迷境」（第二幕）：田夫解锁入口、渡河图显浅滩、蓑衣避寒水、击败灌婴 BOSS 开启归路。
-- **存档**：JSON 双槽位（`saves/save_1.json`、`save_2.json`），持久化队伍状态（HP/SP/maxHP/maxSP/等级/经验/技能/背包/装备）+ 剧情进度（scene/branch/gold）+ 支线进度（`quest`：军心/委托/阴陵 flag），提供存读档界面（覆盖需确认）。
-- **平台抽象**：`console` 15 个函数（`init`/`clearScreen`/`readKey`/`pause`/`pauseEsc`/`setColor`/`sleep`/`kbhit`/`moveCursor`/`setCursorVisible`/`clearToEnd`/`enterRaw`/`restoreCanonical`/`drainInput`/`readLine`），Windows / Linux 双端。
+- **存档**：JSON 双槽位（`saves/save_1.json`、`save_2.json`），持久化队伍状态（HP/SP/maxHP/maxSP/等级/经验/技能/背包/装备）+ 剧情进度（scene/branch/gold）+ 支线进度（`quest`：军心/委托/阴陵 flag）+ 地图状态（`world`：当前地图/玩家坐标/已清除格子），提供存读档界面（覆盖需确认）；读档时若位于地图内则直接恢复进地图，跳过幕次剧情。
+- **平台抽象**：`console` 12 个函数（`init`/`clearScreen`/`readKey`/`pause`/`setColor`/`sleep`/`kbhit`/`setCursorVisible`/`clearToEnd`/`enterRaw`/`drainInput`/`readLine`），Windows / Linux 双端。
 
 ### 未实现 / 待办
 
