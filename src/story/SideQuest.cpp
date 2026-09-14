@@ -150,7 +150,7 @@ bool tryHandleTalk(Game& game, Combatant& player, QuestState& qs,
         return true;
     }
     // 支线一·荒郊逃兵
-    if (mapName == "营外荒郊" && npc.compare(0, 2, "逃兵") == 0) {
+    if (mapName == "营外荒郊" && npc.rfind("逃兵", 0) == 0) {
         talkDeserter(qs, npc);
         return true;
     }

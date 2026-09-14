@@ -9,6 +9,7 @@
 void CombatSystem::displayBattle() {
     if (headless) return; // 无交互模式：不渲染
     console::clearScreen();
+    console::setColor(7); // 重置为默认色，避免被之前剧情播放的颜色染色
     console::setCursorVisible(false);  // 渲染期间隐藏光标
 
     // 每行补空格到固定宽度，覆盖旧内容残留
