@@ -89,4 +89,14 @@ private:
     // AI 决策
     SkillBase* chooseAISkill(Combatant* ai);
     Combatant* chooseAITarget(Combatant* ai, const std::vector<Combatant*>& potentialTargets);
+
+    // ===== 菜单 / 目标选择 / 状态显示辅助（私有静态成员，便于按职责拆分到不同 .cpp）=====
+    static int readMenuChoice(int min, int max, bool allowBack = false);
+    static SkillBase* selectSkill(Combatant* actor);
+    static Combatant* selectTarget(const std::vector<Combatant*>& candidates, const std::string& prompt);
+    static std::vector<Combatant*> buildSkillTargets(const std::vector<Combatant*>& allies,
+                                                     const std::vector<Combatant*>& enemies,
+                                                     SkillBase* skill);
+    static const char* statusName(StatusEffect e);
+    static int defaultStatusDuration(StatusEffect e);
 };
