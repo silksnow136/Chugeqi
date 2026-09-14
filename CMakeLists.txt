@@ -18,11 +18,17 @@ add_executable(Chugeqi
     src/story/map.cpp
     src/story/MapGrid.cpp
     src/story/SceneMap.cpp
+    src/story/MapLayouts.cpp
+    src/story/backpack.cpp
+    src/story/SideQuest.cpp
     src/story/PharManager.cpp
     # 战斗系统（combat）
     src/combat/battleLog.cpp
     src/combat/character.cpp
     src/combat/combatSystem.cpp
+    src/combat/combatSystemUI.cpp
+    src/combat/combatSystemTurns.cpp
+    src/combat/combatSystemActions.cpp
     src/combat/item.cpp
     src/combat/skill.cpp
     src/data/saveManager.cpp
@@ -38,6 +44,9 @@ add_executable(combatTest
     src/combat/battleLog.cpp
     src/combat/character.cpp
     src/combat/combatSystem.cpp
+    src/combat/combatSystemUI.cpp
+    src/combat/combatSystemTurns.cpp
+    src/combat/combatSystemActions.cpp
     src/combat/item.cpp
     src/combat/skill.cpp
     src/data/saveManager.cpp

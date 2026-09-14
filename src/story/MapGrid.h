@@ -14,8 +14,6 @@
 #include <vector>
 #include <string>
 #include <functional>
-#include "combat/character.h"
-#include "combat/item.h"
 
 enum class TileType {
     EMPTY,      // 可通行空地（空格）
@@ -59,11 +57,7 @@ public:
     void render() const;
 
     // WASD 移动
-    bool move(char direction);
-
-    // 获取交互类型和名称
-    TileType getInteractionType() const { return interactionType; }
-    const std::string& getInteractionName() const { return interactionName; }
+    void move(char direction);
 
     int getPlayerRow() const { return playerRow; }
     int getPlayerCol() const { return playerCol; }
@@ -83,23 +77,15 @@ public:
     // 放置水域（横向 length 格）
     void buildWater(int r, int c, int length);
 
-    // 建造传送门（条状，连接地图）：文字提示「去<dest><箭头>」，dest 最多 3 个汉字。
+    // 建造传送门（条状，连接地图）：文字提示「去<dest><箭头>」，dest 存完整目标名。
     // dir 决定箭头指向与条延伸方向；length<=0 时取最小长度（刚好完整显示文字）。
     void buildPortal(int r, int c, PortalDir dir, const std::string& dest, int length = 0);
 
-    // 交互回调
-    std::function<void(const std::string&)> onTalk;
-    std::function<void(const std::string&)> onBattle;
-    std::function<void(const std::string&)> onPharmacy;
-    std::function<void(const std::string&)> onItem;
-    std::function<void(const std::string&)> onAdvance;   // 幕次跳转
-    // 传送门（目标地名, 传送门方向），返回 false 可阻止传送
-    std::function<bool(const std::string&, int)> onPortal;
+    // 交互回调：玩家踩上不可通行格（友方/敌方/药店/物品/跳转点/传送门）时触发
+    std::function<void(TileType, const std::string&)> onInteract;
 
-    // 跳转回调是否已触发（用于通知外部循环退出）
+    // 结果标志：由调用方在 onInteract 内设置（跳幕 / 传送）
     bool advanceTriggered = false;
-
-    // 传送是否触发 / 目标地图（回调内可置 false 阻止传送）
     bool portalTriggered = false;
     std::string portalTarget;
 
@@ -107,35 +93,9 @@ private:
     std::vector<std::vector<Tile>> grid;
     int playerRow = 1;
     int playerCol = 1;
-    TileType interactionType = TileType::EMPTY;
-    std::string interactionName;
 
     // 玩家脚下被覆盖的原始格子（门/空地等），离开时恢复
     Tile underPlayer{ "    ", TileType::EMPTY };
 
     bool isValid(int row, int col) const;
-    void triggerInteraction(TileType type, const std::string& name);
 };
-
-// =========================================================================
-// 通用交互工具（地图场景共用：背包界面/拾取/命令输入）
-// =========================================================================
-
-// 背包条目（分组显示用）
-struct BagEntry {
-    std::string itemId;
-    std::string name;
-    int count;
-    std::string category; // equipment 装备 / potion 药水 / material 材料
-    int slot;             // 装备槽位，非装备为 -1
-};
-
-// 按名称在物品池中查找物品（地图物品格常用中文名标注）
-const Item* findItemByName(const ItemPool& pool, const std::string& name);
-
-// 收集背包条目并按 装备->药水->材料 排序
-void collectBagEntries(Combatant* player, const ItemPool& pool, std::vector<BagEntry>& out);
-
-// 背包界面：显示当前装备与分类物品清单；
-// equip+编号 装配 / unequip+编号 卸下 / use+编号 使用药水；回车或ESC返回地图
-void showBackpack(Combatant* player, const ItemPool& pool);

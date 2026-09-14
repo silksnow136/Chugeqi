@@ -2,7 +2,6 @@
 // portalTestMain.cpp — 传送门地图链测试（二维网格）
 //
 // 6 张小型空地图排成 3 列 × 2 行，相邻地图用成对传送门连通（上下左右）。
-// 从某传送门出发，传送到目标地图后，玩家出现在对应（反向）传送门附近。
 // WASD 移动项羽，走向传送门传送到相邻地图，ESC 退出。
 // ---------------------------------------------------------------------------
 
@@ -26,32 +25,11 @@ static int mapIndexByName(const std::string& name) {
     return -1;
 }
 
-// 反向方向：Left<->Right、Up<->Down
-static int oppositeDir(int dir) {
-    switch (dir) {
-        case static_cast<int>(PortalDir::Left):  return static_cast<int>(PortalDir::Right);
-        case static_cast<int>(PortalDir::Right): return static_cast<int>(PortalDir::Left);
-        case static_cast<int>(PortalDir::Up):    return static_cast<int>(PortalDir::Down);
-        case static_cast<int>(PortalDir::Down):  return static_cast<int>(PortalDir::Up);
-    }
-    return -1;
-}
-
-static MapGrid buildMap(int index, int entryDir = -1) {
+static MapGrid buildMap(int index) {
     MapGrid grid(MAP_ROWS, MAP_COLS);
     int r = index / GRID_COLS;
     int c = index % GRID_COLS;
-
-    // 玩家出生点：按进入方向放在对应传送门内侧；默认地图中央
-    int pr = MAP_ROWS / 2, pc = MAP_COLS / 2;
-    switch (entryDir) {
-        case static_cast<int>(PortalDir::Left):  pr = MAP_ROWS / 2; pc = 3; break;
-        case static_cast<int>(PortalDir::Right): pr = MAP_ROWS / 2; pc = MAP_COLS - 4; break;
-        case static_cast<int>(PortalDir::Up):    pr = 3; pc = MAP_COLS / 2; break;
-        case static_cast<int>(PortalDir::Down):  pr = MAP_ROWS - 4; pc = MAP_COLS / 2; break;
-        default: break;
-    }
-    grid.setPlayer(pr, pc);
+    grid.setPlayer(MAP_ROWS / 2, MAP_COLS / 2);
 
     // 顶部地图名
     grid.setTile(1, MAP_COLS / 2, kMapNames[index], TileType::FRIEND, kMapNames[index]);
@@ -75,26 +53,23 @@ int main() {
     int cur = 0;
     MapGrid grid = buildMap(cur);
 
-    // 回调绑定（切换地图后重建 MapGrid，需重新绑定）
-    std::function<void()> bind;
-    bind = [&]() {
-        grid.onTalk = [&](const std::string& name) {
+    std::function<void(TileType, const std::string&)> interact;
+    interact = [&](TileType type, const std::string& name) {
+        if (type == TileType::FRIEND) {
             console::setColor(10);
             std::cout << "\n当前位于「" << name << "」。" << std::endl;
             console::setColor(7);
             console::pause();
-        };
-        grid.onPortal = [&](const std::string& name, int dir) -> bool {
+        } else if (type == TileType::PORTAL) {
             int target = mapIndexByName(name);
-            if (target < 0) return false;
+            if (target < 0) return;
             cur = target;
-            grid = buildMap(cur, oppositeDir(dir));
-            bind();
+            grid = buildMap(cur);
+            grid.onInteract = interact;
             grid.render();
-            return true;
-        };
+        }
     };
-    bind();
+    grid.onInteract = interact;
 
     grid.render();
     std::cout << "传送门测试 —— WASD 移动，走向传送门传送到相邻地图，ESC 退出" << std::endl;

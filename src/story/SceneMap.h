@@ -17,9 +17,6 @@ class SceneManager;
 
 namespace SceneMap {
 
-// 根据场景 id / 分支构建对应的网格地图（仅布局，不含交互回调）
-MapGrid buildSceneMap(int scene_id, int branch_id);
-
 // 运行场景地图的 WASD 交互循环，回调接入游戏系统
 // 返回 true 表示玩家正常退出（ESC），false 表示战斗失败等
 bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id);
