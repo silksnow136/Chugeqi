@@ -9,6 +9,22 @@
 #include <limits>
 #include <memory>
 
+namespace {
+// 计算 UTF-8 字符串的控制台显示宽度（中文/全角按 2 列，ASCII 按 1 列）
+// 用于退格/空格覆盖等光标操作，避免用字节数导致光标错位
+int displayWidth(const std::string& s) {
+	int width = 0;
+	for (size_t i = 0; i < s.size(); ) {
+		unsigned char c = static_cast<unsigned char>(s[i]);
+		if (c < 0x80)      { width += 1; i += 1; }
+		else if (c < 0xE0) { width += 2; i += 2; }
+		else if (c < 0xF0) { width += 2; i += 3; }
+		else               { width += 2; i += 4; }
+	}
+	return width;
+}
+}
+
 SceneManager::SceneManager(Game& game): game(game)
 {
 	current_scene_id = 0;//剧情初步存档,显示当前场景id
@@ -32,12 +48,14 @@ void SceneManager::changeAuto() {
 
 void SceneManager::deleteWords(string tip) {
 	// 以下是让提示【按任意键继续对话】消失
-	for (int i = 0; i < tip.length(); i++) {
+	// 用显示宽度（而非字节数）计算退格与空格，避免中文导致的错位/残留
+	int w = displayWidth(tip);
+	for (int i = 0; i < w; i++) {
 		cout << '\b'; // \b是退格符，循环提示长度的次数，使光标到达提示之前
 	}
 	// 用空格覆盖所有残留字符，再退回到行首
-	cout << string(tip.length(), ' ');
-	for (int i = 0; i < tip.length(); i++) {
+	cout << string(w, ' ');
+	for (int i = 0; i < w; i++) {
 		cout << '\b';
 	}
 }
