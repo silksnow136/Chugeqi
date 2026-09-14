@@ -5,6 +5,7 @@
 #include "combat/character.h"
 #include "combat/skill.h"
 #include "combat/item.h"
+#include "story/QuestState.h"
 
 // ---------------------------------------------------------------------------
 // 存档管理（JSON 文件）：维护我方角色的运行时状态 + 游戏进度元信息。
@@ -15,7 +16,9 @@
 //   文件结构：
 //   {
 //     "scene": 2, "branch": 1, "gold": 88,
-//     "party": [ { id, name, level, hp, sp, exp, str, mag, end, agi,
+//     "quest": { morale, q1, q2, q3, q3choice, deserters,
+//                deserterTalked[], yinlingUnlocked, guanyingDefeated, raincoatWarned },
+//     "party": [ { id, name, level, hp, sp, maxHp, maxSp, exp, str, mag, end, agi,
 //                  skills: [...], items: {...}, equip: {...} } ]
 //   }
 // ---------------------------------------------------------------------------
@@ -23,11 +26,12 @@ class SaveManager {
 public:
     static constexpr int SLOT_COUNT = 2;
 
-    // 存档元信息：剧情进度 / 第二幕分支 / 金币
+    // 存档元信息：剧情进度 / 第二幕分支 / 金币 / 支线进度
     struct Meta {
         int sceneId;
         int branchId;
         int gold;
+        QuestState quest;
         Meta() : sceneId(0), branchId(0), gold(0) {}
     };
 

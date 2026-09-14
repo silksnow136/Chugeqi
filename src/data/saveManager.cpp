@@ -43,6 +43,46 @@ std::string readFile(const std::string& path) {
     return ss.str();
 }
 
+// 支线任务进度序列化为 JSON 片段（不含外层花括号）
+std::string questToJson(const QuestState& q) {
+    std::string s;
+    s += "\"morale\": " + std::to_string(q.morale) + ", ";
+    s += "\"q1\": " + std::to_string(q.q1) + ", ";
+    s += "\"q2\": " + std::to_string(q.q2) + ", ";
+    s += "\"q3\": " + std::to_string(q.q3) + ", ";
+    s += "\"q3choice\": " + std::to_string(q.q3choice) + ", ";
+    s += "\"deserters\": " + std::to_string(q.deserters) + ", ";
+    s += "\"deserterTalked\": [";
+    for (int i = 0; i < 3; i++) {
+        if (i) s += ", ";
+        s += q.deserterTalked[i] ? "true" : "false";
+    }
+    s += "], ";
+    s += "\"yinlingUnlocked\": " + std::string(q.yinlingUnlocked ? "true" : "false") + ", ";
+    s += "\"guanyingDefeated\": " + std::string(q.guanyingDefeated ? "true" : "false") + ", ";
+    s += "\"raincoatWarned\": " + std::string(q.raincoatWarned ? "true" : "false");
+    return s;
+}
+
+// 从存档根节点恢复支线任务进度（旧存档无 quest 字段时保留默认值）
+void parseQuest(const json::Value& root, QuestState& q) {
+    if (!root.has("quest")) return;
+    const json::Value& j = root["quest"];
+    if (j.has("morale")) q.morale = j["morale"].asInt();
+    if (j.has("q1")) q.q1 = j["q1"].asInt();
+    if (j.has("q2")) q.q2 = j["q2"].asInt();
+    if (j.has("q3")) q.q3 = j["q3"].asInt();
+    if (j.has("q3choice")) q.q3choice = j["q3choice"].asInt();
+    if (j.has("deserters")) q.deserters = j["deserters"].asInt();
+    if (j.has("deserterTalked")) {
+        const json::Value& a = j["deserterTalked"];
+        for (size_t i = 0; i < 3 && i < a.size(); i++) q.deserterTalked[i] = a[i].asBool();
+    }
+    if (j.has("yinlingUnlocked")) q.yinlingUnlocked = j["yinlingUnlocked"].asBool();
+    if (j.has("guanyingDefeated")) q.guanyingDefeated = j["guanyingDefeated"].asBool();
+    if (j.has("raincoatWarned")) q.raincoatWarned = j["raincoatWarned"].asBool();
+}
+
 } // namespace
 
 SaveManager::SaveManager(const std::string& saveDir) : dir_(saveDir) {
@@ -88,6 +128,7 @@ void SaveManager::save(int slot, const std::vector<Combatant*>& party,
     j += "  \"scene\": " + std::to_string(meta.sceneId) + ",\n";
     j += "  \"branch\": " + std::to_string(meta.branchId) + ",\n";
     j += "  \"gold\": " + std::to_string(meta.gold) + ",\n";
+    j += "  \"quest\": { " + questToJson(meta.quest) + " },\n";
     j += "  \"party\": [\n";
 
     for (size_t i = 0; i < party.size(); i++) {
@@ -171,6 +212,7 @@ SaveManager::SaveData SaveManager::load(int slot, const SkillPool& skillPool,
     data.meta.sceneId = root["scene"].asInt();
     data.meta.branchId = root["branch"].asInt();
     data.meta.gold = root["gold"].asInt();
+    parseQuest(root, data.meta.quest);
 
     const json::Value& party = root["party"];
     for (size_t i = 0; i < party.size(); i++) {
