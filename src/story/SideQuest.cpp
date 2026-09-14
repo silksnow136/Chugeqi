@@ -25,10 +25,10 @@ static void talkQuest(Game& game, Combatant& player, QuestState& qs, const std::
             std::cout << "老兵：“逃兵们就在营外荒郊，已劝回 " << qs.deserters << "/3。”\n";
         } else if (qs.q1 == 2) {
             std::cout << "老兵：“三名弟兄都回来了！多谢大王！\n";
-            game.getGold() += 30;
+            game.getGold() += 50;
             player.addItem("herb_potion", 1);
             qs.morale += 15;
-            std::cout << "【奖励】金币 +30、伤药 ×1，军心 +15（当前军心 " << qs.morale << "）\n";
+            std::cout << "【奖励】金币 +50、伤药 ×1，军心 +15（当前军心 " << qs.morale << "）\n";
             qs.q1 = 3;
         } else {
             std::cout << "老兵：“军心已定，愿随大王死战！”\n";
@@ -46,10 +46,10 @@ static void talkQuest(Game& game, Combatant& player, QuestState& qs, const std::
             std::cout << "粮官：“南门外的汉军哨骑仍在游荡，请大王出手！”\n";
         } else if (qs.q2 == 2) {
             std::cout << "粮官：“哨骑已退！这是赏格，请大王收下。\n";
-            game.getGold() += 20;
-            player.addItem("iron_sword", 1);
+            game.getGold() += 40;
+            player.addItem("iron_armor", 1);
             qs.morale += 10;
-            std::cout << "【奖励】金币 +20、铁剑 ×1，军心 +10（当前军心 " << qs.morale << "）\n";
+            std::cout << "【奖励】金币 +40、铁甲 ×1，军心 +10（当前军心 " << qs.morale << "）\n";
             qs.q2 = 3;
         } else {
             std::cout << "粮官：“南门安宁，全赖大王。”\n";
@@ -62,8 +62,8 @@ static void talkQuest(Game& game, Combatant& player, QuestState& qs, const std::
         if (qs.q3 == 0) {
             std::cout << "粮仓官：“仓中余粮无多，请大王示下如何分配？”\n\n"
                          "  1. 优先士兵 —— 伤药×2，军心 +5\n"
-                         "  2. 优先战马 —— 草料×2，军心不变\n"
-                         "  3. 留存突围 —— 木炭×2，军心 -5\n"
+                         "  2. 优先战马 —— 金币 +40，军心不变\n"
+                         "  3. 留存突围 —— 伤药×3，军心 -5\n"
                          "\n请输入 1 / 2 / 3：";
             int key = console::readKey();
             if (key == '1') {
@@ -71,13 +71,13 @@ static void talkQuest(Game& game, Combatant& player, QuestState& qs, const std::
                 qs.morale += 5; qs.q3choice = 1;
                 std::cout << "\n【分配】粮草优先士兵，营中士气大振。\n";
             } else if (key == '2') {
-                player.addItem("fodder", 2);
+                game.getGold() += 40;
                 qs.q3choice = 2;
-                std::cout << "\n【分配】粮草优先战马，马匹膘壮。\n";
+                std::cout << "\n【分配】粮草优先战马，马匹膘壮，粮官折赏银钱。\n";
             } else if (key == '3') {
-                player.addItem("charcoal", 2);
+                player.addItem("herb_potion", 3);
                 qs.morale -= 5; qs.q3choice = 3;
-                std::cout << "\n【分配】粮草留存突围之用，士兵们略有微词。\n";
+                std::cout << "\n【分配】粮草留存突围之用，士兵们略有微词，然突围路上多了几份补给。\n";
             } else {
                 std::cout << "\n（未作分配）\n";
                 console::pause();
@@ -203,9 +203,9 @@ bool canEnterPortal(Combatant& player, QuestState& qs,
     if (mapName == "阴陵二" && dest == "阴陵三" &&
         player.getEquippedItemId(0) != "hr_raincoat" && !qs.raincoatWarned) {
         qs.raincoatWarned = true;
-        player.takeDamage(10);
+        player.takeDamage(30);
         console::setColor(12);
-        std::cout << "\n寒水刺骨，项羽损失 10 点生命（装备蓑衣可免）。当前 HP "
+        std::cout << "\n寒水刺骨，项羽损失 30 点生命（装备蓑衣可免）。当前 HP "
                   << player.getHP() << std::endl;
         console::setColor(7);
         console::pause();
@@ -220,12 +220,19 @@ void onEnterMap(QuestState& qs, const std::string& mapName) {
 
 std::string advanceNarration(const QuestState& qs, int sceneId) {
     if (sceneId != 1) return "";
+    std::string result;
+    // 军心整体基调：完成支线越多军心越高，突围旁白越昂扬
+    if (qs.morale >= 75)      result += "将士归心，八百骑同仇敌忾，突围之势锐不可当。";
+    else if (qs.morale >= 60) result += "军中士气尚可，突围时仍存死战之心。";
+    else                      result += "军心涣散，营中渐有离者，突围之路更显艰难。";
+    // 粮草分配（委托三）的差异化插话
     switch (qs.q3choice) {
-        case 1: return "营中士卒因多分粮草，突围时多有死战之士。";
-        case 2: return "战马食饱，乌骓嘶鸣，行军快了几分。";
-        case 3: return "留存的粮草支撑着这一路奔逃。";
-        default: return "";
+        case 1: result += "营中士卒因多分粮草，突围时多有死战之士。"; break;
+        case 2: result += "战马食饱，乌骓嘶鸣，行军快了几分。"; break;
+        case 3: result += "留存的粮草支撑着这一路奔逃。"; break;
+        default: break;
     }
+    return result;
 }
 
 } // namespace SideQuest

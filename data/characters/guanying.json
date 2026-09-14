@@ -2,15 +2,15 @@
   "name": "灌婴",
   "id": "guanying",
   "level": 3,
-  "hp": 180,
-  "sp": 40,
-  "maxHp": 180,
-  "maxSp": 40,
+  "hp": 360,
+  "sp": 60,
+  "maxHp": 360,
+  "maxSp": 60,
   "exp": 0,
   "baseStats": [
-    9,
-    8,
-    10
+    14,
+    12,
+    12
   ],
   "skills": [
     "cleave",
