@@ -48,24 +48,16 @@ static const char* portalArrow(PortalDir dir) {
     return arrows[static_cast<int>(dir)];
 }
 
-// 按 UTF-8 字符切分（首字节高位个数决定字符字节数）
-static std::vector<std::string> utf8Chars(const std::string& s) {
-    std::vector<std::string> out;
-    for (size_t i = 0; i < s.size(); ) {
-        unsigned char c = static_cast<unsigned char>(s[i]);
-        int len = 1 + (c >= 0x80) + (c >= 0xE0) + (c >= 0xF0);
-        out.push_back(s.substr(i, len));
-        i += len;
-    }
-    return out;
-}
-
 // 按显示宽度切分，每段 <= chunkWidth 列（不拆分多字节字符）
 static std::vector<std::string> splitByWidth(const std::string& s, int chunkWidth) {
     std::vector<std::string> out;
     std::string cur;
     int w = 0;
-    for (const auto& ch : utf8Chars(s)) {
+    for (size_t i = 0; i < s.size(); ) {
+        unsigned char c = static_cast<unsigned char>(s[i]);
+        int len = 1 + (c >= 0x80) + (c >= 0xE0) + (c >= 0xF0);
+        std::string ch = s.substr(i, len);
+        i += len;
         int cw = displayWidth(ch);
         if (w + cw > chunkWidth) { out.push_back(cur); cur = ch; w = cw; }
         else { cur += ch; w += cw; }
