@@ -7,6 +7,12 @@
   "maxHp": 140,
   "maxSp": 30,
   "exp": 0,
-  "baseStats": [8, 5, 7, 9],
-  "skills": ["thunder_crash"]
+  "baseStats": [
+    8,
+    7,
+    9
+  ],
+  "skills": [
+    "heavy_strike"
+  ]
 }

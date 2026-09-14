@@ -7,6 +7,12 @@
   "maxHp": 100,
   "maxSp": 25,
   "exp": 0,
-  "baseStats": [7, 6, 6, 8],
-  "skills": ["frost_arrow"]
+  "baseStats": [
+    7,
+    6,
+    8
+  ],
+  "skills": [
+    "fire_arrow"
+  ]
 }

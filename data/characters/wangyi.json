@@ -7,6 +7,13 @@
   "maxHp": 150,
   "maxSp": 35,
   "exp": 0,
-  "baseStats": [9, 5, 8, 10],
-  "skills": ["cleave", "frost_arrow"]
+  "baseStats": [
+    9,
+    8,
+    10
+  ],
+  "skills": [
+    "cleave",
+    "heavy_strike"
+  ]
 }

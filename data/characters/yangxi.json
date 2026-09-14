@@ -1,12 +1,18 @@
 {
-	"name": "杨喜",
-	"id": "yangxi",
-	"level": 3,
-	"hp": 110,
-	"sp": 30,
-	"maxHp": 110,
-	"maxSp": 30,
-	"exp": 0,
-	"baseStats": [ 8, 5, 7, 9 ],
-	"skills": [ "thunder_crash" ]
+  "name": "杨喜",
+  "id": "yangxi",
+  "level": 3,
+  "hp": 110,
+  "sp": 30,
+  "maxHp": 110,
+  "maxSp": 30,
+  "exp": 0,
+  "baseStats": [
+    8,
+    7,
+    9
+  ],
+  "skills": [
+    "heavy_strike"
+  ]
 }

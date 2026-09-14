@@ -1,12 +1,19 @@
 {
-	"name": "王翦",
-	"id": "wangjian",
-	"level": 2,
-	"hp": 130,
-	"sp": 40,
-	"maxHp": 130,
-	"maxSp": 40,
-	"exp": 0,
-	"baseStats": [ 9, 7, 7, 8 ],
-	"skills": [ "cleave", "thunder_crash" ]
+  "name": "王翦",
+  "id": "wangjian",
+  "level": 2,
+  "hp": 130,
+  "sp": 40,
+  "maxHp": 130,
+  "maxSp": 40,
+  "exp": 0,
+  "baseStats": [
+    9,
+    7,
+    8
+  ],
+  "skills": [
+    "cleave",
+    "heavy_strike"
+  ]
 }

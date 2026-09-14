@@ -7,6 +7,10 @@
   "maxHp": 60,
   "maxSp": 10,
   "exp": 0,
-  "baseStats": [5, 3, 4, 6],
+  "baseStats": [
+    5,
+    4,
+    6
+  ],
   "skills": []
 }

@@ -7,6 +7,12 @@
   "maxHp": 100,
   "maxSp": 20,
   "exp": 0,
-  "baseStats": [7, 3, 5, 8],
-  "skills": ["fireball"]
+  "baseStats": [
+    7,
+    5,
+    8
+  ],
+  "skills": [
+    "fire_arrow"
+  ]
 }

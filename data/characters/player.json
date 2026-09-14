@@ -7,8 +7,16 @@
   "maxHp": 100,
   "maxSp": 50,
   "exp": 0,
-  "baseStats": [10, 5, 8, 12],
-  "skills": ["overlord_slash", "cleave", "charge_boost"],
+  "baseStats": [
+    10,
+    8,
+    12
+  ],
+  "skills": [
+    "overlord_slash",
+    "cleave",
+    "heavy_strike"
+  ],
   "inventory": {
     "herb_potion": 2,
     "iron_sword": 1
