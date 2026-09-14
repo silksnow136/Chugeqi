@@ -19,6 +19,7 @@ struct QuestState {
     int q3choice = 0;         // 1=优先士兵 2=优先战马 3=留存突围
     int deserters = 0;        // 已劝回逃兵数（0~3）
     bool deserterTalked[3] = { false, false, false };
+    bool wildUnlocked = false; // 老兵对话后开启北门「营外荒郊」传送门
 
     // ===== 支线二 =====
     bool yinlingUnlocked = false;  // 田夫指路后开启阴陵入口

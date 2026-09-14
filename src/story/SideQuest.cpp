@@ -21,6 +21,10 @@ static void talkQuest(Game& game, Combatant& player, QuestState& qs, const std::
                          "        他们就在营外荒郊，求大王把他们劝回来！”\n";
             std::cout << "\n【接受委托】寻回逃兵（0/3）—— 从北门白色传送门进入荒郊\n";
             qs.q1 = 1;
+            qs.wildUnlocked = true;
+            console::setColor(14);
+            std::cout << "\n北门传送门已开启（白色传送门 ↑）。\n";
+            console::setColor(7);
         } else if (qs.q1 == 1) {
             std::cout << "老兵：“逃兵们就在营外荒郊，已劝回 " << qs.deserters << "/3。”\n";
         } else if (qs.q1 == 2) {
@@ -183,6 +187,14 @@ void onBattleWon(QuestState& qs, const std::string& mapName, const std::string& 
 
 bool canEnterPortal(Combatant& player, QuestState& qs,
                     const std::string& mapName, const std::string& dest) {
+    // 支线一：营外荒郊入口需先与老兵对话
+    if (mapName == "垓下营地" && dest == "营外荒郊" && !qs.wildUnlocked) {
+        console::setColor(14);
+        std::cout << "\n北门外荒草丛生，似乎无路……先找营中的「老兵」问问吧。" << std::endl;
+        console::setColor(7);
+        console::pause();
+        return false;
+    }
     // 支线二：阴陵入口需田夫指路
     if (mapName == "淮河" && dest == "阴陵一" && !qs.yinlingUnlocked) {
         console::setColor(14);

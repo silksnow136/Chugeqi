@@ -39,6 +39,7 @@ void parseQuest(const json::Value& root, QuestState& q) {
         const json::Value& a = j["deserterTalked"];
         for (size_t i = 0; i < 3 && i < a.size(); i++) q.deserterTalked[i] = a[i].asBool();
     }
+    if (j.has("wildUnlocked")) q.wildUnlocked = j["wildUnlocked"].asBool();
     if (j.has("yinlingUnlocked")) q.yinlingUnlocked = j["yinlingUnlocked"].asBool();
     if (j.has("guanyingDefeated")) q.guanyingDefeated = j["guanyingDefeated"].asBool();
     if (j.has("raincoatWarned")) q.raincoatWarned = j["raincoatWarned"].asBool();
@@ -106,6 +107,7 @@ void SaveManager::save(int slot, const std::vector<Combatant*>& party,
     for (int i = 0; i < 3; i++) talked.push(q.deserterTalked[i]);
     quest.set("deserterTalked", talked);
     quest.set("yinlingUnlocked", q.yinlingUnlocked);
+    quest.set("wildUnlocked", q.wildUnlocked);
     quest.set("guanyingDefeated", q.guanyingDefeated);
     quest.set("raincoatWarned", q.raincoatWarned);
     root.set("quest", quest);

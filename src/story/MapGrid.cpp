@@ -42,6 +42,17 @@ static std::string padToWidth(const std::string& s, int targetWidth) {
     return s + std::string(targetWidth - dw, ' ');
 }
 
+// 返回颜色的 ANSI 转义序列（用于把整幅地图累积成单个字符串一次性输出，
+// 避免逐格 write 在慢终端上导致一行一行缓慢绘制）
+static std::string ansiColor(int code) {
+    static const char* fg[] = {
+        "30","34","32","36","31","35","33","37",
+        "90","94","92","96","91","95","93","97"
+    };
+    if (code < 0 || code > 15) return "";
+    return std::string("\033[") + fg[code] + "m";
+}
+
 // 箭头字符（顺序与 PortalDir 枚举一致：Left/Up/Right/Down）
 static const char* portalArrow(PortalDir dir) {
     static const char* arrows[] = { "←", "↑", "→", "↓" };
@@ -232,50 +243,47 @@ void MapGrid::render() const {
     console::clearScreen();
     console::setCursorVisible(false);
 
+    // 将整幅地图累积成单个字符串后一次性输出，避免逐格 write 在慢终端上
+    // 导致一行一行缓慢绘制
+    std::string out;
+    out.reserve(grid.size() * grid[0].size() * 6 + 256);
+
     // 标题
-    console::setColor(14);
-    std::cout << "========== 场景地图 ==========" << std::endl;
-    console::setColor(7);
+    out += ansiColor(14);
+    out += "========== 场景地图 ==========\n";
+    out += ansiColor(7);
 
     // 地图各行
     for (const auto& row : grid) {
         for (const auto& tile : row) {
+            int c = 7;
             switch (tile.type) {
-                case TileType::WALL:
-                    console::setColor(8);  break;
-                case TileType::PLAYER:
-                    console::setColor(12); break;
-                case TileType::FRIEND:
-                    console::setColor(10); break;
-                case TileType::ENEMY:
-                    console::setColor(12); break;
-                case TileType::PHARMACY:
-                    console::setColor(11); break;
-                case TileType::DOOR:
-                    console::setColor(14); break;
-                case TileType::ITEM:
-                    console::setColor(14); break;
-                case TileType::ADVANCE:
-                    console::setColor(13); break;  // 跳转点=紫色高亮
-                case TileType::PORTAL:
-                    console::setColor(11); break;  // 传送门=青色高亮
-                default:
-                    console::setColor(7);  break;
+                case TileType::WALL:     c = 8;  break;
+                case TileType::PLAYER:   c = 12; break;
+                case TileType::FRIEND:   c = 10; break;
+                case TileType::ENEMY:    c = 12; break;
+                case TileType::PHARMACY: c = 11; break;
+                case TileType::DOOR:     c = 14; break;
+                case TileType::ITEM:     c = 14; break;
+                case TileType::ADVANCE:  c = 13; break;  // 跳转点=紫色高亮
+                case TileType::PORTAL:   c = 11; break;  // 传送门=青色高亮
+                default:                 c = 7;  break;
             }
-            std::cout << padToWidth(tile.display, CELL_WIDTH);
+            out += ansiColor(c);
+            out += padToWidth(tile.display, CELL_WIDTH);
         }
-        std::cout << "  \n"; // 行尾补空格防残留
+        out += "  \n"; // 行尾补空格防残留
     }
 
-    console::setColor(14);
-    std::cout << "-------------------------------" << std::endl;
+    out += ansiColor(14);
+    out += "-------------------------------\n";
     // 图例：直接染色，去掉“（绿）/（红）”等颜色文字
-    auto legend = [](int color, const std::string& word, const std::string& meaning, bool last = false) {
-        console::setColor(color);
-        std::cout << word;
-        console::setColor(7);
-        std::cout << "→" << meaning;
-        if (!last) std::cout << "  ";
+    auto legend = [&out](int color, const std::string& word, const std::string& meaning, bool last = false) {
+        out += ansiColor(color);
+        out += word;
+        out += ansiColor(7);
+        out += "→" + meaning;
+        if (!last) out += "  ";
     };
     legend(12, "项羽", "玩家");
     legend(10, "友方", "对话");
@@ -284,13 +292,14 @@ void MapGrid::render() const {
     legend(13, "帅帐", "下一幕");
     legend(14, "门", "通行");
     legend(11, "传送门", "切换地图");
-    console::setColor(8);
-    std::cout << "█";
-    console::setColor(7);
-    std::cout << "=墙" << std::endl;
-    std::cout << "B=背包与属性  E=存读档" << std::endl;
-    std::cout << "> ";
+    out += ansiColor(8);
+    out += "█";
+    out += ansiColor(7);
+    out += "=墙\n";
+    out += "B=背包与属性  E=存读档\n";
+    out += "> ";
 
+    std::cout << out; // 一次性输出整个画面
     console::setCursorVisible(true);
     console::clearToEnd();  // 清掉交互后残留的对话文字
 }
