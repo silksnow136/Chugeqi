@@ -1,5 +1,30 @@
 #include "console.h"
 
+namespace console {
+// 计算 UTF-8 字符串的控制台显示宽度：
+//   ASCII 1 列，箭头(0x2190~0x2193)与制表符(0x2500~0x259F) 1 列，
+//   其余 CJK/全角字符 2 列。用于退格、补空格、按宽度换行等光标操作。
+int displayWidth(const std::string& s) {
+    int width = 0;
+    for (size_t i = 0; i < s.size(); ) {
+        unsigned char c = static_cast<unsigned char>(s[i]);
+        if (c < 0x80) { width += 1; i += 1; }
+        else if (c < 0xC0) { i += 1; }  // UTF-8 续字节，跳过
+        else if (c < 0xE0) { width += 1; i += 2; }
+        else if (c < 0xF0) {
+            i += 3;
+            unsigned cp = ((c & 0x0F) << 12) |
+                          ((static_cast<unsigned char>(s[i-2]) & 0x3F) << 6) |
+                          (static_cast<unsigned char>(s[i-1]) & 0x3F);
+            width += (cp >= 0x2190 && cp <= 0x2193) ? 1 :
+                     (cp >= 0x2500 && cp <= 0x259F) ? 1 : 2;
+        }
+        else { width += 2; i += 4; }
+    }
+    return width;
+}
+} // namespace console
+
 #if defined(_WIN32)
 #include <conio.h>
 #include <windows.h>

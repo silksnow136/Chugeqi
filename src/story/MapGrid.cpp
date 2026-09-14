@@ -15,29 +15,8 @@ static const std::string FENCE_DISP = "####";       // 栅栏
 static const std::string CHEVAL_DISP = "╳╳╳╳";      // 拒马
 static const std::string WATER_DISP = "~~~~";      // 水域
 
-// 计算 UTF-8 字符串的控制台显示宽度
-static int displayWidth(const std::string& s) {
-    int width = 0;
-    for (size_t i = 0; i < s.size(); ) {
-        unsigned char c = static_cast<unsigned char>(s[i]);
-        if (c < 0x80)        { width += 1; i += 1; }
-        else if (c < 0xC0)   { i += 1; }
-        else if (c < 0xE0)   { width += 1; i += 2; }
-        else if (c < 0xF0)   {
-            i += 3;
-            unsigned cp = ((c & 0x0F) << 12) |
-                          ((static_cast<unsigned char>(s[i-2]) & 0x3F) << 6) |
-                          (static_cast<unsigned char>(s[i-1]) & 0x3F);
-            width += (cp >= 0x2190 && cp <= 0x2193) ? 1 :
-                     (cp >= 0x2500 && cp <= 0x259F) ? 1 : 2;
-        }
-        else                 { width += 2; i += 4; }
-    }
-    return width;
-}
-
 static std::string padToWidth(const std::string& s, int targetWidth) {
-    int dw = displayWidth(s);
+    int dw = console::displayWidth(s);
     if (dw >= targetWidth) return s;
     return s + std::string(targetWidth - dw, ' ');
 }
@@ -69,7 +48,7 @@ static std::vector<std::string> splitByWidth(const std::string& s, int chunkWidt
         int len = 1 + (c >= 0x80) + (c >= 0xE0) + (c >= 0xF0);
         std::string ch = s.substr(i, len);
         i += len;
-        int cw = displayWidth(ch);
+        int cw = console::displayWidth(ch);
         if (w + cw > chunkWidth) { out.push_back(cur); cur = ch; w = cw; }
         else { cur += ch; w += cw; }
     }

@@ -25,6 +25,12 @@ namespace console {
     void setCursorVisible(bool visible); // 显示/隐藏光标（渲染时隐藏，防光标乱闪）
     void clearToEnd(); // 清光标到屏幕底（覆盖重绘后清掉尾部残留）
 
+    // 计算 UTF-8 字符串的控制台显示宽度：
+    //   ASCII 1 列，箭头(0x2190~0x2193)与制表符(0x2500~0x259F) 1 列，
+    //   其余 CJK/全角字符 2 列。用于退格、补空格、按宽度换行等光标操作，
+    //   避免用字节数导致光标错位。
+    int displayWidth(const std::string& s);
+
     // 终端模式切换（Linux 有效，Windows 空实现）
     // 语义：readKey/kbhit 会进入 raw 模式；若调用前已是 raw（如 printWords 主动
     // 持有 raw），则读完后不恢复，交由外层统一恢复，从而在整个输出期间吞掉按键。
