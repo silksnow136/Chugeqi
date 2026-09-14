@@ -16,7 +16,7 @@ SceneManager::SceneManager(Game& game): game(game)
 	autoPlay = false;//判断是否自动播放剧情
 
 	// 启动时载入剧情数据（仅一次）
-	scenes = DataLoader::loadStory("data/story.json").scenes;
+	scenes = DataLoader::loadStory("data/story/story.json").scenes;
 
 	talkManager.setSceneManager(this);
 }
@@ -289,7 +289,7 @@ bool SceneManager::startStoryBattle(const std::string& battleId)
 		return true;
 	}
 
-	std::string battlePath = "data/battle_" + battleId + ".json";
+	std::string battlePath = "data/battles/battle_" + battleId + ".json";
 
 	try {
 		Battle battle = DataLoader::loadBattle(
@@ -300,6 +300,10 @@ bool SceneManager::startStoryBattle(const std::string& battleId)
 		Combatant* player = &game.getPlayer();
 
 		std::vector<Combatant*> companions;
+		if (Combatant* c = game.getCompanion(); c != nullptr && c->isAlive()) {
+			companions.push_back(c);
+		}
+
 		std::vector<Combatant*> enemies;
 
 		for (auto& enemy : battle.enemies) {

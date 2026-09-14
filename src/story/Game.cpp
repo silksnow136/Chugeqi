@@ -14,10 +14,15 @@ void Game::run() {
 }
 
 void Game::initialize() {
-	gameData = DataLoader::loadGameData("data/");
+	gameData = DataLoader::loadGameData("data/core/");
 
 	player = DataLoader::loadCombatant(
-		"data/player.json",
+		"data/characters/player.json",
+		gameData.skillPool
+	);
+
+	companion = DataLoader::loadCombatant(
+		"data/characters/companion.json",
 		gameData.skillPool
 	);
 
@@ -87,6 +92,11 @@ Combatant& Game::getPlayer()
 	return *player;
 }
 
+Combatant* Game::getCompanion()
+{
+	return companion.get();
+}
+
 ItemPool& Game::getItemPool()
 {
 	return gameData.itemPool;
@@ -107,14 +117,16 @@ void Game::doSave(int slot)
 	try {
 		SaveManager save("saves");
 
-		// 队伍（当前仅主角；同伴由战斗系统另行管理）
+		// 队伍（主角 + 同伴）
 		std::vector<Combatant*> party{ player.get() };
+		if (companion) party.push_back(companion.get());
 
-		// 元信息：剧情进度 / 分支 / 金币
+		// 元信息：剧情进度 / 分支 / 金币 / 支线进度
 		SaveManager::Meta meta;
 		meta.sceneId = sceneManager.showScene_id();
 		meta.branchId = sceneManager.showBranch_id();
 		meta.gold = gold;
+		meta.quest = sceneManager.getQuestState();
 
 		save.save(slot, party, gameData.skillPool, meta);
 
@@ -140,9 +152,11 @@ void Game::doLoad(int slot)
 			return;
 		}
 		player = std::move(data.party[0]); // 主角
+		if (data.party.size() > 1) companion = std::move(data.party[1]); // 同伴（旧存档无同伴则保留初始模板）
 
 		gold = data.meta.gold;
 		scene_id = data.meta.sceneId;
+		sceneManager.getQuestState() = data.meta.quest;
 
 		cout << "已读取存档位 " << slot << "。" << "\n";
 		sceneManager.ShowBackground(scene_id);

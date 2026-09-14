@@ -16,7 +16,21 @@
 
 namespace SceneMap {
 
-// 地图遭遇战：复用 battle_test.json，返回是否胜利
+// 按 NPC 名称匹配对应战斗配置（普通汉军兜底）
+static const char* battleFileForEnemy(const std::string& npc) {
+    if (npc == "汉军哨骑") return "data/battles/battle_sentinel.json";
+    if (npc == "汉军铁骑") return "data/battles/battle_iron_cavalry.json";
+    if (npc == "汉军斥候") return "data/battles/battle_scout.json";
+    if (npc == "灌婴")     return "data/battles/battle_guanying.json";
+    if (npc == "杨喜")     return "data/battles/battle_yangxi.json";
+    if (npc == "王翳")     return "data/battles/battle_wangyi.json";
+    if (npc == "吕胜")     return "data/battles/battle_lvsheng.json";
+    if (npc == "赤侯")     return "data/battles/battle_chihou.json";
+    if (npc == "吕马童")   return "data/battles/battle_lvmatong.json";
+    return "data/battles/battle_han_soldier.json";
+}
+
+// 地图遭遇战：按 NPC 名加载对应战斗配置，返回是否胜利
 static bool runBattle(Game& game, Combatant& player, const std::string& enemyName) {
     console::clearScreen();
     console::setColor(12);
@@ -26,10 +40,13 @@ static bool runBattle(Game& game, Combatant& player, const std::string& enemyNam
 
     bool won = false;
     try {
-        Battle battle = DataLoader::loadBattle("data/battle_test.json", game.getGameData());
+        Battle battle = DataLoader::loadBattle(battleFileForEnemy(enemyName), game.getGameData());
 
         Combatant* p = &player;
-        std::vector<Combatant*> companions;  // 地图遭遇战不带同伴
+        std::vector<Combatant*> companions;
+        if (Combatant* c = game.getCompanion(); c != nullptr && c->isAlive()) {
+            companions.push_back(c);
+        }
         std::vector<Combatant*> enemies;
         for (const auto& e : battle.enemies) enemies.push_back(e.get());
 

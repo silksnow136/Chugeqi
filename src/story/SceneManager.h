@@ -65,7 +65,7 @@ private:
 	// 是否自动播放剧情
 	bool autoPlay = false;
 
-	// 剧情数据（构造时从 data/story.json 载入一次）
+	// 剧情数据（构造时从 data/story/story.json 载入一次）
 	std::vector<Scene> scenes;
 
 	// 播放叙事行 / 分支选择

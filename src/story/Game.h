@@ -16,6 +16,9 @@ public:
     // 玩家
     Combatant& getPlayer();
 
+    // 同伴（钟离昧等，可能为空）
+    Combatant* getCompanion();
+
     // 药店需要
     ItemPool& getItemPool();
     int& getGold();
@@ -49,6 +52,9 @@ private:
 
     // 当前玩家
     std::unique_ptr<Combatant> player;
+
+    // 同伴（随队出战，读档时可能为空）
+    std::unique_ptr<Combatant> companion;
 
     // 当前金币
     int gold = 100;
