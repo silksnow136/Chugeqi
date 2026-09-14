@@ -14,24 +14,20 @@ public:
 
     void setSceneManager(SceneManager* manager);
 
-    // 外部直接播放指定人物对话（不刷新场景地图，供地图移动交互调用）
-    void talkCharacterExternal(int scene_id, int character_id, int branch_id);
+    // 按 NPC 名播放 talk.json 中的人物对话；返回是否找到（未找到则走简单对话）
+    bool talkCharacterExternal(int scene_id, const string& name, int branch_id);
 
-    // 从 JSON 读取对话
-    void loadDialogue(
-        int scene_id,
-        int branch_id,
-        int character_id
-    );
+    // 简单对话（talk.json 的 "simple" 表，供未接入主对话的 NPC）
+    void playSimpleTalk(const string& name);
 
     // 播放一句对话
-    void playDialogue(
-        std::string speaker,
-        std::string text
-    );
+    void playDialogue(string speaker, string text);
 
     //打印返回文字
     void waitForReturn();
 private:
+    // 从 talk.json 按人物名读取并播放对话，返回是否找到
+    bool loadDialogue(int scene_id, int branch_id, const string& name);
+
     SceneManager* sceneManager = nullptr;
 };
