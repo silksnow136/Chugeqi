@@ -29,7 +29,7 @@
 
 ```
 Chugeqi/
-├── CMakeLists.txt            # 构建配置（3 个目标）
+├── CMakeLists.txt            # 构建配置（4 个目标）
 ├── README.md                 # 本文件
 ├── 开发日志.md               # 开发进度与实现细节
 ├── data/                     # JSON 数据（静态模板，按用途分类）
@@ -61,7 +61,8 @@ Chugeqi/
 │   │   ├── skill.h/.cpp              # 技能（伤害/治疗）
 │   │   ├── item.h/.cpp               # 物品（消耗品/装备）
 │   │   ├── battleLog.h/.cpp          # 战斗日志
-│   │   └── combatTestMain.cpp        # 战斗测试入口
+│   │   ├── combatTestMain.cpp        # 战斗测试入口
+│   │   └── battleSimMain.cpp         # 战斗模拟器入口（无交互，量化难度）
 │   └── story/                # 剧情 / 场景
 │       ├── Game.h/.cpp              # 游戏外壳（主循环/指令/存读档）
 │       ├── SceneManager.h/.cpp      # 剧情播放/幕次跳转/战斗接入
@@ -113,13 +114,14 @@ cmake --build build
 > Linux 下可执行文件无扩展名，产物在 `build/` 目录（如 `build/Chugeqi`）。
 > 在项目根目录运行，程序会加载 `data/` 下的数据（构建后 CMake 也会自动把 `data/` 复制到 `build/`）。
 
-三个可执行目标：
+四个可执行目标：
 
 | 目标 | 入口 | 说明 |
 |------|------|------|
 | `Chugeqi` | `src/main.cpp` | 主游戏：三幕剧情 + 战斗 + 地图交互 + 支线 |
 | `combatTest` | `src/combat/combatTestMain.cpp` | 战斗测试：回合制战斗 |
 | `portalTest` | `src/story/portalTestMain.cpp` | 传送门地图链测试（6 张地图上下左右互通） |
+| `battleSim` | `src/combat/battleSimMain.cpp` | 无交互战斗模拟器（双方 AI 托管，量化难度） |
 
 CMake 会在构建后自动把 `data/` 复制到各可执行文件同目录。
 
@@ -130,6 +132,7 @@ cd build\Release
 .\Chugeqi.exe       # 跑剧情
 .\combatTest.exe    # 跑战斗测试
 .\portalTest.exe    # 跑传送门地图链测试
+.\battleSim.exe     # 跑战斗模拟器（battleSim <battleId> [level]）
 ```
 
 Linux 运行：
@@ -138,6 +141,7 @@ Linux 运行：
 ./build/Chugeqi     # 跑剧情
 ./build/combatTest  # 跑战斗测试
 ./build/portalTest  # 跑传送门地图链测试
+./build/battleSim   # 跑战斗模拟器（battleSim <battleId> [level]）
 ```
 
 ---
@@ -156,13 +160,13 @@ Linux 运行：
 - **装备**：两槽位（防具/武器）装配/卸下，属性加成叠加进 `getEffectiveStat`。
 - **物品**：消耗品（回 HP/SP）、装备、材料三类，从 `item.json` 加载；背包界面（`backpack`）可装配/卸下/使用/查看属性。
 - **药店**：金币购买、使用药品、查看背包（`PharManager`）。
-- **网格地图**：`MapGrid` 支持 WASD 移动、边界/碰撞检测、按格子类型触发交互（对话/战斗/药店/拾取/门/幕次跳转/传送门）、拟物建造（房间/栅栏/拒马/水域/传送门）、光标定位渲染防闪烁。
+- **网格地图**：`MapGrid` 支持 WASD 移动、边界/碰撞检测、按格子类型触发交互（对话/战斗/药店/拾取/门/幕次跳转/传送门）、拟物建造（房间/栅栏/拒马/水域/传送门）、整幅累积成单字符串一次性输出防闪烁。
 - **地图接入主游戏**：`SceneMap` + `MapLayouts` 将两幕地图接入主流程，含 `ADVANCE` 幕次跳转（帅帐/北渡）；地图内 `B` 背包、`E` 存读档、`ESC` 退出；遇敌按 NPC 名匹配对应 `battle_*.json`。
 - **传送门地图链**：`PORTAL` 格 + `buildPortal` 支持上下左右链式传送，衔接子地图（营外荒郊 / 阴陵一/二/三），进入点与返回点成对；往返传送不刷新已击败的敌人与已拾取的道具。
 - **支线任务**（`SideQuest` + `QuestState`）：
-  - 支线一「收拢军心」（第一幕）：老兵寻回逃兵、粮官巡南门、粮仓分配粮草，影响军心值与突围旁白。
+  - 支线一「收拢军心」（第一幕）：老兵寻回逃兵（北门「营外荒郊」传送门需先与老兵对话解锁）、粮官巡南门、粮仓分配粮草，影响军心值与突围旁白。
   - 支线二「阴陵迷境」（第二幕）：田夫解锁入口、渡河图显浅滩、蓑衣避寒水、击败灌婴 BOSS 开启归路。
-- **存档**：JSON 双槽位（`saves/save_1.json`、`save_2.json`），持久化队伍状态（HP/SP/maxHP/maxSP/等级/经验/技能/背包/装备）+ 剧情进度（scene/branch/gold）+ 支线进度（`quest`：军心/委托/阴陵 flag）+ 地图状态（`world`：当前地图/玩家坐标/已清除格子），提供存读档界面（覆盖需确认）；读档时若位于地图内则直接恢复进地图，跳过幕次剧情。
+- **存档**：JSON 双槽位（`saves/save_1.json`、`save_2.json`），持久化队伍状态（HP/SP/maxHP/maxSP/等级/经验/技能/背包/装备）+ 剧情进度（scene/branch/gold）+ 支线进度（`quest`：军心/委托/北门·阴陵解锁 flag）+ 地图状态（`world`：当前地图/玩家坐标/已清除格子），提供存读档界面（覆盖需确认）；读档时若位于地图内则直接恢复进地图，跳过幕次剧情。
 - **平台抽象**：`console` 12 个函数（`init`/`clearScreen`/`readKey`/`pause`/`setColor`/`sleep`/`kbhit`/`setCursorVisible`/`clearToEnd`/`enterRaw`/`drainInput`/`readLine`），Windows / Linux 双端。
 
 ### 未实现 / 待办
