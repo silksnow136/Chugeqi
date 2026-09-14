@@ -1,9 +1,0 @@
-{
-    "name": "遭遇赤侯",
-    "first_side": "player",
-    "disable_run": false,
-    "disable_items": false,
-    "enemies_ref": [
-        "../characters/chihou.json"
-    ]
-}

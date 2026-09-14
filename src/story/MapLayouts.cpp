@@ -248,8 +248,8 @@ static void buildDongcheng(MapGrid& grid) {
     grid.setTile(1, 14, "汉骑", TileType::ENEMY, "汉军");
     grid.setTile(1, 20, "汉骑", TileType::ENEMY, "汉军");
     grid.setTile(1, 21, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(2, 8, "杨喜", TileType::ENEMY, "杨喜");
-    grid.setTile(2, 18, "王翳", TileType::ENEMY, "王翳");
+    grid.setTile(2, 8, "汉骑", TileType::ENEMY, "汉军");
+    grid.setTile(2, 18, "汉骑", TileType::ENEMY, "汉军");
     grid.setTile(25, 5, "汉骑", TileType::ENEMY, "汉军");
     grid.setTile(25, 6, "汉骑", TileType::ENEMY, "汉军");
     grid.setTile(25, 12, "汉骑", TileType::ENEMY, "汉军");
@@ -257,8 +257,8 @@ static void buildDongcheng(MapGrid& grid) {
     grid.setTile(25, 14, "汉骑", TileType::ENEMY, "汉军");
     grid.setTile(25, 20, "汉骑", TileType::ENEMY, "汉军");
     grid.setTile(25, 21, "汉骑", TileType::ENEMY, "汉军");
-    grid.setTile(24, 8, "吕胜", TileType::ENEMY, "吕胜");
-    grid.setTile(24, 18, "赤侯", TileType::ENEMY, "赤侯");
+    grid.setTile(24, 8, "汉骑", TileType::ENEMY, "汉军");
+    grid.setTile(24, 18, "汉骑", TileType::ENEMY, "汉军");
     grid.setTile(5, 25, "汉骑", TileType::ENEMY, "汉军");
     grid.setTile(12, 25, "汉骑", TileType::ENEMY, "汉军");
     grid.setTile(13, 25, "汉骑", TileType::ENEMY, "汉军");
@@ -270,7 +270,7 @@ static void buildDongcheng(MapGrid& grid) {
     grid.setTile(14, 1, "汉骑", TileType::ENEMY, "汉军");
     grid.setTile(21, 1, "汉骑", TileType::ENEMY, "汉军");
 
-    grid.setTile(2, 13, "灌婴", TileType::ENEMY, "灌婴");
+    grid.setTile(2, 13, "汉骑", TileType::ENEMY, "汉军");
 
     grid.setTile(11, 11, "楚骑", TileType::FRIEND, "楚骑·甲");
     grid.setTile(11, 15, "楚骑", TileType::FRIEND, "楚骑·乙");

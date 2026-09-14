@@ -1,9 +1,0 @@
-{
-    "name": "遭遇王翦",
-    "first_side": "player",
-    "disable_run": true,
-    "disable_items": false,
-    "enemies_ref": [
-        "../characters/wangjian.json"
-    ]
-}

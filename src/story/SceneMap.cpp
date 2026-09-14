@@ -22,10 +22,7 @@ static const char* battleFileForEnemy(const std::string& npc) {
     if (npc == "汉军铁骑") return "data/battles/battle_iron_cavalry.json";
     if (npc == "汉军斥候") return "data/battles/battle_scout.json";
     if (npc == "灌婴")     return "data/battles/battle_guanying.json";
-    if (npc == "杨喜")     return "data/battles/battle_yangxi.json";
     if (npc == "王翳")     return "data/battles/battle_wangyi.json";
-    if (npc == "吕胜")     return "data/battles/battle_lvsheng.json";
-    if (npc == "赤侯")     return "data/battles/battle_chihou.json";
     if (npc == "吕马童")   return "data/battles/battle_lvmatong.json";
     return "data/battles/battle_han_soldier.json";
 }

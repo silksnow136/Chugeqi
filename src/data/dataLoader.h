@@ -43,7 +43,7 @@ struct StoryLine {
     // 是否在这句剧情之后进入战斗
     bool battle = false;
 
-    // 战斗文件，例如 "wangjian"
+    // 战斗文件，例如 "wangyi"
     std::string battleId;
 };
 

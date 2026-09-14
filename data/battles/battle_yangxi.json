@@ -1,9 +1,0 @@
-{
-    "name": "遭遇杨喜",
-    "first_side": "player",
-    "disable_run": true,
-    "disable_items": false,
-    "enemies_ref": [
-        "../characters/yangxi.json"
-    ]
-}
