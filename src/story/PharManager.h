@@ -4,8 +4,6 @@
 #include "combat/character.h"
 #include "combat/item.h"
 
-using namespace std;
-
 // 药店管理
 class PharManager
 {
@@ -39,5 +37,5 @@ private:
     void showMedicineBag(Combatant& player);
 
     // 查找指定药品
-    const Consumable* findMedicine(const string& itemId) const;
+    const Consumable* findMedicine(const std::string& itemId) const;
 };
