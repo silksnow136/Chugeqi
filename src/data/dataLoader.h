@@ -67,6 +67,7 @@ struct Scene {
     std::string advance;           // 幕次跳转旁白（ADVANCE 格触发）
     std::vector<StoryLine> lines;  // 顺序播放的叙事
     StoryChoice choice;            // 可选分支（options 为空表示无分支）
+    std::vector<StoryLine> ending; // 终幕结局叙事（地图 ADVANCE 后触发，含最终战斗）
 };
 
 // 整个剧情

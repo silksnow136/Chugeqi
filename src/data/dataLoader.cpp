@@ -211,6 +211,7 @@ StoryData DataLoader::loadStory(const std::string& path) {
         scene.id = s["id"].asInt();
         if (s.has("advance")) scene.advance = s["advance"].asString();
         if (s.has("lines")) scene.lines = parseLines(s["lines"]);
+        if (s.has("ending")) scene.ending = parseLines(s["ending"]);
         if (s.has("choice")) {
             const auto& c = s["choice"];
             scene.choice.prompt = c.has("prompt") ? c["prompt"].asString() : "";
