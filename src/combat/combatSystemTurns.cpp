@@ -51,13 +51,7 @@ void CombatSystem::manualTurn(Combatant* actor, int maxChoice) {
             case 2: { // 技能：单体手动选择目标
                 SkillBase* s = selectSkill(actor);
                 if (!s) continue; // 取消，返回主菜单
-                std::vector<Combatant*> targets;
-                if (dynamic_cast<ChargingSkill*>(s) != nullptr) {
-                    // 充能技能：目标固定为施法者自己
-                    targets.push_back(actor);
-                } else {
-                    targets = buildSkillTargets(getAliveAllies(), getAliveEnemies(), s);
-                }
+                std::vector<Combatant*> targets = buildSkillTargets(getAliveAllies(), getAliveEnemies(), s);
                 if (targets.empty()) continue; // 取消，返回主菜单
                 performSkill(actor, s, targets);
                 break;

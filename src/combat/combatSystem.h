@@ -81,7 +81,7 @@ private:
     std::vector<Combatant*> getAliveAllies() const;
 
     // 状态效果结算
-    void applyStatusEffects(Combatant* c); // 回合开始：对单个战斗者结算（灼烧扣血 / 迟缓提示）
+    void applyStatusEffects(Combatant* c); // 回合开始：对单个战斗者结算（灼烧扣血）
     void applyRoundStartStatus();          // 回合开始：对全体存活战斗者统一结算
     void applyRoundEndStatus();            // 回合结束：对全体存活战斗者递减状态持续回合
 

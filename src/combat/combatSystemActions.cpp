@@ -9,14 +9,14 @@
 
 void CombatSystem::performAttack(Combatant* attacker, Combatant* target) {
     // 命中判定（基于敏捷）
-    float hitRate = calculateHitRate(0.85f, attacker->getEffectiveStat(3), target->getEffectiveStat(3));
+    float hitRate = calculateHitRate(0.85f, attacker->getEffectiveStat(2), target->getEffectiveStat(2));
     if (roll(100) >= static_cast<int>(hitRate * 100)) {
         addLog(attacker->getName() + " 攻击 " + target->getName() + "，但未命中！");
         return; // 未命中
     }
 
     // 伤害 = 力量 * 威力 - 防御（普通攻击威力固定为 10）
-    int damage = calculateDamage(attacker->getEffectiveStat(0), 10, target->getEffectiveStat(2));
+    int damage = calculateDamage(attacker->getEffectiveStat(0), 10, target->getEffectiveStat(1));
     target->takeDamage(damage);
     addLog(attacker->getName() + " 攻击 " + target->getName() + "，造成 " + std::to_string(damage) + " 点伤害。");
 }
@@ -34,12 +34,12 @@ void CombatSystem::performSkill(Combatant* user, SkillBase* skill, std::vector<C
     if (auto* dmg = dynamic_cast<DamageSkill*>(skill)) {
         // 伤害技能
         for (auto* target : targets) {
-            float hitRate = calculateHitRate(dmg->getHitRate(), user->getEffectiveStat(3), target->getEffectiveStat(3));
+            float hitRate = calculateHitRate(dmg->getHitRate(), user->getEffectiveStat(2), target->getEffectiveStat(2));
             if (roll(100) >= static_cast<int>(hitRate * 100)) {
                 addLog(user->getName() + " 的「" + skill->getName() + "」未命中 " + target->getName() + "。");
                 continue; // 未命中
             }
-            int damage = dmg->calculateDamage(user->getEffectiveStat(0), target->getEffectiveStat(2));
+            int damage = dmg->calculateDamage(user->getEffectiveStat(0), target->getEffectiveStat(1));
             target->takeDamage(damage);
             addLog(user->getName() + " 对 " + target->getName() + " 使用「" + skill->getName() + "」，造成 " + std::to_string(damage) + " 点伤害。");
             // 命中后附加技能附带的状态效果（skill.json 未配置则不附加）
@@ -55,11 +55,6 @@ void CombatSystem::performSkill(Combatant* user, SkillBase* skill, std::vector<C
             target->heal(heal->getHealAmount());
             addLog(user->getName() + " 对 " + target->getName() + " 使用「" + skill->getName() + "」，恢复 " + std::to_string(heal->getHealAmount()) + " 点 HP。");
         }
-    } else if (auto* charge = dynamic_cast<ChargingSkill*>(skill)) {
-        // 充能技能：给自己附加充能状态（倍率与持续回合取自技能配置）
-        user->addStatusEffect(StatusEffect::Charge, charge->getDuration(),
-                              charge->getTargetStat(), charge->getMultiplier());
-        addLog(user->getName() + " 使用「" + skill->getName() + "」，进入充能状态！");
     } else {
         // 其他未实现的技能类型
         std::cout << "该技能类型：(未实现)" << std::endl;
@@ -178,9 +173,9 @@ void CombatSystem::attemptRun(Combatant* runner) {
     }
 
     // 逃跑成功率：基于自身敏捷与敌方敏捷之和
-    int selfAgi = runner->getEffectiveStat(3);
+    int selfAgi = runner->getEffectiveStat(2);
     int totalEnemyAgi = 0;
-    for (auto* e : getAliveEnemies()) totalEnemyAgi += e->getEffectiveStat(3);
+    for (auto* e : getAliveEnemies()) totalEnemyAgi += e->getEffectiveStat(2);
 
     if (totalEnemyAgi == 0 || roll(100) < (selfAgi * 100 / (selfAgi + totalEnemyAgi))) {
         addLog(runner->getName() + " 成功逃跑！");

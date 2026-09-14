@@ -32,7 +32,7 @@ bool CombatSystem::startBattle() {
 
     // 主循环：我方（玩家 + 同伴）→ 敌方。每轮统一在轮首结算、轮末递减状态。
     while (!battleEnded) {
-        // 回合开始：灼烧扣血、迟缓提示（眩晕的行动跳过在各回合函数内处理）
+        // 回合开始：灼烧扣血（眩晕的行动跳过在各回合函数内处理）
         applyRoundStartStatus();
         // 灼烧等持续伤害可能在轮首直接击杀，需在此即时判定胜负
         if (getAliveEnemies().empty()) { battleEnded = true; playerWon = true; break; }
@@ -151,20 +151,15 @@ std::vector<Combatant*> CombatSystem::getAliveAllies() const {
 // ---------------------------------------------------------------------------
 
 // 回合开始：对单个战斗者结算持续型状态效果。
-// 真实效果分工：灼烧在此扣血；迟缓的敏捷降低在 Combatant::getEffectiveStat 中生效；
-// 眩晕的行动跳过在回合流程（manualTurn / processEnemyTurn / processAllyAITurn）中处理。
+// 灼烧在此扣血；眩晕的行动跳过在回合流程（manualTurn / processEnemyTurn / processAllyAITurn）中处理。
 void CombatSystem::applyStatusEffects(Combatant* c) {
     if (!c->isAlive()) return;
 
     if (c->hasStatusEffect(StatusEffect::Burn)) {
-        // 灼烧伤害 = 目标最大生命的 10%（至少 1 点），与目标自身魔力无关
+        // 灼烧伤害 = 目标最大生命的 10%（至少 1 点）
         int damage = std::max(1, c->getMaxHP() / 10);
         c->takeDamage(damage);
         addLog(c->getName() + " 被灼烧，受到 " + std::to_string(damage) + " 点伤害。");
-    }
-
-    if (c->hasStatusEffect(StatusEffect::Slow)) {
-        addLog(c->getName() + " 处于迟缓状态，敏捷降低。");
     }
 }
 

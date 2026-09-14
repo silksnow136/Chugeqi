@@ -29,12 +29,3 @@ HealSkill::HealSkill(const std::string& name, const std::string& description, in
     : SkillBase(name, description, cost, scope), healAmount(healAmount) {}
 
 int HealSkill::getHealAmount() const { return healAmount; }
-
-// ---- ChargingSkill ----
-ChargingSkill::ChargingSkill(const std::string& name, const std::string& description, int cost,
-                             float multiplier, int targetStat, int duration, AttackScope scope)
-    : SkillBase(name, description, cost, scope), multiplier(multiplier), targetStat(targetStat), duration(duration) {}
-
-float ChargingSkill::getMultiplier() const { return multiplier; }
-int ChargingSkill::getTargetStat() const { return targetStat; }
-int ChargingSkill::getDuration() const { return duration; }

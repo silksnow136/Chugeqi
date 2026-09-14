@@ -62,9 +62,7 @@ std::string CombatSystem::displayStatus(const Combatant* c) const {
                   + "  状态：";
     std::vector<std::string> statuses;
     if (c->hasStatusEffect(StatusEffect::Burn))   statuses.push_back(statusName(StatusEffect::Burn));
-    if (c->hasStatusEffect(StatusEffect::Slow))   statuses.push_back(statusName(StatusEffect::Slow));
     if (c->hasStatusEffect(StatusEffect::Stun))   statuses.push_back(statusName(StatusEffect::Stun));
-    if (c->hasStatusEffect(StatusEffect::Charge)) statuses.push_back(statusName(StatusEffect::Charge));
     if (statuses.empty()) {
         s += "无";
     } else {
@@ -145,9 +143,7 @@ std::vector<Combatant*> CombatSystem::buildSkillTargets(const std::vector<Combat
 const char* CombatSystem::statusName(StatusEffect e) {
     switch (e) {
         case StatusEffect::Burn:   return "灼烧";
-        case StatusEffect::Slow:   return "迟缓";
         case StatusEffect::Stun:   return "眩晕";
-        case StatusEffect::Charge: return "充能";
         default:                   return "未知";
     }
 }

@@ -11,9 +11,9 @@ enum class AttackScope {
 };
 
 // ---------------------------------------------------------------------------
-// 技能体系：SkillBase 为基类，派生 DamageSkill（伤害）、HealSkill（治疗）、
-// ChargingSkill（充能/属性提升）。技能对象由 DataLoader 从 skill.json 创建并
-// 长期持有；实际执行逻辑统一放在 CombatSystem 中按 dynamic_cast 分派。
+// 技能体系：SkillBase 为基类，派生 DamageSkill（伤害）、HealSkill（治疗）。
+// 技能对象由 DataLoader 从 skill.json 创建并长期持有；实际执行逻辑统一放在
+// CombatSystem 中按 dynamic_cast 分派。
 // ---------------------------------------------------------------------------
 
 // 技能基类
@@ -57,20 +57,6 @@ private:
 public:
     HealSkill(const std::string& name, const std::string& description, int cost, int healAmount, AttackScope scope);
     int getHealAmount() const;
-};
-
-// 充能技能（提升属性）
-class ChargingSkill : public SkillBase {
-private:
-    float multiplier;    // 属性提升倍率
-    int targetStat; // -1全属性，0~3具体属性
-    int duration;   // 持续回合数
-public:
-    ChargingSkill(const std::string& name, const std::string& description, int cost,
-                  float multiplier, int targetStat, int duration, AttackScope scope);
-    float getMultiplier() const;
-    int getTargetStat() const;
-    int getDuration() const;
 };
 
 // 技能池：由 DataLoader 长期持有，唯一拥有 SkillBase 对象的所有权。

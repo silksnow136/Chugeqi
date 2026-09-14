@@ -6,13 +6,13 @@
 
 // ---- Combatant ----
 Combatant::Combatant(const std::string& name, int level, int hp, int sp, int exp,
-                     const int baseStats[4], const std::vector<SkillBase*>& skills,
+                     const int baseStats[3], const std::vector<SkillBase*>& skills,
                      const std::unordered_map<std::string, int>& inventory, const std::string& id,
                      int maxHp, int maxSp)
     : Character(name), id(id), hp(hp), sp(sp), level(level), exp(exp), statusFlags(0), skills(skills), inventory(inventory) {
-    std::copy(baseStats, baseStats + 4, this->baseStats);
-    std::fill(equipmentBonus, equipmentBonus + 4, 0);
-    std::fill(&slotBonuses[0][0], &slotBonuses[0][0] + 16, 0);
+    std::copy(baseStats, baseStats + 3, this->baseStats);
+    std::fill(equipmentBonus, equipmentBonus + 3, 0);
+    std::fill(&slotBonuses[0][0], &slotBonuses[0][0] + 6, 0);
     // 最大HP/SP未显式给出时，按当前值回退（模板加载时当前值即满值）
     this->maxHp = (maxHp >= 0) ? maxHp : hp;
     this->maxSp = (maxSp >= 0) ? maxSp : sp;
@@ -46,18 +46,14 @@ void Combatant::restoreSP(int amount) {
     if (sp < 0) sp = 0;
 }
 
-void Combatant::addStatusEffect(StatusEffect type, int duration, int targetStat, float mult) {
+void Combatant::addStatusEffect(StatusEffect type, int duration) {
     // 如果已有同类型，刷新持续时间
     auto it = std::find_if(activeStatusEffects.begin(), activeStatusEffects.end(),
         [type](const StatusEffectInstance& effect) { return effect.type == type; });
     if (it != activeStatusEffects.end()) {
         it->duration = duration;
-        if (type == StatusEffect::Charge) {
-            it->targetStatIndex = targetStat;
-            it->multiplier = mult;
-        }
     } else {
-        StatusEffectInstance effect{type, duration, targetStat, mult};
+        StatusEffectInstance effect{type, duration};
         activeStatusEffects.push_back(effect);
     }
     recalcStatusFlags();
@@ -97,19 +93,8 @@ void Combatant::recalcStatusFlags() {
 }
 
 int Combatant::getEffectiveStat(int index) const {
-    if (index < 0 || index >= 4) return 0;
-    int stat = baseStats[index] + equipmentBonus[index];
-    // 状态效果修正：迟缓降低敏捷，充能按倍率提升指定属性。
-    // 均以 baseStats + equipmentBonus 为基准逐项乘算，天然幂等（不会随查询次数累积）。
-    for (const auto& effect : activeStatusEffects) {
-        if (effect.type == StatusEffect::Slow && index == 3) {
-            stat = stat * 3 / 5; // 迟缓：敏捷降为原来的 60%
-        } else if (effect.type == StatusEffect::Charge &&
-                   (effect.targetStatIndex == -1 || effect.targetStatIndex == index)) {
-            stat = static_cast<int>(stat * effect.multiplier);
-        }
-    }
-    return stat;
+    if (index < 0 || index >= 3) return 0;
+    return baseStats[index] + equipmentBonus[index];
 }
 
 int Combatant::getHP() const { return hp; }
@@ -120,23 +105,23 @@ int Combatant::getLevel() const { return level; }
 int Combatant::getExp() const { return exp; }
 
 int Combatant::getBaseStat(int index) const {
-    if (index < 0 || index >= 4) return 0;
+    if (index < 0 || index >= 3) return 0;
     return baseStats[index];
 }
 
-void Combatant::setEquipmentBonus(const int bonus[4]) {
-    std::copy(bonus, bonus + 4, equipmentBonus);
+void Combatant::setEquipmentBonus(const int bonus[3]) {
+    std::copy(bonus, bonus + 3, equipmentBonus);
 }
 
 void Combatant::clearEquipmentBonus() {
-    std::fill(equipmentBonus, equipmentBonus + 4, 0);
+    std::fill(equipmentBonus, equipmentBonus + 3, 0);
 }
 
-bool Combatant::equipItem(int slot, const std::string& itemId, const int bonus[4]) {
-    if (slot < 0 || slot > 3) return false;
+bool Combatant::equipItem(int slot, const std::string& itemId, const int bonus[3]) {
+    if (slot < 0 || slot > 1) return false;
     if (!equippedItemIds[slot].empty()) unequipItem(slot); // 同槽已有装备则先卸下
     equippedItemIds[slot] = itemId;
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 3; i++) {
         slotBonuses[slot][i] = bonus[i];
         equipmentBonus[i] += bonus[i];
     }
@@ -144,8 +129,8 @@ bool Combatant::equipItem(int slot, const std::string& itemId, const int bonus[4
 }
 
 void Combatant::unequipItem(int slot) {
-    if (slot < 0 || slot > 3 || equippedItemIds[slot].empty()) return;
-    for (int i = 0; i < 4; i++) {
+    if (slot < 0 || slot > 1 || equippedItemIds[slot].empty()) return;
+    for (int i = 0; i < 3; i++) {
         equipmentBonus[i] -= slotBonuses[slot][i];
         slotBonuses[slot][i] = 0;
     }
@@ -154,7 +139,7 @@ void Combatant::unequipItem(int slot) {
 
 const std::string& Combatant::getEquippedItemId(int slot) const {
     static const std::string empty;
-    if (slot < 0 || slot > 3) return empty;
+    if (slot < 0 || slot > 1) return empty;
     return equippedItemIds[slot];
 }
 
@@ -205,7 +190,7 @@ void Combatant::addExp(int amount) {
 void Combatant::levelUp() {
     level++;
     // 全属性+1
-    for (int i = 0; i < 4; ++i) baseStats[i] += 1;
+    for (int i = 0; i < 3; ++i) baseStats[i] += 1;
     // 提升上限并恢复满HP/SP
     maxHp += 10;
     maxSp += 5;
@@ -220,8 +205,7 @@ void Combatant::showStats() const {
     std::cout << "生命: " << hp << "/" << maxHp << "  技能值: " << sp << "/" << maxSp << "\n";
     std::cout << "经验: " << exp << "/" << (10 * level * level) << "\n";
     std::cout << "力量: " << getEffectiveStat(0)
-              << "  魔力: " << getEffectiveStat(1)
-              << "  耐力: " << getEffectiveStat(2)
-              << "  敏捷: " << getEffectiveStat(3) << "\n";
+              << "  耐力: " << getEffectiveStat(1)
+              << "  敏捷: " << getEffectiveStat(2) << "\n";
     std::cout << "==============================\n";
 }

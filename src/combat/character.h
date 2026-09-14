@@ -19,17 +19,13 @@ public:
 enum class StatusEffect : uint16_t {
     None   = 0,
     Burn   = 1 << 0,   // 灼烧
-    Slow   = 1 << 1,   // 迟缓
-    Stun   = 1 << 2,   // 眩晕
-    Charge = 1 << 3,   // 充能（特殊状态，需携带额外数据）
+    Stun   = 1 << 1,   // 眩晕
 };
 
-// 状态实例（用于存储持续回合和数值）
+// 状态实例（用于存储持续回合数）
 struct StatusEffectInstance {
     StatusEffect type;
     int duration;          // 剩余持续回合数
-    int targetStatIndex;   // -1 表示全属性，0~3 分别对应力量/魔力/耐力/敏捷
-    float multiplier;      // 仅对充能有效
 };
 
 // 战斗角色
@@ -42,14 +38,14 @@ private:
     int maxSp;             // 最大技能值
     int level;
     int exp;
-    int baseStats[4];      // strength, magic, endurance, agility 
+    int baseStats[3];      // strength, endurance, agility
     uint16_t statusFlags;  // 快速检查位
     std::vector<StatusEffectInstance> activeStatusEffects; // 状态详细信息
     std::vector<SkillBase*> skills;
     std::unordered_map<std::string, int> inventory; // 物品ID -> 数量
 public:
     Combatant(const std::string& name, int level, int hp, int sp, int exp,
-              const int baseStats[4], const std::vector<SkillBase*>& skills,
+              const int baseStats[3], const std::vector<SkillBase*>& skills,
               const std::unordered_map<std::string, int>& inventory = {},
               const std::string& id = "",
               int maxHp = -1, int maxSp = -1);
@@ -66,12 +62,12 @@ public:
     void restoreSP(int amount);
 
     // 状态管理
-    void addStatusEffect(StatusEffect type, int duration, int targetStat = -1, float mult = 0.0f);
+    void addStatusEffect(StatusEffect type, int duration);
     void updateStatusEffects(); // 每回合结束调用，减少持续回合，移除到期状态
     void removeStatusEffect(StatusEffect type); // 立即移除指定状态（眩晕在目标回合被跳过时消费）
 
     // 属性获取（含装备加成）
-    int getEffectiveStat(int index) const; // index 0~3
+    int getEffectiveStat(int index) const; // index 0~2：力量/耐力/敏捷
     int getBaseStat(int index) const;      // 基础属性（不含装备加成，供存档）
     int getHP() const;
     int getSP() const;
@@ -81,11 +77,11 @@ public:
     int getExp() const;
 
     // 装备加成（外部设置）
-    void setEquipmentBonus(const int bonus[4]); // 四项属性加成
+    void setEquipmentBonus(const int bonus[3]); // 三项属性加成
     void clearEquipmentBonus();
 
-    // 装备槽位管理（槽位与 EquipmentSlot 一致：0=防具 1=武器 2=鞋子 3=配饰）
-    bool equipItem(int slot, const std::string& itemId, const int bonus[4]); // 装配装备（同槽已有则先卸下）
+    // 装备槽位管理（槽位与 EquipmentSlot 一致：0=防具 1=武器）
+    bool equipItem(int slot, const std::string& itemId, const int bonus[3]); // 装配装备（同槽已有则先卸下）
     void unequipItem(int slot);                                              // 卸下指定槽位装备
     const std::string& getEquippedItemId(int slot) const;                    // 当前装备物品ID，空串=未装备
 
@@ -108,8 +104,8 @@ public:
     void showStats() const;
 
 private:
-    int equipmentBonus[4];         // 四项属性加成（各槽位加成之和）
-    std::string equippedItemIds[4]; // 每槽位装备的物品ID（空串=未装备）
-    int slotBonuses[4][4];          // 每槽位对四项属性的加成
+    int equipmentBonus[3];          // 三项属性加成（各槽位加成之和）
+    std::string equippedItemIds[2]; // 每槽位装备的物品ID（空串=未装备）
+    int slotBonuses[2][3];          // 每槽位对三项属性的加成
     void recalcStatusFlags(); // 根据activeStatusEffects更新statusFlags
 };

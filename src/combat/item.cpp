@@ -24,12 +24,12 @@ int Consumable::getStatIndex() const { return statIndex; }
 int Consumable::getDuration() const { return duration; }
 
 Equipment::Equipment(const std::string& id, const std::string& name, const std::string& description, int price,
-                     EquipmentSlot slot, const int bonus[4], const std::string& category)
+                     EquipmentSlot slot, const int bonus[3], const std::string& category)
     : Item(id, name, description, price, category), slot(slot) {
-    std::copy(bonus, bonus + 4, statBonus);
+    std::copy(bonus, bonus + 3, statBonus);
 }
 
 EquipmentSlot Equipment::getSlot() const { return slot; }
-void Equipment::getStatBonus(int out[4]) const {
-    std::copy(statBonus, statBonus + 4, out);
+void Equipment::getStatBonus(int out[3]) const {
+    std::copy(statBonus, statBonus + 3, out);
 }

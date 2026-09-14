@@ -29,7 +29,7 @@ private:
     int healHP;        // 恢复HP量，0表示无
     int healSP;        // 恢复SP量，0表示无
     int statBonus;     // 临时属性加成（仅本场战斗有效），0表示无
-    int statIndex;     // 对应strength(0), magic(1), endurance(2), agility(3)
+    int statIndex;     // 对应strength(0), endurance(1), agility(2)
     int duration;      // 持续回合数，0表示立即生效
 public:
     Consumable(const std::string& id, const std::string& name, const std::string& description, int price,
@@ -42,23 +42,21 @@ public:
     int getDuration() const;
 };
 
-// 装备（盔甲、武器、载具/鞋子、配饰）
+// 装备（防具、武器）
 enum class EquipmentSlot {
     Armor,
-    Weapon,
-    Shoes,   // 或载具
-    Accessory
+    Weapon
 };
 
 class Equipment : public Item {
 private:
     EquipmentSlot slot;
-    int statBonus[4];   // 对strength, magic, endurance, agility的加成
+    int statBonus[3];   // 对strength, endurance, agility的加成
 public:
     Equipment(const std::string& id, const std::string& name, const std::string& description, int price,
-              EquipmentSlot slot, const int bonus[4], const std::string& category = "equipment");
+              EquipmentSlot slot, const int bonus[3], const std::string& category = "equipment");
     EquipmentSlot getSlot() const;
-    void getStatBonus(int out[4]) const;
+    void getStatBonus(int out[3]) const;
 };
 
 // 物品池：由 DataLoader 长期持有，唯一拥有 Item 对象的所有权。
