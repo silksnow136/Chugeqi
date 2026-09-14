@@ -53,8 +53,8 @@ int main() {
     int cur = 0;
     MapGrid grid = buildMap(cur);
 
-    std::function<void(TileType, const std::string&)> interact;
-    interact = [&](TileType type, const std::string& name) {
+    std::function<void(TileType, const std::string&, int, int)> interact;
+    interact = [&](TileType type, const std::string& name, int, int) {
         if (type == TileType::FRIEND) {
             console::setColor(10);
             std::cout << "\n当前位于「" << name << "」。" << std::endl;

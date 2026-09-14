@@ -50,6 +50,9 @@ public:
     // 设置某格内容（不覆盖玩家位置）
     void setTile(int row, int col, const std::string& display, TileType type, const std::string& name = "");
 
+    // 清除某格内容，恢复为空地（击败敌人后使其从地图上消失）
+    void clearTile(int row, int col);
+
     // 设置玩家初始位置
     void setPlayer(int row, int col);
 
@@ -81,8 +84,9 @@ public:
     // dir 决定箭头指向与条延伸方向；length<=0 时取最小长度（刚好完整显示文字）。
     void buildPortal(int r, int c, PortalDir dir, const std::string& dest, int length = 0);
 
-    // 交互回调：玩家踩上不可通行格（友方/敌方/药店/物品/跳转点/传送门）时触发
-    std::function<void(TileType, const std::string&)> onInteract;
+    // 交互回调：玩家踩上不可通行格（友方/敌方/药店/物品/跳转点/传送门）时触发，
+    // 参数依次为：格子类型、单位名、所在行、所在列
+    std::function<void(TileType, const std::string&, int, int)> onInteract;
 
     // 结果标志：由调用方在 onInteract 内设置（跳幕 / 传送）
     bool advanceTriggered = false;

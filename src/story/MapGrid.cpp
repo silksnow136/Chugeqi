@@ -212,6 +212,12 @@ void MapGrid::setTile(int row, int col, const std::string& display, TileType typ
     grid[row][col] = Tile(display, type, name);
 }
 
+void MapGrid::clearTile(int row, int col) {
+    if (!isValid(row, col)) return;
+    if (row == playerRow && col == playerCol) return; // 不覆盖玩家位置
+    grid[row][col] = Tile(EMPTY_DISP, TileType::EMPTY);
+}
+
 void MapGrid::setPlayer(int row, int col) {
     if (!isValid(row, col)) return;
     // 清除旧位置（恢复 underPlayer）
@@ -326,12 +332,12 @@ void MapGrid::move(char direction) {
         playerRow = newRow;
         playerCol = newCol;
         grid[newRow][newCol] = Tile("项羽", TileType::PLAYER, "项羽");
-        if (target.type == TileType::ITEM && onInteract) onInteract(TileType::ITEM, target.name);
+        if (target.type == TileType::ITEM && onInteract) onInteract(TileType::ITEM, target.name, newRow, newCol);
         return;
     }
 
     // 交互格（友方/敌方/药店/跳转点/传送门）：不移动，通知回调
-    if (onInteract) onInteract(target.type, target.name);
+    if (onInteract) onInteract(target.type, target.name, newRow, newCol);
 }
 
 bool MapGrid::isValid(int row, int col) const {

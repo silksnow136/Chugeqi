@@ -80,7 +80,7 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
     MapGrid grid = MapLayouts::buildSceneMap(scene_id, branch_id);
 
     // 单一交互回调：[&] 捕获，mapName 随传送更新，无需按地图重新实现
-    auto interact = [&](TileType type, const std::string& name) {
+    auto interact = [&](TileType type, const std::string& name, int row, int col) {
         switch (type) {
             case TileType::FRIEND: {
                 if (SideQuest::tryHandleTalk(game, player, qs, mapName, name)) break;
@@ -89,7 +89,10 @@ bool runSceneMap(Game& game, SceneManager& sm, int scene_id, int branch_id) {
                 break;
             }
             case TileType::ENEMY: {
-                if (runBattle(game, player, name)) SideQuest::onBattleWon(qs, mapName, name);
+                if (runBattle(game, player, name)) {
+                    SideQuest::onBattleWon(qs, mapName, name);
+                    grid.clearTile(row, col); // 击败后该敌人从地图上消失
+                }
                 break;
             }
             case TileType::PHARMACY: {
