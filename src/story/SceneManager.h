@@ -34,6 +34,8 @@ public:
 	int showScene_id();
 	// 获得当前分支id（第二幕 A/B）
 	int showBranch_id();
+	// 幕次跳转旁白（ADVANCE 格触发）
+	const string& getAdvancePrompt(int scene_id) const;
 	// 修改场景
 	void changeScene(int scene_id);
 	//场景功能显示管理

@@ -79,6 +79,14 @@ int SceneManager::showBranch_id() {
 	return current_branch_id;
 }
 
+const string& SceneManager::getAdvancePrompt(int scene_id) const {
+	static const string empty;
+	for (const auto& s : scenes) {
+		if (s.id == scene_id) return s.advance;
+	}
+	return empty;
+}
+
 void SceneManager::changeScene(int scene_id)
 {
 	// 离开旧场景
@@ -191,9 +199,7 @@ void SceneManager::ShowBackground(int scene_id = 0) {
 	//清屏
 	console::clearScreen();
 
-	cout << "已存档" << "\n";
 	current_scene_id = scene_id;
-	cout << "输入w或south继续剧情" << "\n";
 
 	if (scene_id == 2) {
 		showSceneManager(current_scene_id, branch_id);

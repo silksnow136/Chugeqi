@@ -20,7 +20,7 @@
 // 全局静态数据（JSON 载入，长期维护）
 struct GameData {
     SkillPool skillPool;
-    ItemPool itemPool; // 道具未实现，保持为空
+    ItemPool itemPool;
 };
 
 // 一场战斗的运行时数据（敌方模板实例 + 配置，不含我方队伍）
@@ -64,6 +64,7 @@ struct StoryChoice {
 // 一幕场景
 struct Scene {
     int id = 0;
+    std::string advance;           // 幕次跳转旁白（ADVANCE 格触发）
     std::vector<StoryLine> lines;  // 顺序播放的叙事
     StoryChoice choice;            // 可选分支（options 为空表示无分支）
 };
